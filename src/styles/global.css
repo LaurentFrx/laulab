@@ -1,0 +1,1539 @@
+/* ==========================================================================
+   L@uL@b — feuille de style « plan d'ingénieur »
+   Deux thèmes : cyanotype (fond bleu de Prusse, traits clairs) — par défaut —
+   et calque (papier clair, encre bleue). Les couleurs ne sont définies qu'ici.
+   ========================================================================== */
+
+/* --- Polices auto-hébergées ------------------------------------------------ */
+@import '@fontsource-variable/anybody/wdth.css';
+@import '@fontsource/atkinson-hyperlegible/400.css';
+@import '@fontsource/atkinson-hyperlegible/400-italic.css';
+@import '@fontsource/atkinson-hyperlegible/700.css';
+
+@font-face {
+  font-family: 'osifont';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/osifont-lgpl3fe-latin.woff2') format('woff2');
+}
+
+/* --- Jetons --------------------------------------------------------------- */
+:root {
+  color-scheme: dark;
+
+  /* Cyanotype */
+  --papier: #0e2a47;
+  --papier-2: #0a2038;
+  --papier-3: #071a2e;
+  --trait: #dce9f5;
+  --encre: #eaf2fa;
+  --encre-2: #a9c0d4;
+  --cote: #8fd8ff;
+  --crayon: #ff6a3d;
+
+  --trait-2: color-mix(in oklab, var(--trait) 55%, transparent);
+  --trait-3: color-mix(in oklab, var(--trait) 24%, transparent);
+  --trait-4: color-mix(in oklab, var(--trait) 10%, transparent);
+  --grille: color-mix(in oklab, var(--trait) 7%, transparent);
+  --grille-2: color-mix(in oklab, var(--trait) 13%, transparent);
+  --cote-voile: color-mix(in oklab, var(--cote) 18%, transparent);
+  --crayon-voile: color-mix(in oklab, var(--crayon) 18%, transparent);
+
+  /* Typographie */
+  --f-titre: 'Anybody Variable', 'Arial Narrow', 'Helvetica Neue', system-ui, sans-serif;
+  --f-texte: 'Atkinson Hyperlegible', 'Segoe UI', system-ui, sans-serif;
+  --f-cote: 'osifont', 'IBM Plex Mono', 'DejaVu Sans Mono', monospace;
+
+  --t-0: 0.78rem;
+  --t-1: 1.0625rem;
+  --t-2: 1.25rem;
+  --t-3: 1.6rem;
+  --t-4: 2.1rem;
+  --t-5: 3rem;
+  --t-6: clamp(2.9rem, 7.6vw, 6.2rem);
+
+  /* Rythme */
+  --u: 0.5rem;
+  --marge: clamp(1.25rem, 4vw, 3.5rem);
+  --cadre: 8px;
+  --bande: 0px;
+  --largeur-texte: 66ch;
+  --largeur-page: 1240px;
+
+  /* Traits (épaisseurs ISO 128, à l'échelle de l'écran) */
+  --ep-fort: 1.5px;
+  --ep-moyen: 1px;
+  --ep-fin: 0.75px;
+}
+
+:root[data-theme='calque'] {
+  color-scheme: light;
+  --papier: #f2f5f8;
+  --papier-2: #e8edf3;
+  --papier-3: #dde5ee;
+  --trait: #143a5e;
+  --encre: #0f2b4a;
+  --encre-2: #4a6580;
+  --cote: #0a6fb5;
+  --crayon: #d8432b;
+}
+
+@media (min-width: 900px) {
+  :root {
+    --cadre: 10px;
+    --bande: 16px;
+  }
+}
+
+/* --- Base ----------------------------------------------------------------- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  background: var(--papier);
+  color: var(--encre);
+  font-family: var(--f-texte);
+  font-size: 100%;
+  line-height: 1.55;
+  -webkit-text-size-adjust: 100%;
+  scroll-behavior: smooth;
+  scroll-padding-top: 5rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+body {
+  margin: 0;
+  min-height: 100dvh;
+  background-color: var(--papier);
+  background-image:
+    linear-gradient(var(--grille-2) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grille-2) 1px, transparent 1px),
+    linear-gradient(var(--grille) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grille) 1px, transparent 1px);
+  background-size:
+    64px 64px,
+    64px 64px,
+    8px 8px,
+    8px 8px;
+  background-position: -1px -1px;
+  font-size: var(--t-1);
+  padding: calc(var(--cadre) + var(--bande));
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--f-titre);
+  font-weight: 650;
+  font-stretch: 100%;
+  line-height: 1.05;
+  margin: 0;
+  letter-spacing: -0.005em;
+  text-wrap: balance;
+}
+
+h1 {
+  font-size: var(--t-5);
+}
+h2 {
+  font-size: var(--t-4);
+}
+h3 {
+  font-size: var(--t-3);
+}
+h4 {
+  font-size: var(--t-2);
+}
+
+p {
+  margin: 0 0 1em;
+  max-width: var(--largeur-texte);
+}
+
+a {
+  color: var(--cote);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.2em;
+  text-decoration-color: color-mix(in oklab, var(--cote) 50%, transparent);
+}
+a:hover {
+  text-decoration-color: var(--cote);
+  text-decoration-thickness: 1.5px;
+}
+
+:focus-visible {
+  outline: 2px solid var(--crayon);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+::selection {
+  background: var(--cote);
+  color: var(--papier);
+}
+
+img,
+svg {
+  max-width: 100%;
+  height: auto;
+}
+
+ul,
+ol {
+  padding-left: 1.25em;
+}
+
+li + li {
+  margin-top: 0.35em;
+}
+
+strong {
+  font-weight: 700;
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+hr {
+  border: 0;
+  border-top: var(--ep-fin) solid var(--trait-3);
+  margin: 2rem 0;
+}
+
+code {
+  font-family: var(--f-cote);
+  font-size: 0.95em;
+  color: var(--cote);
+}
+
+/* --- Texte technique ------------------------------------------------------ */
+.cote,
+.technique {
+  font-family: var(--f-cote);
+  font-size: var(--t-0);
+  letter-spacing: 0.02em;
+  color: var(--encre-2);
+}
+
+.passer {
+  position: absolute;
+  left: -200vw;
+  top: 0;
+}
+.passer:focus {
+  left: 50%;
+  transform: translateX(-50%);
+  top: calc(var(--cadre) + var(--bande) + 0.5rem);
+  z-index: 100;
+  background: var(--papier);
+  color: var(--encre);
+  padding: 0.5rem 1rem;
+  border: var(--ep-moyen) solid var(--trait);
+}
+
+.visually-hidden {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* --- Cadre de la planche (ISO 5457, simplifié) ---------------------------- */
+.cadre {
+  position: fixed;
+  inset: var(--cadre);
+  pointer-events: none;
+  z-index: 50;
+  border: var(--ep-fin) solid var(--trait-3);
+}
+.cadre::after {
+  content: '';
+  position: absolute;
+  inset: var(--bande);
+  border: var(--ep-fort) solid var(--trait-2);
+  display: none;
+}
+.cadre-zones {
+  display: none;
+}
+
+@media (min-width: 900px) {
+  .cadre::after {
+    display: block;
+  }
+  .cadre-zones {
+    display: block;
+    position: absolute;
+    inset: 0;
+    font-family: var(--f-cote);
+    font-size: 11px;
+    color: var(--encre-2);
+  }
+  .cadre-zones > span {
+    position: absolute;
+    display: grid;
+    place-items: center;
+  }
+  .cadre-zones .zone-h {
+    left: var(--bande);
+    right: var(--bande);
+    height: var(--bande);
+    grid-auto-flow: column;
+    grid-auto-columns: 1fr;
+  }
+  .cadre-zones .zone-h.haut {
+    top: 0;
+  }
+  .cadre-zones .zone-h.bas {
+    bottom: 0;
+  }
+  .cadre-zones .zone-v {
+    top: var(--bande);
+    bottom: var(--bande);
+    width: var(--bande);
+    grid-auto-flow: row;
+    grid-auto-rows: 1fr;
+  }
+  .cadre-zones .zone-v.gauche {
+    left: 0;
+  }
+  .cadre-zones .zone-v.droite {
+    right: 0;
+  }
+  .cadre-zones i {
+    font-style: normal;
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 100%;
+    height: 100%;
+  }
+  .cadre-zones .zone-h i + i::before,
+  .cadre-zones .zone-v i + i::before {
+    content: '';
+    position: absolute;
+    background: var(--trait-3);
+  }
+  .cadre-zones .zone-h i + i::before {
+    left: 0;
+    top: 3px;
+    bottom: 3px;
+    width: 1px;
+  }
+  .cadre-zones .zone-v i + i::before {
+    top: 0;
+    left: 3px;
+    right: 3px;
+    height: 1px;
+  }
+  /* Repère de centrage (petits traits au milieu de chaque côté) */
+  .cadre-zones .centrage {
+    position: absolute;
+    background: var(--trait-2);
+  }
+  .cadre-zones .centrage.h {
+    width: 1px;
+    height: calc(var(--bande) + 6px);
+    left: 50%;
+  }
+  .cadre-zones .centrage.h.haut {
+    top: 0;
+  }
+  .cadre-zones .centrage.h.bas {
+    bottom: 0;
+  }
+  .cadre-zones .centrage.v {
+    height: 1px;
+    width: calc(var(--bande) + 6px);
+    top: 50%;
+  }
+  .cadre-zones .centrage.v.gauche {
+    left: 0;
+  }
+  .cadre-zones .centrage.v.droite {
+    right: 0;
+  }
+}
+
+/* --- Page ----------------------------------------------------------------- */
+.page {
+  max-width: var(--largeur-page);
+  margin: 0 auto;
+  padding: 0 var(--marge);
+}
+
+.en-tete {
+  position: sticky;
+  top: calc(var(--cadre) + var(--bande));
+  z-index: 40;
+  background: color-mix(in oklab, var(--papier) 88%, transparent);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  border-bottom: var(--ep-fin) solid var(--trait-3);
+}
+.en-tete .page {
+  display: flex;
+  align-items: center;
+  gap: 1rem 1.5rem;
+  min-height: 3.5rem;
+  flex-wrap: wrap;
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+}
+.marque {
+  font-family: var(--f-titre);
+  font-weight: 760;
+  font-stretch: 125%;
+  font-size: 1.35rem;
+  letter-spacing: 0.01em;
+  color: var(--encre);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.6rem;
+}
+.marque:hover {
+  text-decoration: none;
+  color: var(--cote);
+}
+.marque small {
+  font-family: var(--f-cote);
+  font-weight: 400;
+  font-size: var(--t-0);
+  color: var(--encre-2);
+  letter-spacing: 0.04em;
+  display: none;
+}
+@media (min-width: 640px) {
+  .marque small {
+    display: inline;
+  }
+}
+.nav {
+  display: flex;
+  gap: 0.25rem 1.25rem;
+  margin-left: auto;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.nav a {
+  color: var(--encre);
+  text-decoration: none;
+  font-family: var(--f-titre);
+  font-weight: 600;
+  font-size: 1rem;
+  padding: 0.25rem 0;
+  border-bottom: var(--ep-moyen) solid transparent;
+}
+.nav a:hover,
+.nav a[aria-current='page'] {
+  border-bottom-color: var(--cote);
+}
+.nav a[aria-current='page'] {
+  color: var(--cote);
+}
+
+.bascule {
+  appearance: none;
+  background: transparent;
+  color: var(--encre-2);
+  border: var(--ep-fin) solid var(--trait-3);
+  border-radius: 999px;
+  font-family: var(--f-cote);
+  font-size: var(--t-0);
+  letter-spacing: 0.03em;
+  padding: 0.3rem 0.7rem 0.3rem 0.55rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  line-height: 1;
+}
+.bascule:hover {
+  color: var(--encre);
+  border-color: var(--trait-2);
+}
+.bascule svg {
+  width: 14px;
+  height: 14px;
+  display: block;
+}
+.bascule .si-calque {
+  display: none;
+}
+:root[data-theme='calque'] .bascule .si-calque {
+  display: inline;
+}
+:root[data-theme='calque'] .bascule .si-cyano {
+  display: none;
+}
+
+@media (max-width: 640px) {
+  .en-tete {
+    position: static;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+  .en-tete .page {
+    gap: 0.5rem 0.9rem;
+  }
+  .nav {
+    gap: 0.25rem 0.9rem;
+  }
+  .nav a {
+    font-size: 0.95rem;
+  }
+  .bascule span {
+    display: none;
+  }
+  .bascule {
+    padding: 0.35rem;
+  }
+}
+
+main.page {
+  padding-top: clamp(1.5rem, 4vw, 3rem);
+  padding-bottom: clamp(2rem, 5vw, 4rem);
+}
+
+/* --- Blocs de planche ----------------------------------------------------- */
+.section {
+  margin-top: clamp(3rem, 7vw, 6rem);
+}
+.section > h2 {
+  margin-bottom: 1.25rem;
+}
+
+.ligne-titre {
+  display: flex;
+  align-items: baseline;
+  gap: 1rem;
+  flex-wrap: wrap;
+  border-bottom: var(--ep-moyen) solid var(--trait-2);
+  padding-bottom: 0.6rem;
+  margin-bottom: 1.5rem;
+}
+.ligne-titre .cote {
+  margin-left: auto;
+}
+
+.prose > :first-child {
+  margin-top: 0;
+}
+.prose h2 {
+  font-size: var(--t-3);
+  margin: 2rem 0 0.75rem;
+}
+.prose h3 {
+  font-size: var(--t-2);
+  margin: 1.5rem 0 0.5rem;
+}
+.prose ul,
+.prose ol {
+  max-width: var(--largeur-texte);
+  margin: 0 0 1em;
+}
+.prose table {
+  max-width: var(--largeur-texte);
+  margin: 1em 0 1.5em;
+  font-size: 0.95em;
+}
+.prose th,
+.prose td {
+  text-align: left;
+  padding: 0.45em 0.75em 0.45em 0;
+  border-bottom: var(--ep-fin) solid var(--trait-3);
+  vertical-align: top;
+}
+.prose th {
+  font-family: var(--f-cote);
+  font-weight: 400;
+  font-size: var(--t-0);
+  color: var(--encre-2);
+  letter-spacing: 0.03em;
+}
+.prose blockquote {
+  margin: 1.5em 0;
+  padding-left: 1em;
+  border-left: var(--ep-fort) solid var(--cote);
+  color: var(--encre-2);
+}
+
+/* --- Tampon d'état -------------------------------------------------------- */
+.tampon {
+  display: inline-block;
+  font-family: var(--f-titre);
+  font-weight: 700;
+  font-stretch: 110%;
+  font-size: 0.8rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  line-height: 1;
+  padding: 0.4em 0.6em 0.35em;
+  border: 2px solid currentColor;
+  border-radius: 3px;
+  color: var(--trait);
+  transform: rotate(-4deg);
+  transform-origin: center;
+  white-space: nowrap;
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='40'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='0.9' numOctaves='2' seed='3'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1.6 -0.25'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' fill='white'/%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.55'/%3E%3C/svg%3E");
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='40'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='0.9' numOctaves='2' seed='3'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1.6 -0.25'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' fill='white'/%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.55'/%3E%3C/svg%3E");
+}
+.tampon.en-ligne,
+.tampon.en-service {
+  color: var(--cote);
+}
+.tampon.en-chantier {
+  color: var(--crayon);
+}
+.tampon.a-l-etude {
+  color: var(--encre-2);
+  border-style: dashed;
+}
+.tampon.termine {
+  color: var(--trait);
+}
+.tampon.droit {
+  transform: none;
+}
+.tampon.petit {
+  font-size: 0.66rem;
+  padding: 0.3em 0.45em 0.25em;
+  border-width: 1.5px;
+}
+
+/* --- Repères (bulles numérotées) ------------------------------------------ */
+.repere {
+  display: inline-grid;
+  place-items: center;
+  width: 1.65em;
+  height: 1.65em;
+  border: var(--ep-moyen) solid var(--trait);
+  border-radius: 50%;
+  font-family: var(--f-cote);
+  font-size: 0.85rem;
+  color: var(--encre);
+  line-height: 1;
+  flex: none;
+}
+.liste-reperes {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 0.5rem;
+  max-width: var(--largeur-texte);
+}
+.liste-reperes li {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+  margin: 0;
+}
+.liste-reperes li .repere {
+  margin-top: 0.15em;
+}
+
+/* --- Cartouche ------------------------------------------------------------ */
+.cartouche {
+  margin-top: clamp(3rem, 8vw, 6rem);
+  display: flex;
+  justify-content: flex-end;
+}
+.cartouche table {
+  width: 100%;
+  max-width: 620px;
+  border: var(--ep-fort) solid var(--trait);
+  background: color-mix(in oklab, var(--papier-2) 70%, transparent);
+  font-size: 0.95rem;
+  table-layout: fixed;
+}
+.cartouche td {
+  border: var(--ep-fin) solid var(--trait-2);
+  padding: 0.45rem 0.7rem 0.5rem;
+  vertical-align: top;
+}
+.cartouche td .etiquette {
+  display: block;
+  font-family: var(--f-cote);
+  font-size: 0.68rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--encre-2);
+  margin-bottom: 0.15rem;
+}
+.cartouche td .valeur {
+  display: block;
+  font-family: var(--f-cote);
+  font-size: 0.95rem;
+  color: var(--encre);
+}
+.cartouche td.titre {
+  padding: 0.6rem 0.7rem 0.7rem;
+}
+.cartouche td.titre .valeur {
+  font-family: var(--f-titre);
+  font-weight: 700;
+  font-stretch: 105%;
+  font-size: 1.5rem;
+  line-height: 1.05;
+}
+.cartouche td.titre .sous-titre {
+  display: block;
+  color: var(--encre-2);
+  font-size: 0.92rem;
+  margin-top: 0.3rem;
+  max-width: none;
+}
+.cartouche .marque {
+  font-size: 1.15rem;
+}
+.cartouche a {
+  color: var(--encre);
+}
+.cartouche a:hover {
+  color: var(--cote);
+}
+.cartouche .nav-pied {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  font-family: var(--f-cote);
+  font-size: var(--t-0);
+}
+
+/* --- Nomenclature --------------------------------------------------------- */
+.nomenclature {
+  border-top: var(--ep-fort) solid var(--trait);
+  border-bottom: var(--ep-fort) solid var(--trait);
+}
+.nomenclature thead th {
+  font-family: var(--f-cote);
+  font-weight: 400;
+  font-size: var(--t-0);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--encre-2);
+  text-align: left;
+  padding: 0.55rem 0.75rem 0.55rem 0;
+  border-bottom: var(--ep-moyen) solid var(--trait-2);
+  white-space: nowrap;
+}
+.nomenclature tbody th,
+.nomenclature tbody td {
+  padding: 0.7rem 0.75rem 0.7rem 0;
+  border-bottom: var(--ep-fin) solid var(--trait-3);
+  vertical-align: top;
+  text-align: left;
+  font-weight: 400;
+}
+.nomenclature tbody tr:last-child th,
+.nomenclature tbody tr:last-child td {
+  border-bottom: 0;
+}
+.nomenclature .groupe th {
+  font-family: var(--f-titre);
+  font-weight: 650;
+  font-size: var(--t-2);
+  padding-top: 1.4rem;
+  padding-bottom: 0.5rem;
+  border-bottom: var(--ep-moyen) solid var(--trait-2);
+  color: var(--encre);
+}
+.nomenclature .groupe:first-child th {
+  padding-top: 0.6rem;
+}
+.nomenclature .rep {
+  width: 3.2rem;
+  font-family: var(--f-cote);
+  color: var(--encre-2);
+}
+.nomenclature .design a {
+  color: var(--encre);
+  text-decoration: none;
+  font-family: var(--f-titre);
+  font-weight: 650;
+  font-size: 1.12rem;
+}
+.nomenclature .design a:hover {
+  color: var(--cote);
+}
+.nomenclature .design .accroche {
+  display: block;
+  color: var(--encre-2);
+  font-size: 0.95rem;
+  margin-top: 0.15rem;
+  max-width: 60ch;
+}
+.nomenclature .mat {
+  color: var(--encre-2);
+  font-size: 0.92rem;
+  max-width: 34ch;
+}
+.nomenclature .periode {
+  font-family: var(--f-cote);
+  color: var(--encre-2);
+  white-space: nowrap;
+}
+.nomenclature .statut {
+  white-space: nowrap;
+}
+.nomenclature tr[hidden] {
+  display: none;
+}
+
+@media (max-width: 760px) {
+  .nomenclature thead {
+    display: none;
+  }
+  .nomenclature tbody tr {
+    display: grid;
+    grid-template-columns: 3rem 1fr auto;
+    grid-template-areas:
+      'rep design statut'
+      'rep mat mat'
+      'rep periode periode';
+    column-gap: 0.5rem;
+    padding: 0.7rem 0;
+    border-bottom: var(--ep-fin) solid var(--trait-3);
+  }
+  .nomenclature tbody tr.groupe {
+    display: block;
+  }
+  .nomenclature tbody th,
+  .nomenclature tbody td {
+    border: 0;
+    padding: 0.1rem 0;
+  }
+  .nomenclature .rep {
+    grid-area: rep;
+    width: auto;
+  }
+  .nomenclature .design {
+    grid-area: design;
+  }
+  .nomenclature .statut {
+    grid-area: statut;
+  }
+  .nomenclature .mat {
+    grid-area: mat;
+    max-width: none;
+  }
+  .nomenclature .periode {
+    grid-area: periode;
+  }
+}
+
+/* Filtres de la nomenclature */
+.filtres {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 0 0 1.25rem;
+  padding: 0;
+  list-style: none;
+}
+.filtres button {
+  appearance: none;
+  background: transparent;
+  border: var(--ep-fin) solid var(--trait-2);
+  color: var(--encre-2);
+  font-family: var(--f-cote);
+  font-size: var(--t-0);
+  letter-spacing: 0.03em;
+  padding: 0.4rem 0.7rem;
+  cursor: pointer;
+  border-radius: 2px;
+}
+.filtres button:hover {
+  color: var(--encre);
+  border-color: var(--trait);
+}
+.filtres button[aria-pressed='true'] {
+  color: var(--papier);
+  background: var(--cote);
+  border-color: var(--cote);
+}
+.filtres .sep {
+  width: 1px;
+  background: var(--trait-3);
+  margin: 0 0.25rem;
+}
+
+/* --- Figures (dessins) ---------------------------------------------------- */
+.figure {
+  margin: 0;
+  position: relative;
+}
+.figure svg {
+  width: 100%;
+  height: auto;
+  display: block;
+  overflow: visible;
+}
+.figure figcaption {
+  font-family: var(--f-cote);
+  font-size: var(--t-0);
+  color: var(--encre-2);
+  margin-top: 0.6rem;
+  letter-spacing: 0.02em;
+}
+/* Jeux de traits partagés par toutes les figures */
+.figure .fort {
+  stroke: var(--trait);
+  stroke-width: 1.6;
+  fill: none;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+  vector-effect: non-scaling-stroke;
+}
+.figure .moyen {
+  stroke: var(--trait);
+  stroke-width: 1;
+  fill: none;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+  vector-effect: non-scaling-stroke;
+}
+.figure .fin {
+  stroke: var(--trait-2);
+  stroke-width: 0.75;
+  fill: none;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+  vector-effect: non-scaling-stroke;
+}
+.figure .axe {
+  stroke: var(--trait-2);
+  stroke-width: 0.75;
+  fill: none;
+  stroke-dasharray: 8 3 1.5 3;
+  vector-effect: non-scaling-stroke;
+}
+.figure .cache {
+  stroke: var(--trait-2);
+  stroke-width: 0.75;
+  fill: none;
+  stroke-dasharray: 4 2.5;
+  vector-effect: non-scaling-stroke;
+}
+.figure .dim {
+  stroke: var(--cote);
+  stroke-width: 0.75;
+  fill: none;
+  vector-effect: non-scaling-stroke;
+}
+.figure .dim-fleche {
+  fill: var(--cote);
+  stroke: none;
+}
+.figure .texte-cote {
+  font-family: var(--f-cote);
+  fill: var(--cote);
+  font-size: 4.2px;
+  letter-spacing: 0.02em;
+  paint-order: stroke fill;
+  stroke: var(--papier);
+  stroke-width: 1.6px;
+  stroke-linejoin: round;
+}
+.figure .texte-cote.lettre {
+  font-size: 4.6px;
+}
+.figure .texte-cote.encre {
+  fill: var(--encre-2);
+}
+.figure .texte-legende {
+  font-family: var(--f-cote);
+  fill: var(--encre-2);
+  font-size: 4px;
+  paint-order: stroke fill;
+  stroke: var(--papier);
+  stroke-width: 1.4px;
+  stroke-linejoin: round;
+}
+.figure .crayon {
+  stroke: var(--crayon);
+  fill: none;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  vector-effect: non-scaling-stroke;
+}
+.figure .articulation {
+  fill: var(--papier);
+  stroke: var(--trait);
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+}
+.figure .articulation.fixe {
+  fill: var(--trait);
+}
+.figure .hachure {
+  stroke: var(--trait-3);
+  stroke-width: 0.6;
+  vector-effect: non-scaling-stroke;
+}
+.figure .bulle circle {
+  fill: var(--papier);
+  stroke: var(--trait);
+  stroke-width: 0.8;
+  vector-effect: non-scaling-stroke;
+}
+.figure .bulle text {
+  font-family: var(--f-cote);
+  fill: var(--encre);
+  font-size: 4.2px;
+  text-anchor: middle;
+  dominant-baseline: central;
+}
+.figure .bulle line {
+  stroke: var(--trait-2);
+  stroke-width: 0.6;
+  vector-effect: non-scaling-stroke;
+}
+.figure .voile-cote {
+  fill: var(--cote-voile);
+  stroke: none;
+}
+.figure .voile-crayon {
+  fill: var(--crayon-voile);
+  stroke: none;
+}
+/* Vignette : on cache les cotes et les bulles, on épaissit un peu */
+.figure.vignette .texte-cote,
+.figure.vignette .dim,
+.figure.vignette .dim-fleche,
+.figure.vignette .bulle,
+.figure.vignette .texte-legende,
+.figure.vignette .seulement-planche {
+  display: none;
+}
+
+/* Dessin « à compléter » */
+.a-completer {
+  border: var(--ep-fin) dashed var(--trait-2);
+  aspect-ratio: 4 / 3;
+  display: grid;
+  place-items: center;
+  position: relative;
+  background-image: repeating-linear-gradient(
+    -45deg,
+    transparent 0 14px,
+    var(--trait-4) 14px 15px
+  );
+}
+.a-completer p {
+  margin: 0;
+  background: var(--papier);
+  padding: 0.6rem 0.9rem;
+  border: var(--ep-fin) solid var(--trait-2);
+  font-family: var(--f-cote);
+  font-size: var(--t-0);
+  color: var(--encre-2);
+  text-align: center;
+  max-width: 26ch;
+}
+
+/* --- Grilles de vues ------------------------------------------------------ */
+.vues {
+  display: grid;
+  gap: 2.5rem 2rem;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.vue {
+  display: grid;
+  gap: 0.75rem;
+  margin: 0;
+}
+.vue .figure {
+  border: var(--ep-fin) solid var(--trait-3);
+  padding: 1rem;
+  aspect-ratio: 4 / 3;
+  display: grid;
+  place-items: center;
+}
+.vue .figure svg {
+  width: 100%;
+  height: 100%;
+}
+.vue .figure.a-completer {
+  padding: 0;
+}
+.vue h3 {
+  font-size: var(--t-2);
+}
+.vue h3 a {
+  color: var(--encre);
+  text-decoration: none;
+}
+.vue h3 a:hover {
+  color: var(--cote);
+}
+.vue .ligne-vue {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+.vue p {
+  color: var(--encre-2);
+  margin: 0;
+  font-size: 0.97rem;
+}
+.vue:hover .figure {
+  border-color: var(--trait-2);
+}
+
+/* --- Planche projet ------------------------------------------------------- */
+.planche-tete {
+  display: grid;
+  gap: 1rem 2rem;
+  grid-template-columns: 1fr;
+  align-items: start;
+  margin-bottom: clamp(1.5rem, 4vw, 2.5rem);
+}
+.planche-tete .cote {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+.planche-tete h1 {
+  font-size: clamp(2.2rem, 6vw, 4rem);
+  margin-top: 0.35rem;
+}
+.planche-tete .accroche {
+  font-size: var(--t-2);
+  color: var(--encre-2);
+  margin-top: 0.75rem;
+  max-width: 48ch;
+  text-wrap: pretty;
+}
+.planche-tete .tampon {
+  justify-self: start;
+  margin-top: 0.5rem;
+}
+.planche-corps {
+  display: grid;
+  gap: clamp(2rem, 5vw, 3.5rem);
+  grid-template-columns: 1fr;
+}
+@media (min-width: 980px) {
+  .planche-corps {
+    grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+    align-items: start;
+  }
+  .planche-corps .colonne-droite {
+    position: sticky;
+    top: calc(var(--cadre) + var(--bande) + 4.5rem);
+  }
+}
+.planche-corps .figure {
+  border: var(--ep-fin) solid var(--trait-3);
+  padding: clamp(1rem, 3vw, 2rem);
+}
+
+.caracteristiques {
+  border-top: var(--ep-fort) solid var(--trait);
+  margin: 0;
+}
+.caracteristiques > div {
+  display: grid;
+  grid-template-columns: 7.5rem 1fr;
+  gap: 0.25rem 1rem;
+  padding: 0.65rem 0;
+  border-bottom: var(--ep-fin) solid var(--trait-3);
+}
+.caracteristiques dt {
+  font-family: var(--f-cote);
+  font-size: var(--t-0);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--encre-2);
+  padding-top: 0.2em;
+}
+.caracteristiques dd {
+  margin: 0;
+}
+.caracteristiques ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.caracteristiques li {
+  margin: 0;
+}
+.caracteristiques li + li {
+  margin-top: 0.2em;
+}
+
+.collaboration {
+  margin-top: 2rem;
+  border: var(--ep-fin) solid var(--trait-2);
+  padding: 1.1rem 1.25rem 1.25rem;
+}
+.collaboration h2 {
+  font-size: var(--t-2);
+  margin-bottom: 0.25rem;
+}
+.collaboration > p {
+  color: var(--encre-2);
+  font-size: 0.95rem;
+  margin-bottom: 1rem;
+}
+.collaboration .deux {
+  display: grid;
+  gap: 1.25rem;
+  grid-template-columns: 1fr;
+}
+@media (min-width: 560px) {
+  .collaboration .deux {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+.collaboration h3 {
+  font-family: var(--f-cote);
+  font-weight: 400;
+  font-size: var(--t-0);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--encre-2);
+  margin-bottom: 0.5rem;
+  padding-bottom: 0.35rem;
+  border-bottom: var(--ep-fin) solid var(--trait-3);
+}
+.collaboration ul {
+  padding-left: 1.1em;
+  margin: 0;
+  font-size: 0.97rem;
+}
+
+.voisins {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 3rem;
+  padding-top: 1rem;
+  border-top: var(--ep-fin) solid var(--trait-3);
+  font-family: var(--f-cote);
+  font-size: 0.9rem;
+}
+.voisins a {
+  color: var(--encre);
+  text-decoration: none;
+  display: grid;
+  gap: 0.15rem;
+}
+.voisins a:hover {
+  color: var(--cote);
+}
+.voisins a span {
+  color: var(--encre-2);
+  font-size: var(--t-0);
+}
+.voisins a.suivant {
+  text-align: right;
+}
+
+/* --- Accueil -------------------------------------------------------------- */
+.hero {
+  display: grid;
+  gap: 1.5rem 2.5rem;
+  grid-template-columns: 1fr;
+  grid-template-areas:
+    'tete'
+    'texte'
+    'figure';
+  align-items: start;
+  padding: clamp(0.5rem, 2vw, 1.5rem) 0 0;
+}
+.hero > .hero-tete {
+  grid-area: tete;
+}
+.hero > .hero-texte {
+  grid-area: texte;
+}
+.hero > .figure {
+  grid-area: figure;
+}
+@media (min-width: 900px) {
+  .hero {
+    grid-template-columns: minmax(0, 4fr) minmax(0, 8fr);
+    grid-template-areas:
+      'tete tete'
+      'texte figure';
+    gap: 2rem 3rem;
+  }
+}
+.hero .cote {
+  display: flex;
+  gap: 0.6rem 1.25rem;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+}
+.hero h1 {
+  font-size: var(--t-6);
+  font-weight: 760;
+  font-stretch: 92%;
+  line-height: 0.92;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+  max-width: 20ch;
+}
+.hero .intro {
+  font-size: var(--t-2);
+  margin-top: 0;
+  max-width: 34ch;
+  color: var(--encre);
+  text-wrap: pretty;
+}
+.hero .actions {
+  display: flex;
+  gap: 0.75rem 1.5rem;
+  flex-wrap: wrap;
+  margin-top: 1.75rem;
+}
+.bouton {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--f-titre);
+  font-weight: 650;
+  font-size: 1.02rem;
+  color: var(--encre);
+  text-decoration: none;
+  border: var(--ep-moyen) solid var(--trait);
+  padding: 0.6rem 1rem;
+  border-radius: 2px;
+}
+.bouton:hover {
+  background: var(--trait);
+  color: var(--papier);
+  text-decoration: none;
+}
+.bouton.discret {
+  border-color: var(--trait-3);
+  color: var(--encre-2);
+}
+.bouton.discret:hover {
+  background: transparent;
+  color: var(--encre);
+  border-color: var(--trait);
+}
+.hero .figure {
+  border: var(--ep-fin) solid var(--trait-3);
+  padding: clamp(0.75rem, 2.5vw, 1.75rem);
+}
+
+.methode-apercu {
+  display: grid;
+  gap: 1.5rem 2.5rem;
+  grid-template-columns: 1fr;
+}
+@media (min-width: 820px) {
+  .methode-apercu {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+.methode-apercu h3 {
+  font-size: var(--t-2);
+  margin-bottom: 0.5rem;
+}
+.methode-apercu p {
+  color: var(--encre-2);
+  margin: 0;
+}
+
+/* --- Méthode : boucle de travail ------------------------------------------ */
+.boucle {
+  list-style: none;
+  padding: 0;
+  margin: 1.5rem 0 0;
+  counter-reset: etape;
+  display: grid;
+  gap: 0;
+  border-top: var(--ep-fort) solid var(--trait);
+}
+.boucle li {
+  display: grid;
+  grid-template-columns: 3rem 1fr;
+  gap: 0.25rem 1rem;
+  padding: 1.1rem 0;
+  border-bottom: var(--ep-fin) solid var(--trait-3);
+  margin: 0;
+}
+.boucle li::before {
+  counter-increment: etape;
+  content: counter(etape, decimal-leading-zero);
+  font-family: var(--f-cote);
+  color: var(--encre-2);
+  font-size: var(--t-0);
+  padding-top: 0.45em;
+}
+.boucle h3 {
+  font-size: var(--t-2);
+  margin-bottom: 0.35rem;
+}
+.boucle p {
+  margin: 0;
+  color: var(--encre-2);
+}
+.boucle p + p {
+  margin-top: 0.5rem;
+}
+
+.regles {
+  display: grid;
+  gap: 1rem 2rem;
+  grid-template-columns: 1fr;
+  margin-top: 1.5rem;
+}
+@media (min-width: 720px) {
+  .regles {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+.regles > div {
+  border: var(--ep-fin) solid var(--trait-3);
+  padding: 1rem 1.1rem 1.1rem;
+}
+.regles h3 {
+  font-size: var(--t-2);
+  margin-bottom: 0.5rem;
+}
+.regles p {
+  margin: 0;
+  color: var(--encre-2);
+}
+
+.chrono {
+  list-style: none;
+  padding: 0;
+  margin: 1.5rem 0 0;
+  display: grid;
+  gap: 0;
+}
+.chrono li {
+  display: grid;
+  grid-template-columns: 7rem 1fr;
+  gap: 0.25rem 1.25rem;
+  padding: 0.8rem 0;
+  border-bottom: var(--ep-fin) solid var(--trait-3);
+  margin: 0;
+}
+.chrono li:first-child {
+  border-top: var(--ep-fort) solid var(--trait);
+}
+.chrono .quand {
+  font-family: var(--f-cote);
+  color: var(--encre-2);
+  padding-top: 0.2em;
+}
+.chrono .quoi {
+  max-width: var(--largeur-texte);
+}
+.chrono .quoi a {
+  color: var(--encre);
+}
+
+/* --- Animation d'apparition des figures ----------------------------------- */
+@media (prefers-reduced-motion: no-preference) {
+  .figure[data-trace] .fort,
+  .figure[data-trace] .moyen,
+  .figure[data-trace] .fin,
+  .figure[data-trace] .dim,
+  .figure[data-trace] .cache,
+  .figure[data-trace] .axe {
+    stroke-dasharray: 1200;
+    stroke-dashoffset: 1200;
+    animation: tracer 1.6s cubic-bezier(0.3, 0, 0.2, 1) forwards;
+    animation-delay: var(--retard, 0s);
+  }
+  .figure[data-trace] .cache {
+    animation-name: tracer-cache;
+  }
+  .figure[data-trace] .axe {
+    animation-name: tracer-axe;
+  }
+  .figure[data-trace] .texte-cote,
+  .figure[data-trace] .texte-legende,
+  .figure[data-trace] .bulle,
+  .figure[data-trace] .dim-fleche {
+    opacity: 0;
+    animation: apparaitre 0.6s ease-out forwards;
+    animation-delay: calc(var(--retard, 0s) + 1.2s);
+  }
+}
+@keyframes tracer {
+  to {
+    stroke-dashoffset: 0;
+    stroke-dasharray: none;
+  }
+}
+@keyframes tracer-cache {
+  to {
+    stroke-dashoffset: 0;
+    stroke-dasharray: 4 2.5;
+  }
+}
+@keyframes tracer-axe {
+  to {
+    stroke-dashoffset: 0;
+    stroke-dasharray: 8 3 1.5 3;
+  }
+}
+@keyframes apparaitre {
+  to {
+    opacity: 1;
+  }
+}
+
+/* --- Transitions de pages ------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+}
+
+/* --- Impression ----------------------------------------------------------- */
+@media print {
+  :root {
+    --papier: #fff;
+    --papier-2: #fff;
+    --trait: #0f2b4a;
+    --encre: #000;
+    --encre-2: #333;
+    --cote: #0a4f8a;
+    --crayon: #c0392b;
+  }
+  body {
+    background-image: none;
+    padding: 0;
+  }
+  .cadre,
+  .en-tete,
+  .bascule,
+  .voisins,
+  .filtres {
+    display: none !important;
+  }
+}

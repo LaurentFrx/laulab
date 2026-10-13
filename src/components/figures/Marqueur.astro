@@ -1,0 +1,11 @@
+---
+/** Pointe de flèche de cotation, à déclarer une fois par figure dans <defs>. */
+interface Props {
+  id: string;
+}
+const { id } = Astro.props;
+---
+
+<marker id={id} viewBox="0 0 6 6" refX="5.5" refY="3" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+  <path d="M0 0.6 L6 3 L0 5.4 Z" class="dim-fleche"></path>
+</marker>

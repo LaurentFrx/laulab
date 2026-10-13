@@ -1,0 +1,129 @@
+---
+import { getCollection } from 'astro:content';
+import Planche from '../../layouts/Planche.astro';
+import Tampon from '../../components/Tampon.astro';
+import Cartouche from '../../components/Cartouche.astro';
+import { CATEGORIES, STATUTS, ORDRE_CATEGORIES, parCategorie, numeroPlanche } from '../../lib/nomenclature';
+
+const projets = await getCollection('projets');
+const groupes = parCategorie(projets);
+const statutsPresents = (Object.keys(STATUTS) as (keyof typeof STATUTS)[]).filter((s) =>
+  projets.some((p) => p.data.statut === s)
+);
+---
+
+<Planche
+  titre="Nomenclature"
+  description="La liste complète des projets de Laurent Feroux : applications, robots, atelier et électronique, énergie et systèmes. Filtrable par catégorie et par état d'avancement."
+  actif="projets"
+>
+  <div class="planche-tete">
+    <p class="cote">
+      <span>Nomenclature</span>
+      <span>{projets.length} repères</span>
+    </p>
+    <h1>Nomenclature</h1>
+    <p class="accroche">
+      Chaque repère renvoie à une planche : le dessin, les matières, l'état, et qui a fait quoi.
+    </p>
+  </div>
+
+  <ul class="filtres" data-filtres aria-label="Filtres">
+    <li><button type="button" data-filtre="categorie" data-valeur="" aria-pressed="true">Tout</button></li>
+    {ORDRE_CATEGORIES.map((c) => (
+      <li><button type="button" data-filtre="categorie" data-valeur={c} aria-pressed="false">{CATEGORIES[c].label}</button></li>
+    ))}
+    <li class="sep" aria-hidden="true"></li>
+    <li><button type="button" data-filtre="statut" data-valeur="" aria-pressed="true">Tous états</button></li>
+    {statutsPresents.map((s) => (
+      <li><button type="button" data-filtre="statut" data-valeur={s} aria-pressed="false">{STATUTS[s].label}</button></li>
+    ))}
+  </ul>
+
+  <table class="nomenclature" data-nomenclature>
+    <thead>
+      <tr>
+        <th scope="col">Rep.</th>
+        <th scope="col">Désignation</th>
+        <th scope="col">Statut</th>
+        <th scope="col">Matières</th>
+        <th scope="col">Période</th>
+      </tr>
+    </thead>
+    <tbody>
+      {groupes.map((g) => (
+        <>
+          <tr class="groupe" data-categorie={g.categorie}>
+            <th scope="colgroup" colspan="5">{CATEGORIES[g.categorie].label}</th>
+          </tr>
+          {g.projets.map((p) => (
+            <tr data-categorie={g.categorie} data-statut={p.data.statut}>
+              <th scope="row" class="rep">{numeroPlanche(p)}</th>
+              <td class="design">
+                <a href={`/projets/${p.id}/`}>{p.data.titre}</a>
+                <span class="accroche">{p.data.accroche}</span>
+              </td>
+              <td class="statut"><Tampon statut={p.data.statut} droit petit /></td>
+              <td class="mat">{p.data.matieres.slice(0, 4).join(', ')}</td>
+              <td class="periode">{p.data.periode}</td>
+            </tr>
+          ))}
+        </>
+      ))}
+    </tbody>
+  </table>
+  <p class="cote" data-vide hidden style="margin-top:1.5rem">Aucun repère ne correspond à ces filtres.</p>
+
+  <Cartouche
+    planche="N"
+    titre="Nomenclature"
+    sousTitre={`${projets.length} repères en ${groupes.length} catégories`}
+    revision="A"
+    date="2026-10"
+    echelle="—"
+  />
+</Planche>
+
+<script>
+  function init() {
+    const conteneur = document.querySelector<HTMLElement>('[data-filtres]');
+    const tableau = document.querySelector<HTMLTableElement>('[data-nomenclature]');
+    if (!conteneur || !tableau || conteneur.dataset.pret) return;
+    const table: HTMLTableElement = tableau;
+    conteneur.dataset.pret = '1';
+    const etat = { categorie: '', statut: '' };
+    const vide = document.querySelector<HTMLElement>('[data-vide]');
+
+    function appliquer() {
+      const lignes = table.querySelectorAll<HTMLTableRowElement>('tbody tr');
+      const visiblesParGroupe = new Map<string, number>();
+      lignes.forEach((tr) => {
+        if (tr.classList.contains('groupe')) return;
+        const ok =
+          (!etat.categorie || tr.dataset.categorie === etat.categorie) &&
+          (!etat.statut || tr.dataset.statut === etat.statut);
+        tr.hidden = !ok;
+        if (ok) visiblesParGroupe.set(tr.dataset.categorie ?? '', (visiblesParGroupe.get(tr.dataset.categorie ?? '') ?? 0) + 1);
+      });
+      lignes.forEach((tr) => {
+        if (tr.classList.contains('groupe')) tr.hidden = !visiblesParGroupe.get(tr.dataset.categorie ?? '');
+      });
+      let total = 0;
+      visiblesParGroupe.forEach((n) => (total += n));
+      if (vide) vide.hidden = total > 0;
+    }
+
+    conteneur.addEventListener('click', (ev) => {
+      const b = (ev.target as HTMLElement).closest<HTMLButtonElement>('button[data-filtre]');
+      if (!b) return;
+      const cle = b.dataset.filtre as 'categorie' | 'statut';
+      etat[cle] = b.dataset.valeur ?? '';
+      conteneur.querySelectorAll<HTMLButtonElement>(`button[data-filtre="${cle}"]`).forEach((x) => {
+        x.setAttribute('aria-pressed', x === b ? 'true' : 'false');
+      });
+      appliquer();
+    });
+  }
+  init();
+  document.addEventListener('astro:page-load', init);
+</script>

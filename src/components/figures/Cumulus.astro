@@ -1,0 +1,90 @@
+---
+/** Domo : le cumulus, sa sonde, et ce qui le pilote. Vue schématique. */
+import Bulle from './Bulle.astro';
+import Cote from './Cote.astro';
+import Marqueur from './Marqueur.astro';
+
+interface Props {
+  mode?: 'planche' | 'vignette';
+  tracer?: boolean;
+  legende?: string;
+}
+const { mode = 'planche', tracer = true, legende } = Astro.props;
+const niveaux = [44, 62, 80, 98, 116];
+---
+
+<figure class:list={['figure', 'cumulus', { vignette: mode === 'vignette' }]} data-trace={tracer ? '' : undefined}>
+  <svg viewBox="0 0 220 150" role="img" aria-label="Schéma : ballon d'eau chaude avec sonde en bas, contacteur Shelly, compteur d'énergie, production solaire et serveur Domo">
+    <defs><Marqueur id="f-cumulus" /></defs>
+
+    <!-- Ballon -->
+    <line class="axe" x1="70" y1="12" x2="70" y2="142"></line>
+    <rect class="fort" x="40" y="22" width="60" height="112" rx="9"></rect>
+    <rect class="fin" x="44" y="26" width="52" height="104" rx="7"></rect>
+    {niveaux.map((y, k) => (
+      <>
+        <line class="cache" x1="46" y1={y} x2="94" y2={y}></line>
+        <text class="texte-cote encre" x="98" y={y + 1.4} font-size="3.6">T{5 - k}</text>
+      </>
+    ))}
+    <!-- Résistance (cachée) -->
+    <polyline class="cache" points="52,124 56,120 60,128 64,120 68,128 72,120 76,128 80,120 84,128 88,124"></polyline>
+    <!-- Doigt de gant et sonde -->
+    <line class="moyen" x1="100" y1="129" x2="74" y2="129"></line>
+    <line class="moyen" x1="100" y1="131.5" x2="74" y2="131.5"></line>
+    <path class="moyen" d="M74 129 a1.25 1.25 0 0 0 0 2.5"></path>
+    <circle class="crayon" cx="76" cy="130.25" r="1.1"></circle>
+    <!-- Entrée eau froide, sortie eau chaude -->
+    <line class="moyen" x1="20" y1="126" x2="40" y2="126"></line>
+    <line class="dim" x1="22" y1="126" x2="34" y2="126" marker-end="url(#f-cumulus)"></line>
+    <text class="texte-legende" x="8" y="123">eau froide</text>
+    <line class="moyen" x1="70" y1="22" x2="70" y2="8"></line>
+    <line class="dim" x1="70" y1="18" x2="70" y2="10" marker-end="url(#f-cumulus)"></line>
+    <text class="texte-legende" x="74" y="10">eau chaude</text>
+    <Cote x1="40" y1="140" x2="100" y2="140" texte="300 L" decalage="4" marqueur="f-cumulus" />
+
+    <!-- Contacteur + Shelly Pro 1 -->
+    <rect class="moyen" x="126" y="66" width="36" height="24"></rect>
+    <text class="texte-legende" x="130" y="74">contacteur</text>
+    <text class="texte-legende" x="130" y="80">Shelly Pro 1</text>
+    <text class="texte-legende" x="130" y="86">2 900 W</text>
+    <polyline class="moyen" points="126,78 112,78 112,124 90,124"></polyline>
+
+    <!-- Compteur EM-50 et réseau -->
+    <rect class="moyen" x="126" y="22" width="36" height="20"></rect>
+    <text class="texte-legende" x="130" y="30">Shelly</text>
+    <text class="texte-legende" x="130" y="36">Pro EM-50</text>
+    <line class="moyen" x1="162" y1="32" x2="214" y2="32"></line>
+    <text class="texte-legende" x="190" y="29">réseau</text>
+    <line class="moyen" x1="144" y1="42" x2="144" y2="66"></line>
+    <line class="moyen" x1="144" y1="90" x2="144" y2="104"></line>
+
+    <!-- Production PV -->
+    <g transform="translate(128 104)">
+      <rect class="moyen" x="0" y="0" width="32" height="14"></rect>
+      <line class="fin" x1="8" y1="0" x2="8" y2="14"></line>
+      <line class="fin" x1="16" y1="0" x2="16" y2="14"></line>
+      <line class="fin" x1="24" y1="0" x2="24" y2="14"></line>
+      <line class="fin" x1="0" y1="7" x2="32" y2="7"></line>
+    </g>
+    <text class="texte-legende" x="128" y="124">EZ1-H · 2 × SB3 Pro</text>
+    <text class="texte-legende" x="128" y="130">3 340 Wc</text>
+
+    <!-- Domo sur le VPS -->
+    <rect class="moyen" x="176" y="52" width="36" height="22" rx="2"></rect>
+    <text class="texte-legende" x="180" y="60">Domo</text>
+    <text class="texte-legende" x="180" y="66">VPS · Caddy</text>
+    <polyline class="cache" points="176,63 170,63 170,32 162,32"></polyline>
+    <polyline class="cache" points="176,68 168,68 168,78 162,78"></polyline>
+    <text class="texte-legende" x="166" y="48" font-size="3.4">tunnel SSH</text>
+
+    <!-- Repères -->
+    <Bulle n="1" x="24" y="40" ax="40" ay="50" />
+    <Bulle n="2" x="112" y="142" ax="78" ay="131" />
+    <Bulle n="3" x="150" y="54" ax="144" ay="66" />
+    <Bulle n="4" x="118" y="12" ax="128" ay="22" />
+    <Bulle n="5" x="172" y="138" ax="160" ay="118" />
+    <Bulle n="6" x="206" y="86" ax="200" ay="74" />
+  </svg>
+  {legende && <figcaption>{legende}</figcaption>}
+</figure>

@@ -1,0 +1,73 @@
+---
+/** Compteur de personnes : caméra au-dessus d'un passage, ligne de comptage, Raspberry Pi et Hailo-8. */
+import Bulle from './Bulle.astro';
+import Cote from './Cote.astro';
+import Marqueur from './Marqueur.astro';
+
+interface Props {
+  mode?: 'planche' | 'vignette';
+  tracer?: boolean;
+  legende?: string;
+}
+const { mode = 'planche', tracer = true, legende } = Astro.props;
+---
+
+<figure class:list={['figure', 'compteur', { vignette: mode === 'vignette' }]} data-trace={tracer ? '' : undefined}>
+  <svg viewBox="0 0 220 150" role="img" aria-label="Coupe d'un passage : caméra fixée en hauteur, champ de vision vers le sol, ligne virtuelle de comptage, boîtier Raspberry Pi 5 avec module Hailo-8">
+    <defs><Marqueur id="f-compteur" /></defs>
+
+    <!-- Sol et plafond -->
+    <line class="fort" x1="10" y1="132" x2="210" y2="132"></line>
+    {Array.from({ length: 33 }, (_, n) => 12 + n * 6).map((x) => (
+      <line class="hachure" x1={x} y1="132.5" x2={x - 4} y2="136.5"></line>
+    ))}
+    <line class="fort" x1="10" y1="18" x2="210" y2="18"></line>
+    {Array.from({ length: 33 }, (_, n) => 12 + n * 6).map((x) => (
+      <line class="hachure" x1={x} y1="17.5" x2={x + 4} y2="13.5"></line>
+    ))}
+
+    <!-- Caméra -->
+    <rect class="moyen" x="106" y="18" width="10" height="4"></rect>
+    <rect class="fort" x="100" y="22" width="20" height="10" rx="1.5"></rect>
+    <path class="fort" d="M106 32 L114 32 L112 36 L108 36 Z"></path>
+    <circle class="moyen" cx="110" cy="34" r="1.2"></circle>
+    <!-- Champ de vision -->
+    <line class="cache" x1="110" y1="36" x2="52" y2="132"></line>
+    <line class="cache" x1="110" y1="36" x2="168" y2="132"></line>
+    <path class="fin" d="M98 56 A24 24 0 0 1 122 56"></path>
+    <text class="texte-cote" x="110" y="52" text-anchor="middle">champ</text>
+
+    <!-- Ligne de comptage -->
+    <line class="crayon" x1="110" y1="40" x2="110" y2="132" stroke-dasharray="5 3"></line>
+    <text class="texte-cote" x="113" y="124">ligne de comptage</text>
+
+    <!-- Trajectoires -->
+    <path class="moyen" d="M30 100 C 70 96, 90 104, 128 100" marker-end="url(#f-compteur)"></path>
+    <text class="texte-legende" x="30" y="96">+1</text>
+    <path class="moyen" d="M190 112 C 160 110, 140 116, 96 112" marker-end="url(#f-compteur)"></path>
+    <text class="texte-legende" x="184" y="108">−1</text>
+    <!-- Silhouettes schématiques (ellipse = tête vue d'en haut) -->
+    <ellipse class="fin" cx="60" cy="100" rx="4" ry="2.5"></ellipse>
+    <ellipse class="fin" cx="160" cy="112" rx="4" ry="2.5"></ellipse>
+
+    <!-- Boîtier Raspberry Pi 5 + Hailo -->
+    <rect class="fort" x="150" y="40" width="44" height="26"></rect>
+    <rect class="fin" x="154" y="44" width="22" height="14"></rect>
+    <text class="texte-legende" x="156" y="50" font-size="3.4">RPi 5</text>
+    <rect class="fin" x="178" y="44" width="12" height="18"></rect>
+    <text class="texte-legende" x="179.5" y="54" font-size="3">Hailo</text>
+    <text class="texte-legende" x="179.5" y="58" font-size="3">-8</text>
+    <text class="texte-legende" x="154" y="64" font-size="3.4">YOLOv8n · 26 TOPS</text>
+    <polyline class="moyen" points="120 27 150 27 150 40"></polyline>
+    <text class="texte-legende" x="126" y="25" font-size="3.4">CSI / USB</text>
+
+    <Cote x1="52" y1="140" x2="168" y2="140" texte="zone couverte" decalage="4" marqueur="f-compteur" />
+
+    <!-- Repères -->
+    <Bulle n="1" x="80" y="30" ax="100" ay="27" />
+    <Bulle n="2" x="130" y="82" ax="110" ay="86" />
+    <Bulle n="3" x="206" y="80" ax="194" ay="62" />
+    <Bulle n="4" x="36" y="76" ax="66" ay="88" />
+  </svg>
+  {legende && <figcaption>{legende}</figcaption>}
+</figure>

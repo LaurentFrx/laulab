@@ -1,0 +1,45 @@
+---
+/**
+ * Ligne de cote : deux flèches et un texte centré, posée entre (x1,y1) et (x2,y2).
+ * Le texte est décalé perpendiculairement de `decalage` unités (à gauche du sens 1→2 si positif).
+ */
+interface Props {
+  x1: number | string;
+  y1: number | string;
+  x2: number | string;
+  y2: number | string;
+  texte: string;
+  decalage?: number | string;
+  marqueur: string;
+  /** Lignes d'attache (extension) : longueur en unités depuis chaque extrémité, perpendiculaire */
+  attache?: number | string;
+}
+const props = Astro.props;
+const x1 = Number(props.x1);
+const y1 = Number(props.y1);
+const x2 = Number(props.x2);
+const y2 = Number(props.y2);
+const texte = props.texte;
+const decalage = Number(props.decalage ?? -3);
+const marqueur = props.marqueur;
+const attache = Number(props.attache ?? 0);
+const dx = x2 - x1;
+const dy = y2 - y1;
+const dd = Math.hypot(dx, dy) || 1;
+const nx = -dy / dd;
+const ny = dx / dd;
+const mx = (x1 + x2) / 2 + nx * decalage;
+const my = (y1 + y2) / 2 + ny * decalage;
+let angle = (Math.atan2(dy, dx) * 180) / Math.PI;
+if (angle > 90 || angle < -90) angle += 180;
+const f = (n: number) => n.toFixed(2);
+---
+
+{attache > 0 && (
+  <>
+    <line class="fin" x1={f(x1 - nx * attache)} y1={f(y1 - ny * attache)} x2={f(x1 + nx * 1.5)} y2={f(y1 + ny * 1.5)}></line>
+    <line class="fin" x1={f(x2 - nx * attache)} y1={f(y2 - ny * attache)} x2={f(x2 + nx * 1.5)} y2={f(y2 + ny * 1.5)}></line>
+  </>
+)}
+<line class="dim" x1={f(x1)} y1={f(y1)} x2={f(x2)} y2={f(y2)} marker-start={`url(#${marqueur})`} marker-end={`url(#${marqueur})`}></line>
+<text class="texte-cote" x={f(mx)} y={f(my)} text-anchor="middle" dominant-baseline="central" transform={`rotate(${angle.toFixed(1)} ${f(mx)} ${f(my)})`}>{texte}</text>

@@ -1,0 +1,138 @@
+---
+import { getCollection, render } from 'astro:content';
+import Planche from '../../layouts/Planche.astro';
+import Figure from '../../components/Figure.astro';
+import Tampon from '../../components/Tampon.astro';
+import Cartouche from '../../components/Cartouche.astro';
+import { CATEGORIES, numeroPlanche, trierParRepere } from '../../lib/nomenclature';
+
+export async function getStaticPaths() {
+  const projets = trierParRepere(await getCollection('projets'));
+  return projets.map((projet, k) => ({
+    params: { slug: projet.id },
+    props: { projet, precedent: projets[k - 1] ?? null, suivant: projets[k + 1] ?? null }
+  }));
+}
+
+const { projet, precedent, suivant } = Astro.props;
+const { Content } = await render(projet);
+const d = projet.data;
+const planche = numeroPlanche(projet);
+const dessine = d.collaboration.claude.length ? 'Laurent Feroux et Claude' : 'Laurent Feroux';
+---
+
+<Planche titre={d.titre} description={d.accroche} actif="projets">
+  <article>
+    <header class="planche-tete">
+      <p class="cote">
+        <span>Planche {planche}</span>
+        <span>{CATEGORIES[d.categorie].label}</span>
+        {d.lieu && <span>{d.lieu}</span>}
+        <span>{d.periode}</span>
+      </p>
+      <h1>{d.titre}</h1>
+      <p class="accroche">{d.accroche}</p>
+      <Tampon statut={d.statut} />
+    </header>
+
+    <div class="planche-corps">
+      <div>
+        <Figure nom={d.figure} mode="planche" titre={d.titre} legende={d.figure ? `Fig. 1 — ${d.titre}, repères 1 à ${d.reperes.length}.` : undefined} />
+        {d.reperes.length > 0 && (
+          <ol class="liste-reperes" style="margin-top:1.25rem" aria-label="Légende des repères">
+            {d.reperes.map((r, k) => (
+              <li>
+                <span class="repere">{k + 1}</span>
+                <span>{r}</span>
+              </li>
+            ))}
+          </ol>
+        )}
+        <div class="prose" style="margin-top:2.5rem">
+          <Content />
+        </div>
+      </div>
+
+      <aside class="colonne-droite">
+        <dl class="caracteristiques">
+          <div>
+            <dt>Statut</dt>
+            <dd><Tampon statut={d.statut} droit petit /></dd>
+          </div>
+          <div>
+            <dt>Période</dt>
+            <dd>{d.periode}</dd>
+          </div>
+          {d.lieu && (
+            <div>
+              <dt>Lieu</dt>
+              <dd>{d.lieu}</dd>
+            </div>
+          )}
+          <div>
+            <dt>Matières</dt>
+            <dd>
+              <ul>{d.matieres.map((m) => <li>{m}</li>)}</ul>
+            </dd>
+          </div>
+          {d.liens.length > 0 && (
+            <div>
+              <dt>Liens</dt>
+              <dd>
+                <ul>
+                  {d.liens.map((l) => (
+                    <li><a href={l.url} rel="noopener">{l.label}</a></li>
+                  ))}
+                </ul>
+              </dd>
+            </div>
+          )}
+        </dl>
+
+        <section class="collaboration" aria-labelledby="collab">
+          <h2 id="collab">Qui a fait quoi</h2>
+          <p>Pilote et copilote : la répartition du travail sur cette planche.</p>
+          <div class="deux">
+            <div>
+              <h3>Laurent</h3>
+              <ul>{d.collaboration.laurent.map((x) => <li>{x}</li>)}</ul>
+            </div>
+            <div>
+              <h3>Claude</h3>
+              <ul>{d.collaboration.claude.map((x) => <li>{x}</li>)}</ul>
+            </div>
+          </div>
+        </section>
+      </aside>
+    </div>
+
+    <nav class="voisins" aria-label="Planches voisines">
+      {precedent ? (
+        <a href={`/projets/${precedent.id}/`} rel="prev">
+          <span>← Planche {numeroPlanche(precedent)}</span>
+          {precedent.data.titre}
+        </a>
+      ) : (
+        <span></span>
+      )}
+      {suivant ? (
+        <a href={`/projets/${suivant.id}/`} rel="next" class="suivant">
+          <span>Planche {numeroPlanche(suivant)} →</span>
+          {suivant.data.titre}
+        </a>
+      ) : (
+        <span></span>
+      )}
+    </nav>
+  </article>
+
+  <Cartouche
+    planche={planche}
+    titre={d.titre}
+    sousTitre={d.accroche}
+    revision={d.revision}
+    statut={d.statut}
+    date={d.debut}
+    dessine={dessine}
+  />
+</Planche>

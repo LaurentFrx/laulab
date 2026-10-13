@@ -1,0 +1,61 @@
+---
+import '../styles/global.css';
+import { ClientRouter } from 'astro:transitions';
+import Cadre from '../components/Cadre.astro';
+import EnTete from '../components/EnTete.astro';
+
+interface Props {
+  titre: string;
+  description: string;
+  actif?: 'accueil' | 'projets' | 'methode' | 'a-propos';
+}
+const { titre, description, actif } = Astro.props;
+const titreComplet = actif === 'accueil' ? titre : `${titre} — L@uL@b`;
+const url = new URL(Astro.url.pathname, Astro.site);
+---
+
+<!doctype html>
+<html lang="fr" data-theme="cyanotype">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{titreComplet}</title>
+    <meta name="description" content={description} />
+    <meta name="author" content="Laurent Feroux" />
+    <meta name="color-scheme" content="dark light" />
+    <meta name="theme-color" content="#0e2a47" />
+    <link rel="canonical" href={url.href} />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="sitemap" href="/sitemap-index.xml" />
+    <link rel="preload" href="/fonts/osifont-lgpl3fe-latin.woff2" as="font" type="font/woff2" crossorigin />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={titreComplet} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={url.href} />
+    <meta property="og:locale" content="fr_FR" />
+    <meta property="og:site_name" content="L@uL@b" />
+    <script is:inline>
+      (function () {
+        try {
+          var t = localStorage.getItem('laulab-theme');
+          if (t === 'calque' || t === 'cyanotype') document.documentElement.dataset.theme = t;
+        } catch (e) {}
+      })();
+      document.addEventListener('astro:after-swap', function () {
+        try {
+          var t = localStorage.getItem('laulab-theme');
+          if (t === 'calque' || t === 'cyanotype') document.documentElement.dataset.theme = t;
+        } catch (e) {}
+      });
+    </script>
+    <ClientRouter />
+  </head>
+  <body>
+    <a class="passer" href="#contenu">Aller au contenu</a>
+    <Cadre />
+    <EnTete actif={actif} />
+    <main class="page" id="contenu">
+      <slot />
+    </main>
+  </body>
+</html>

@@ -1,0 +1,61 @@
+---
+import Planche from '../layouts/Planche.astro';
+import Cartouche from '../components/Cartouche.astro';
+---
+
+<Planche
+  titre="À propos"
+  description="Laurent Feroux, à Sanguinet dans les Landes : autodidacte en informatique depuis 1981, ancien pilote d'hélicoptère, membre du FabLab BiscaLab."
+  actif="a-propos"
+>
+  <div class="planche-tete">
+    <p class="cote">
+      <span>Planche A</span>
+      <span>Renseignements</span>
+    </p>
+    <h1>Laurent Feroux</h1>
+    <p class="accroche">Sanguinet, Landes. Autodidacte en informatique depuis 1981, ancien pilote d'hélicoptère.</p>
+  </div>
+
+  <section class="section" aria-labelledby="parcours">
+    <div class="ligne-titre"><h2 id="parcours">Parcours</h2></div>
+    <div class="prose">
+      <p>
+        J'ai commencé l'informatique en 1981, seul, et je n'ai jamais arrêté. Entre-temps, j'ai piloté des
+        hélicoptères. À la retraite, je construis ce qui me manque : une domotique qui fait ce que je veux,
+        des capteurs pour le FabLab, des robots pour le plaisir de les voir marcher.
+      </p>
+      <p>
+        Je suis membre actif de BiscaLab, le FabLab de Biscarrosse : découpe laser, impression 3D, électronique, et des projets en commun comme la station
+        météo ou le compteur de personnes.
+      </p>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="ce-site">
+    <div class="ligne-titre"><h2 id="ce-site">Ce site</h2></div>
+    <div class="prose">
+      <p>
+        Il est construit comme un jeu de plans : une planche par projet, un cartouche, des repères. Les dessins
+        sont des SVG tracés à la main ; le mécanisme de Jansen de l'accueil est calculé en direct. Pas de
+        suivi, pas de cookie, pas de service tiers : les polices sont hébergées ici.
+      </p>
+      <p>
+        Les polices : <em>Anybody</em> pour les titres, <em>Atkinson Hyperlegible</em> pour le texte, et
+        <em>osifont</em> pour les cotes, une police libre qui suit la norme ISO 3098 du lettrage technique.
+      </p>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="contact">
+    <div class="ligne-titre"><h2 id="contact">Contact</h2></div>
+    <div class="prose">
+      <ul>
+        <li>GitHub : <a href="https://github.com/LaurentFrx" rel="noopener">LaurentFrx</a></li>
+        <li>Au FabLab : BiscaLab, Biscarrosse</li>
+      </ul>
+    </div>
+  </section>
+
+  <Cartouche planche="A" titre="À propos" sousTitre="Laurent Feroux — renseignements" revision="A" date="2026-10" echelle="—" />
+</Planche>

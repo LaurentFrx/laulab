@@ -1,0 +1,14 @@
+---
+import Planche from '../layouts/Planche.astro';
+import Cartouche from '../components/Cartouche.astro';
+---
+
+<Planche titre="Planche introuvable" description="Cette page n'existe pas.">
+  <div class="planche-tete">
+    <p class="cote"><span>Erreur 404</span></p>
+    <h1>Planche introuvable</h1>
+    <p class="accroche">Cette adresse ne correspond à aucune planche du jeu. Elle a peut-être été renumérotée.</p>
+    <p><a class="bouton" href="/projets/">Ouvrir la nomenclature</a></p>
+  </div>
+  <Cartouche planche="—" titre="Planche introuvable" revision="A" date="2026-10" echelle="—" />
+</Planche>

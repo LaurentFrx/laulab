@@ -1,0 +1,18 @@
+---
+/** Cadre fixe de la planche, avec les zones de repérage (A–H, 1–6) sur grand écran. */
+const colonnes = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
+const lignes = ['1', '2', '3', '4', '5', '6'];
+---
+
+<div class="cadre" aria-hidden="true">
+  <div class="cadre-zones">
+    <span class="zone-h haut">{colonnes.map((c) => <i>{c}</i>)}</span>
+    <span class="zone-h bas">{colonnes.map((c) => <i>{c}</i>)}</span>
+    <span class="zone-v gauche">{lignes.map((l) => <i>{l}</i>)}</span>
+    <span class="zone-v droite">{lignes.map((l) => <i>{l}</i>)}</span>
+    <b class="centrage h haut"></b>
+    <b class="centrage h bas"></b>
+    <b class="centrage v gauche"></b>
+    <b class="centrage v droite"></b>
+  </div>
+</div>

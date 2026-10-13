@@ -1,0 +1,14 @@
+---
+import { STATUTS, type Statut } from '../lib/nomenclature';
+
+interface Props {
+  statut: Statut;
+  droit?: boolean;
+  petit?: boolean;
+}
+const { statut, droit = false, petit = false } = Astro.props;
+---
+
+<span class:list={['tampon', statut, { droit, petit }]} title={STATUTS[statut].description}>
+  {STATUTS[statut].label}
+</span>

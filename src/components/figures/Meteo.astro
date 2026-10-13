@@ -1,0 +1,93 @@
+---
+/** Station météo : mât, capteurs, carte LoRaWAN, passerelle et Node-RED. Élévation. */
+import Bulle from './Bulle.astro';
+import Cote from './Cote.astro';
+import Marqueur from './Marqueur.astro';
+
+interface Props {
+  mode?: 'planche' | 'vignette';
+  tracer?: boolean;
+  legende?: string;
+}
+const { mode = 'planche', tracer = true, legende } = Astro.props;
+---
+
+<figure class:list={['figure', 'meteo', { vignette: mode === 'vignette' }]} data-trace={tracer ? '' : undefined}>
+  <svg viewBox="0 0 220 150" role="img" aria-label="Élévation d'un mât météo : anémomètre et girouette en tête, pluviomètre, abri de température et UV, boîtier ESP32 avec antenne LoRaWAN ; liaison radio vers une passerelle puis Node-RED">
+    <defs><Marqueur id="f-meteo" /></defs>
+
+    <!-- Sol -->
+    <line class="moyen" x1="10" y1="138" x2="130" y2="138"></line>
+    {Array.from({ length: 20 }, (_, n) => 12 + n * 6).map((x) => (
+      <line class="hachure" x1={x} y1="138.5" x2={x - 4} y2="142.5"></line>
+    ))}
+
+    <!-- Mât -->
+    <line class="axe" x1="66" y1="6" x2="66" y2="146"></line>
+    <rect class="fort" x="64" y="24" width="4" height="114"></rect>
+    <rect class="moyen" x="56" y="132" width="20" height="6"></rect>
+
+    <!-- Anémomètre -->
+    <line class="moyen" x1="66" y1="24" x2="66" y2="14"></line>
+    <line class="moyen" x1="52" y1="14" x2="80" y2="14"></line>
+    <circle class="moyen" cx="52" cy="14" r="3"></circle>
+    <circle class="moyen" cx="80" cy="14" r="3"></circle>
+    <circle class="moyen" cx="66" cy="14" r="1.6"></circle>
+    <!-- Girouette -->
+    <line class="moyen" x1="66" y1="24" x2="66" y2="30"></line>
+    <line class="moyen" x1="48" y1="30" x2="86" y2="30"></line>
+    <path class="fort" d="M86 30 L80 27 L80 33 Z"></path>
+    <path class="moyen" d="M48 30 L54 26 L54 34 Z"></path>
+
+    <!-- Pluviomètre -->
+    <line class="moyen" x1="68" y1="52" x2="92" y2="52"></line>
+    <path class="moyen" d="M86 42 L100 42 L95 50 L95 62 L91 62 L91 50 Z"></path>
+    <line class="fin" x1="92" y1="54" x2="94" y2="54"></line>
+    <line class="fin" x1="92" y1="58" x2="94" y2="58"></line>
+
+    <!-- Abri température / UV (plaques empilées) -->
+    <line class="moyen" x1="64" y1="72" x2="40" y2="72"></line>
+    {[66, 70, 74, 78, 82].map((y) => (
+      <path class="moyen" d={`M30 ${y} L50 ${y} L48 ${y + 2.5} L32 ${y + 2.5} Z`}></path>
+    ))}
+    <line class="fin" x1="40" y1="60" x2="40" y2="66"></line>
+    <path class="moyen" d="M36 60 L44 60 L43 57 L37 57 Z"></path>
+
+    <!-- Boîtier électronique + antenne -->
+    <rect class="fort" x="72" y="86" width="26" height="22"></rect>
+    <rect class="fin" x="76" y="90" width="18" height="10"></rect>
+    <text class="texte-legende" x="77" y="97" font-size="3.4">ESP32</text>
+    <line class="moyen" x1="98" y1="92" x2="104" y2="92"></line>
+    <line class="fort" x1="104" y1="92" x2="104" y2="74"></line>
+    <line class="moyen" x1="98" y1="104" x2="110" y2="104"></line>
+    <text class="texte-legende" x="100" y="110" font-size="3.4">alim.</text>
+    <!-- Ondes -->
+    <path class="cache" d="M110 72 a10 10 0 0 1 0 20"></path>
+    <path class="cache" d="M116 66 a16 16 0 0 1 0 32"></path>
+    <path class="cache" d="M122 60 a22 22 0 0 1 0 44"></path>
+    <text class="texte-cote" x="112" y="56">LoRaWAN</text>
+
+    <!-- Passerelle -->
+    <rect class="moyen" x="156" y="70" width="34" height="22"></rect>
+    <text class="texte-legende" x="160" y="79">passerelle</text>
+    <text class="texte-legende" x="160" y="86">LoRaWAN</text>
+    <line class="fort" x1="173" y1="70" x2="173" y2="58"></line>
+    <line class="moyen" x1="173" y1="92" x2="173" y2="106"></line>
+    <!-- Node-RED -->
+    <rect class="moyen" x="150" y="106" width="46" height="30"></rect>
+    <text class="texte-legende" x="154" y="114">Node-RED</text>
+    <polyline class="fin" points="154,130 160,124 166,127 172,118 178,122 186,116 192,120"></polyline>
+    <line class="fin" x1="154" y1="118" x2="154" y2="131"></line>
+    <line class="fin" x1="154" y1="131" x2="192" y2="131"></line>
+
+    <Cote x1="108" y1="24" x2="108" y2="138" texte="hauteur à définir" decalage="-4" marqueur="f-meteo" attache="4" />
+
+    <!-- Repères -->
+    <Bulle n="1" x="30" y="12" ax="50" ay="14" />
+    <Bulle n="2" x="118" y="40" ax="100" ay="45" />
+    <Bulle n="3" x="16" y="88" ax="31" ay="80" />
+    <Bulle n="4" x="52" y="114" ax="72" ay="104" />
+    <Bulle n="5" x="206" y="52" ax="190" ay="72" />
+  </svg>
+  {legende && <figcaption>{legende}</figcaption>}
+</figure>

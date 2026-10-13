@@ -1,0 +1,156 @@
+---
+import { getCollection } from 'astro:content';
+import Planche from '../layouts/Planche.astro';
+import Figure from '../components/Figure.astro';
+import Jansen from '../components/figures/Jansen.astro';
+import Tampon from '../components/Tampon.astro';
+import Cartouche from '../components/Cartouche.astro';
+import { CATEGORIES, STATUTS, parCategorie, numeroPlanche, trierParRepere } from '../lib/nomenclature';
+
+const projets = await getCollection('projets');
+const vedettes = trierParRepere(projets.filter((p) => p.data.vedette));
+const groupes = parCategorie(projets);
+const nb = projets.length;
+const nbEnService = projets.filter((p) => ['en-ligne', 'en-service'].includes(p.data.statut)).length;
+const nbChantier = projets.filter((p) => p.data.statut === 'en-chantier').length;
+const nbEtude = projets.filter((p) => p.data.statut === 'a-l-etude').length;
+const nbTermine = projets.filter((p) => p.data.statut === 'termine').length;
+---
+
+<Planche
+  titre="L@uL@b — Laurent Feroux, capteurs, robots et applications"
+  description="Les projets de Laurent Feroux, à Sanguinet : domotique et énergie solaire, robots marcheurs, capteurs, applications web, faits seul ou au FabLab BiscaLab, avec Claude comme copilote."
+  actif="accueil"
+>
+  <section class="hero">
+    <div class="hero-tete">
+      <p class="cote">
+        <span>Planche 00</span>
+        <span>Vue d'ensemble</span>
+        <span>Sanguinet, Landes</span>
+      </p>
+      <h1>Capteurs, robots et applications.</h1>
+    </div>
+    <div class="hero-texte">
+      <p class="intro">
+        Autodidacte en informatique depuis 1981, ancien pilote d'hélicoptère. Je construis des
+        choses, seul ou au FabLab BiscaLab, avec Claude comme copilote. Ce site en est le jeu de plans.
+      </p>
+      <div class="actions">
+        <a class="bouton" href="/projets/">Voir la nomenclature</a>
+        <a class="bouton discret" href="/methode/">Comment je travaille</a>
+      </div>
+    </div>
+    <Jansen
+      mode="planche"
+      legende="Fig. 1 — Patte de Jansen, cotée aux nombres de Theo Jansen. La manivelle tourne, le pied avance à plat. Projet Jansenosaure, repère 05."
+    />
+  </section>
+
+  <section class="section" aria-labelledby="vedettes">
+    <div class="ligne-titre">
+      <h2 id="vedettes">Vues principales</h2>
+      <span class="cote">{vedettes.length} planches sur {nb}</span>
+    </div>
+    <ul class="vues">
+      {vedettes.map((p) => (
+        <li class="vue">
+          <a href={`/projets/${p.id}/`} aria-label={`Planche ${numeroPlanche(p)} : ${p.data.titre}`} tabindex="-1">
+            <Figure nom={p.data.figure} mode="vignette" titre={p.data.titre} tracer={false} />
+          </a>
+          <div class="ligne-vue">
+            <span class="cote">Planche {numeroPlanche(p)}</span>
+            <Tampon statut={p.data.statut} droit petit />
+          </div>
+          <h3><a href={`/projets/${p.id}/`}>{p.data.titre}</a></h3>
+          <p>{p.data.accroche}</p>
+        </li>
+      ))}
+    </ul>
+  </section>
+
+  <section class="section" aria-labelledby="nomenclature">
+    <div class="ligne-titre">
+      <h2 id="nomenclature">Nomenclature</h2>
+      <span class="cote">
+        {nbEnService} en service · {nbChantier} en chantier · {nbEtude} à l'étude · {nbTermine} terminés
+      </span>
+    </div>
+    <table class="nomenclature">
+      <thead>
+        <tr>
+          <th scope="col">Rep.</th>
+          <th scope="col">Désignation</th>
+          <th scope="col">Statut</th>
+          <th scope="col">Matières</th>
+          <th scope="col">Période</th>
+        </tr>
+      </thead>
+      <tbody>
+        {groupes.map((g) => (
+          <>
+            <tr class="groupe">
+              <th scope="colgroup" colspan="5">{CATEGORIES[g.categorie].label}</th>
+            </tr>
+            {g.projets.map((p) => (
+              <tr>
+                <th scope="row" class="rep">{numeroPlanche(p)}</th>
+                <td class="design">
+                  <a href={`/projets/${p.id}/`}>{p.data.titre}</a>
+                </td>
+                <td class="statut">
+                  <Tampon statut={p.data.statut} droit petit />
+                </td>
+                <td class="mat">{p.data.matieres.slice(0, 3).join(', ')}</td>
+                <td class="periode">{p.data.periode}</td>
+              </tr>
+            ))}
+          </>
+        ))}
+      </tbody>
+    </table>
+    <p class="cote" style="margin-top:1rem">
+      Statuts : {Object.values(STATUTS).map((s) => s.label.toLowerCase()).join(' · ')}.
+      <a href="/projets/">Nomenclature détaillée, avec filtres</a>.
+    </p>
+  </section>
+
+  <section class="section" aria-labelledby="methode">
+    <div class="ligne-titre">
+      <h2 id="methode">Pilote et copilote</h2>
+      <span class="cote"><a href="/methode/">La méthode en détail</a></span>
+    </div>
+    <div class="methode-apercu">
+      <div>
+        <h3>Je décide, Claude exécute</h3>
+        <p>
+          Je fixe le besoin, les contraintes et les arbitrages. Claude écrit le code, lit les normes, propose
+          des solutions. Puis je teste sur le matériel réel : c'est moi qui vois le résultat.
+        </p>
+      </div>
+      <div>
+        <h3>Jamais de terminal à la main</h3>
+        <p>
+          Toute action sur un serveur passe par un prompt écrit, relu, puis exécuté par Claude Code. Les
+          mises en production sont des scripts, reproductibles, et non des manipulations.
+        </p>
+      </div>
+      <div>
+        <h3>Vérifié avant d'être dessiné</h3>
+        <p>
+          Les grilles du bac sont vérifiées contre les bulletins officiels, le circuit solaire contre la
+          NF C 15-100, les cotes de Jansen contre ses nombres. Le cartouche de chaque planche dit qui a fait quoi.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <Cartouche
+    planche="00"
+    titre="Vue d'ensemble"
+    sousTitre={`${nb} projets, ${groupes.length} catégories — Sanguinet, Landes`}
+    revision="A"
+    date="2026-10"
+    echelle="—"
+  />
+</Planche>

@@ -1,0 +1,12 @@
+---
+/** Vue à compléter : la place d'une photo ou d'un dessin pas encore fait. */
+interface Props {
+  mode?: 'planche' | 'vignette';
+  titre?: string;
+}
+const { mode = 'planche', titre } = Astro.props;
+---
+
+<figure class:list={['figure', 'a-completer', { vignette: mode === 'vignette' }]} aria-label={`Vue à compléter${titre ? ` : ${titre}` : ''}`}>
+  <p>{mode === 'vignette' ? 'Vue à venir' : 'Vue à compléter — photo ou dessin à venir'}</p>
+</figure>

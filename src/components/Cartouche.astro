@@ -1,0 +1,102 @@
+---
+/**
+ * Cartouche : le bloc d'identification en bas de chaque planche.
+ */
+import Tampon from './Tampon.astro';
+import type { Statut } from '../lib/nomenclature';
+
+interface Props {
+  planche: string;
+  titre: string;
+  sousTitre?: string;
+  revision?: string;
+  statut?: Statut;
+  date: string;
+  echelle?: string;
+  concu?: string;
+  dessine?: string;
+  verifie?: string;
+}
+const {
+  planche,
+  titre,
+  sousTitre,
+  revision = 'A',
+  statut,
+  date,
+  echelle = '1:1',
+  concu = 'Laurent Feroux',
+  dessine = 'Laurent Feroux et Claude',
+  verifie = 'Laurent Feroux'
+} = Astro.props;
+---
+
+<footer class="cartouche" aria-label="Cartouche">
+  <table>
+    <colgroup>
+      <col style="width:25%" />
+      <col style="width:25%" />
+      <col style="width:25%" />
+      <col style="width:25%" />
+    </colgroup>
+    <tbody>
+      <tr>
+        <td class="marque-cell" colspan="2">
+          <a class="marque" href="/">L@uL@b</a>
+          <span class="etiquette" style="margin-top:.25rem">Laurent Feroux — Sanguinet, Landes</span>
+        </td>
+        <td>
+          <span class="etiquette">Planche</span>
+          <span class="valeur">{planche}</span>
+        </td>
+        <td>
+          <span class="etiquette">Révision</span>
+          <span class="valeur">{revision}</span>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <span class="etiquette">Conçu</span>
+          <span class="valeur">{concu}</span>
+        </td>
+        <td>
+          <span class="etiquette">Dessiné</span>
+          <span class="valeur">{dessine}</span>
+        </td>
+        <td>
+          <span class="etiquette">Vérifié</span>
+          <span class="valeur">{verifie}</span>
+        </td>
+        <td>
+          <span class="etiquette">Date</span>
+          <span class="valeur"><time datetime={date}>{date}</time></span>
+        </td>
+      </tr>
+      <tr>
+        <td class="titre" colspan="3">
+          <span class="valeur">{titre}</span>
+          {sousTitre && <span class="sous-titre">{sousTitre}</span>}
+        </td>
+        <td>
+          <span class="etiquette">Échelle</span>
+          <span class="valeur">{echelle}</span>
+          {statut && (
+            <span style="display:block;margin-top:.5rem">
+              <Tampon statut={statut} droit petit />
+            </span>
+          )}
+        </td>
+      </tr>
+      <tr>
+        <td colspan="4">
+          <nav class="nav-pied" aria-label="Pied de page">
+            <a href="/projets/">Nomenclature</a>
+            <a href="/methode/">Méthode</a>
+            <a href="/a-propos/">À propos</a>
+            <a href="/sitemap-index.xml">Plan du site</a>
+          </nav>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</footer>

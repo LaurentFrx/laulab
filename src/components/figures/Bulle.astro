@@ -1,0 +1,27 @@
+---
+/** Repère numéroté : une bulle reliée par une ligne d'attache au point (ax, ay). */
+interface Props {
+  n: number | string;
+  x: number | string;
+  y: number | string;
+  ax: number | string;
+  ay: number | string;
+}
+const n = Astro.props.n;
+const x = Number(Astro.props.x);
+const y = Number(Astro.props.y);
+const ax = Number(Astro.props.ax);
+const ay = Number(Astro.props.ay);
+const dx = x - ax;
+const dy = y - ay;
+const dd = Math.hypot(dx, dy) || 1;
+const r = 4;
+const fx = x - (dx / dd) * r;
+const fy = y - (dy / dd) * r;
+---
+
+<g class="bulle">
+  <line x1={ax} y1={ay} x2={fx.toFixed(2)} y2={fy.toFixed(2)}></line>
+  <circle cx={x} cy={y} r={r}></circle>
+  <text x={x} y={y}>{n}</text>
+</g>

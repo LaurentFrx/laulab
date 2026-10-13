@@ -1,0 +1,108 @@
+---
+/** Installation solaire : plan des deux champs de panneaux et schéma unifilaire. */
+import Bulle from './Bulle.astro';
+import Marqueur from './Marqueur.astro';
+
+interface Props {
+  mode?: 'planche' | 'vignette';
+  tracer?: boolean;
+  legende?: string;
+}
+const { mode = 'planche', tracer = true, legende } = Astro.props;
+---
+
+<figure class:list={['figure', 'solaire', { vignette: mode === 'vignette' }]} data-trace={tracer ? '' : undefined}>
+  <svg viewBox="0 0 220 150" role="img" aria-label="Plan de toiture : quatre panneaux orientés à 190°, deux panneaux orientés à 280°, et schéma de raccordement avec onduleur, deux batteries Solarbank et compteur">
+    <defs><Marqueur id="f-solaire" /></defs>
+
+    <!-- Rose : le nord -->
+    <g transform="translate(200 18)">
+      <line class="moyen" x1="0" y1="10" x2="0" y2="-9"></line>
+      <path class="fort" d="M-3 -3 L0 -10 L3 -3"></path>
+      <text class="texte-cote encre" x="4" y="-5">N</text>
+    </g>
+
+    <!-- Champ 1 : 4 × 585 Wc, azimut 190° -->
+    <g transform="translate(60 40) rotate(10)">
+      {[-36, -18, 0, 18].map((x) => (
+        <>
+          <rect class="fort" x={x - 8} y="-14" width="16" height="28"></rect>
+          <line class="fin" x1={x} y1="-14" x2={x} y2="14"></line>
+          <line class="fin" x1={x - 8} y1="-7" x2={x + 8} y2="-7"></line>
+          <line class="fin" x1={x - 8} y1="0" x2={x + 8} y2="0"></line>
+          <line class="fin" x1={x - 8} y1="7" x2={x + 8} y2="7"></line>
+        </>
+      ))}
+      <line class="axe" x1="-50" y1="0" x2="32" y2="0"></line>
+      <line class="dim" x1="-9" y1="14" x2="-9" y2="32" marker-end="url(#f-solaire)"></line>
+    </g>
+    <text class="texte-cote" x="40" y="80">190°</text>
+    <text class="texte-legende" x="12" y="18">4 × 585 Wc · incl. 20°</text>
+
+    <!-- Champ 2 : 2 × 500 Wc, azimut 280° -->
+    <g transform="translate(150 50) rotate(100)">
+      {[-9, 9].map((x) => (
+        <>
+          <rect class="fort" x={x - 8} y="-14" width="16" height="28"></rect>
+          <line class="fin" x1={x} y1="-14" x2={x} y2="14"></line>
+          <line class="fin" x1={x - 8} y1="-7" x2={x + 8} y2="-7"></line>
+          <line class="fin" x1={x - 8} y1="0" x2={x + 8} y2="0"></line>
+          <line class="fin" x1={x - 8} y1="7" x2={x + 8} y2="7"></line>
+        </>
+      ))}
+      <line class="axe" x1="-24" y1="0" x2="24" y2="0"></line>
+      <line class="dim" x1="0" y1="14" x2="0" y2="30" marker-end="url(#f-solaire)"></line>
+    </g>
+    <text class="texte-cote" x="100" y="41">280°</text>
+    <text class="texte-legende" x="128" y="18">2 × 500 Wc · incl. 20°</text>
+    <!-- faîtage -->
+    <line class="cache" x1="8" y1="66" x2="118" y2="66"></line>
+    <text class="texte-legende" x="8" y="72" font-size="3.4">faîtage</text>
+
+    <!-- Schéma unifilaire -->
+    <line class="fin" x1="8" y1="86" x2="212" y2="86"></line>
+    <g transform="translate(0 92)">
+      <!-- sources -->
+      <text class="texte-legende" x="10" y="8">2 pann.</text>
+      <text class="texte-legende" x="10" y="26">2 pann.</text>
+      <text class="texte-legende" x="10" y="44">2 pann.</text>
+      <line class="moyen" x1="26" y1="6" x2="44" y2="6"></line>
+      <line class="moyen" x1="26" y1="24" x2="44" y2="24"></line>
+      <line class="moyen" x1="26" y1="42" x2="44" y2="42"></line>
+      <rect class="moyen" x="44" y="0" width="30" height="12"></rect>
+      <text class="texte-legende" x="47" y="8">EZ1-H</text>
+      <rect class="moyen" x="44" y="18" width="30" height="12"></rect>
+      <text class="texte-legende" x="47" y="26">SB3 Pro 1</text>
+      <rect class="moyen" x="44" y="36" width="30" height="12"></rect>
+      <text class="texte-legende" x="47" y="44">SB3 Pro 2</text>
+      <!-- bus maison -->
+      <line class="moyen" x1="74" y1="6" x2="100" y2="6"></line>
+      <line class="moyen" x1="74" y1="24" x2="100" y2="24"></line>
+      <line class="moyen" x1="74" y1="42" x2="100" y2="42"></line>
+      <line class="fort" x1="100" y1="0" x2="100" y2="50"></line>
+      <text class="texte-legende" x="104" y="48">tableau</text>
+      <!-- Max AC sur circuit dédié -->
+      <rect class="moyen" x="112" y="30" width="34" height="12"></rect>
+      <text class="texte-legende" x="115" y="38">Max AC · 16 A C</text>
+      <line class="moyen" x1="100" y1="36" x2="112" y2="36"></line>
+      <!-- compteur + réseau -->
+      <line class="moyen" x1="100" y1="12" x2="156" y2="12"></line>
+      <circle class="moyen" cx="162" cy="12" r="6"></circle>
+      <text class="texte-legende" x="158.5" y="13.6" font-size="3.4">kWh</text>
+      <line class="moyen" x1="168" y1="12" x2="212" y2="12"></line>
+      <text class="texte-legende" x="182" y="9">Linky · réseau</text>
+      <path class="fin" d="M148 8 a6 6 0 0 1 0 8"></path>
+      <text class="texte-legende" x="138" y="22" font-size="3.4">smart meter</text>
+      <text class="texte-cote" x="104" y="3">1 200 W max / batterie</text>
+    </g>
+
+    <!-- Repères -->
+    <Bulle n="1" x="10" y="48" ax="24" ay="46" />
+    <Bulle n="2" x="178" y="64" ax="160" ay="58" />
+    <Bulle n="3" x="34" y="104" ax="44" ay="98" />
+    <Bulle n="4" x="84" y="140" ax="74" ay="134" />
+    <Bulle n="5" x="160" y="140" ax="140" ay="134" />
+    <Bulle n="6" x="196" y="128" ax="166" ay="110" />
+  </svg>
+  {legende && <figcaption>{legende}</figcaption>}
+</figure>

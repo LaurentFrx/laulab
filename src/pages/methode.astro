@@ -1,0 +1,155 @@
+---
+import Planche from '../layouts/Planche.astro';
+import Cartouche from '../components/Cartouche.astro';
+---
+
+<Planche
+  titre="Méthode — pilote et copilote"
+  description="Comment Laurent Feroux travaille avec Claude : qui décide, qui écrit, qui vérifie ; la boucle de travail, les règles, et ce que l'IA ne fait pas."
+  actif="methode"
+>
+  <div class="planche-tete">
+    <p class="cote">
+      <span>Planche M</span>
+      <span>Procédure</span>
+    </p>
+    <h1>Pilote et copilote</h1>
+    <p class="accroche">
+      Tout ce qui est sur ce site a été fait avec Claude. Voici ce que cela veut dire concrètement : qui
+      décide, qui écrit, qui vérifie, et ce qui ne marche pas.
+    </p>
+  </div>
+
+  <section class="section" aria-labelledby="pourquoi">
+    <div class="ligne-titre"><h2 id="pourquoi">Pourquoi un copilote</h2></div>
+    <div class="prose">
+      <p>
+        J'ai appris l'informatique seul, depuis 1981, en lisant, en essayant et en cassant. J'ai piloté des
+        hélicoptères : on y apprend à décider vite avec les bonnes informations, et à vérifier deux fois.
+        Depuis quelques mois, je travaille avec Claude comme on travaille avec un copilote : il lit les
+        normes et les documentations, il écrit le code, il propose des solutions. Je garde la décision et
+        les commandes.
+      </p>
+      <p>
+        Le résultat, ce sont les planches de ce site : une domotique écrite sur mesure, une application en
+        ligne, des robots à l'étude, des installations qui fonctionnent. Je n'aurais pas mené tout cela de
+        front sans lui ; il n'aurait rien fait de tout cela sans moi.
+      </p>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="boucle">
+    <div class="ligne-titre"><h2 id="boucle">La boucle de travail</h2></div>
+    <ol class="boucle">
+      <li>
+        <div>
+          <h3>Je pose le besoin</h3>
+          <p>
+            En français, dans la conversation, avec le contexte réel : le matériel exact, les contraintes de la
+            maison ou du FabLab, ce que je veux et ce que je refuse.
+          </p>
+        </div>
+      </li>
+      <li>
+        <div>
+          <h3>Claude propose, je tranche</h3>
+          <p>
+            Il compare les voies possibles, cite les normes ou les documentations, anticipe les cas limites.
+            Je choisis. Quand deux solutions se valent, c'est mon usage qui décide.
+          </p>
+        </div>
+      </li>
+      <li>
+        <div>
+          <h3>Claude écrit le prompt, Claude Code l'exécute</h3>
+          <p>
+            Pour toute action sur un serveur, Claude rédige un prompt précis que je colle dans Claude Code, qui
+            travaille directement sur le serveur. Je ne tape jamais de commande à la main.
+          </p>
+        </div>
+      </li>
+      <li>
+        <div>
+          <h3>Je teste sur le vrai matériel</h3>
+          <p>
+            Claude ne voit ni mon écran, ni mon ballon d'eau chaude, ni le robot. C'est moi qui regarde,
+            mesure, et renvoie ce que j'observe : une capture, une courbe, un ressenti.
+          </p>
+        </div>
+      </li>
+      <li>
+        <div>
+          <h3>On corrige, et on note</h3>
+          <p>
+            Ce qui a été appris reste écrit : dans le code, dans les fichiers de contexte du projet, dans les
+            planches de ce site. La fois suivante repart de là.
+          </p>
+        </div>
+      </li>
+    </ol>
+  </section>
+
+  <section class="section" aria-labelledby="regles">
+    <div class="ligne-titre"><h2 id="regles">Les règles</h2></div>
+    <div class="regles">
+      <div>
+        <h3>Pas de terminal à la main</h3>
+        <p>
+          Les commandes sont exécutées par Claude Code, jamais recopiées. Une mise en production est un script
+          qu'on peut relire et rejouer.
+        </p>
+      </div>
+      <div>
+        <h3>Le matériel réel a raison</h3>
+        <p>
+          Une sonde au fond d'un doigt de gant, un câble USB-C qui ne négocie pas, un ordre de couleurs BRG :
+          le terrain corrige la théorie, pas l'inverse.
+        </p>
+      </div>
+      <div>
+        <h3>Vérifier contre la source</h3>
+        <p>
+          Grilles du bac contre les bulletins officiels, circuit solaire contre la NF C 15-100, cotes de Jansen
+          contre ses nombres. Pas de « ça devrait marcher ».
+        </p>
+      </div>
+      <div>
+        <h3>Dire qui a fait quoi</h3>
+        <p>
+          Le cartouche de chaque planche porte trois noms : conçu, dessiné, vérifié. Claude figure où il a
+          travaillé, et nulle part ailleurs.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="outils">
+    <div class="ligne-titre"><h2 id="outils">Les outils</h2></div>
+    <div class="prose">
+      <ul>
+        <li><strong>L'application Claude</strong>, pour discuter, décider et rédiger — y compris depuis l'iPad.</li>
+        <li><strong>Claude Code</strong>, en session SSH sur le serveur, pour tout ce qui touche au code et aux services.</li>
+        <li><strong>GitHub</strong>, où vit le code de chaque projet, et <strong>Caddy</strong> sur un VPS Hetzner pour servir ce qui doit l'être.</li>
+        <li>Un PC Windows pour la CAO, la découpe laser et l'électronique ; un Raspberry Pi 4 comme serveur maison.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="limites">
+    <div class="ligne-titre"><h2 id="limites">Ce qui ne marche pas</h2></div>
+    <div class="prose">
+      <p>
+        Claude n'a pas d'yeux sur mon installation : il faut lui décrire, lui envoyer des captures, et parfois
+        il se trompe avec assurance. Il a tendance à ouvrir trop de pistes à la fois ; il faut recadrer. Il ne
+        remplace ni le coup d'œil sur une soudure, ni l'oreille sur un moteur qui force. Et quand un sujet est
+        pointu — l'extrapolation de la température d'un ballon à partir d'une seule sonde — le modèle reste
+        imprécis tant qu'il n'est pas confronté à des mesures.
+      </p>
+      <p>
+        C'est pour cela que la dernière ligne du cartouche, « vérifié », porte toujours mon nom.
+      </p>
+    </div>
+  </section>
+
+  <Cartouche planche="M" titre="Pilote et copilote" sousTitre="Procédure de travail avec Claude" revision="A" date="2026-10" echelle="—" />
+</Planche>

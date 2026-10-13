@@ -1,0 +1,111 @@
+---
+/** Cube de résine : vue éclatée, de haut en bas. */
+import Bulle from './Bulle.astro';
+import Cote from './Cote.astro';
+import Marqueur from './Marqueur.astro';
+
+interface Props {
+  mode?: 'planche' | 'vignette';
+  tracer?: boolean;
+  legende?: string;
+}
+const { mode = 'planche', tracer = true, legende } = Astro.props;
+// Petit repère isométrique : x vers la droite-bas, y vers la gauche-bas, z vers le haut
+const iso = (x: number, y: number, z: number): [number, number] => [
+  110 + (x - y) * 0.866,
+  70 + (x + y) * 0.5 - z
+];
+const f = (p: [number, number]) => `${p[0].toFixed(2)},${p[1].toFixed(2)}`;
+const cube = (cx: number, cy: number, z0: number, s: number) => {
+  const a = iso(cx - s, cy - s, z0 + s);
+  const b = iso(cx + s, cy - s, z0 + s);
+  const c = iso(cx + s, cy + s, z0 + s);
+  const d = iso(cx - s, cy + s, z0 + s);
+  const b2 = iso(cx + s, cy - s, z0 - s);
+  const c2 = iso(cx + s, cy + s, z0 - s);
+  const d2 = iso(cx - s, cy + s, z0 - s);
+  return {
+    dessus: `${f(a)} ${f(b)} ${f(c)} ${f(d)}`,
+    droite: `${f(b)} ${f(c)} ${f(c2)} ${f(b2)}`,
+    gauche: `${f(d)} ${f(c)} ${f(c2)} ${f(d2)}`
+  };
+};
+const C = cube(0, 0, 48, 16);
+const socleH = iso(-22, -22, -10);
+const socle = {
+  dessus: `${f(iso(-22, -22, -10))} ${f(iso(22, -22, -10))} ${f(iso(22, 22, -10))} ${f(iso(-22, 22, -10))}`,
+  droite: `${f(iso(22, -22, -10))} ${f(iso(22, 22, -10))} ${f(iso(22, 22, -22))} ${f(iso(22, -22, -22))}`,
+  gauche: `${f(iso(-22, 22, -10))} ${f(iso(22, 22, -10))} ${f(iso(22, 22, -22))} ${f(iso(-22, 22, -22))}`
+};
+const anneau = iso(0, 0, 18);
+const pcb = {
+  dessus: `${f(iso(-10, -7, 2))} ${f(iso(10, -7, 2))} ${f(iso(10, 7, 2))} ${f(iso(-10, 7, 2))}`
+};
+const batt = {
+  dessus: `${f(iso(-12, -8, -4))} ${f(iso(12, -8, -4))} ${f(iso(12, 8, -4))} ${f(iso(-12, 8, -4))}`,
+  droite: `${f(iso(12, -8, -4))} ${f(iso(12, 8, -4))} ${f(iso(12, 8, -8))} ${f(iso(12, -8, -8))}`,
+  gauche: `${f(iso(-12, 8, -4))} ${f(iso(12, 8, -4))} ${f(iso(12, 8, -8))} ${f(iso(-12, 8, -8))}`
+};
+const axeHaut = iso(0, 0, 72);
+const axeBas = iso(0, 0, -30);
+---
+
+<figure class:list={['figure', 'cube', { vignette: mode === 'vignette' }]} data-trace={tracer ? '' : undefined}>
+  <svg viewBox="0 0 220 150" role="img" aria-label="Vue éclatée : cube de résine, anneau de LED, carte ESP32-C3, batterie et chargeur, socle en contreplaqué">
+    <defs><Marqueur id="f-cube" /></defs>
+
+    <line class="axe" x1={axeHaut[0]} y1={axeHaut[1]} x2={axeBas[0]} y2={axeBas[1]}></line>
+
+    <!-- Socle -->
+    <polygon class="fort" points={socle.dessus}></polygon>
+    <polygon class="fort" points={socle.droite}></polygon>
+    <polygon class="fort" points={socle.gauche}></polygon>
+    <ellipse class="cache" cx={iso(0, 0, -10)[0]} cy={iso(0, 0, -10)[1]} rx="14" ry="7"></ellipse>
+    {Array.from({ length: 9 }, (_, n) => n).map((n) => (
+      <line
+        class="hachure"
+        x1={iso(22, -22 + n * 5, -10 - (n * 12) / 8)[0]}
+        y1={iso(22, -22 + n * 5, -10 - (n * 12) / 8)[1]}
+        x2={iso(22, -22 + n * 5, -10 - (n * 12) / 8)[0] + 4}
+        y2={iso(22, -22 + n * 5, -10 - (n * 12) / 8)[1] + 2}
+      ></line>
+    ))}
+
+    <!-- Batterie + TP4056 -->
+    <polygon class="moyen" points={batt.dessus}></polygon>
+    <polygon class="moyen" points={batt.droite}></polygon>
+    <polygon class="moyen" points={batt.gauche}></polygon>
+    <rect class="fin" x={iso(4, -8, -4)[0] - 1} y={iso(4, -8, -4)[1] - 1} width="6" height="3"></rect>
+
+    <!-- Carte ESP32-C3 -->
+    <polygon class="moyen" points={pcb.dessus}></polygon>
+    <rect class="fin" x={iso(-4, -3, 2)[0]} y={iso(-4, -3, 2)[1] - 2} width="7" height="4"></rect>
+    <line class="fin" x1={iso(-10, 0, 2)[0]} y1={iso(-10, 0, 2)[1]} x2={iso(-14, 0, 2)[0]} y2={iso(-14, 0, 2)[1]}></line>
+
+    <!-- Anneau de LED -->
+    <ellipse class="fort" cx={anneau[0]} cy={anneau[1]} rx="13" ry="6.5"></ellipse>
+    <ellipse class="moyen" cx={anneau[0]} cy={anneau[1]} rx="9" ry="4.5"></ellipse>
+    {Array.from({ length: 12 }, (_, n) => (n / 12) * Math.PI * 2).map((t) => (
+      <circle class="crayon" cx={anneau[0] + Math.cos(t) * 11} cy={anneau[1] + Math.sin(t) * 5.5} r="0.7"></circle>
+    ))}
+
+    <!-- Cube de résine -->
+    <polygon class="voile-cote" points={C.dessus}></polygon>
+    <polygon class="fort" points={C.dessus}></polygon>
+    <polygon class="fort" points={C.droite}></polygon>
+    <polygon class="fort" points={C.gauche}></polygon>
+    <line class="cache" x1={iso(-16, -16, 64)[0]} y1={iso(-16, -16, 64)[1]} x2={iso(-16, -16, 32)[0]} y2={iso(-16, -16, 32)[1]}></line>
+    <line class="cache" x1={iso(-16, -16, 32)[0]} y1={iso(-16, -16, 32)[1]} x2={iso(16, -16, 32)[0]} y2={iso(16, -16, 32)[1]}></line>
+    <line class="cache" x1={iso(-16, -16, 32)[0]} y1={iso(-16, -16, 32)[1]} x2={iso(-16, 16, 32)[0]} y2={iso(-16, 16, 32)[1]}></line>
+
+    <Cote x1={iso(16, -16, 32)[0]} y1={iso(16, -16, 32)[1]} x2={iso(16, -16, 64)[0]} y2={iso(16, -16, 64)[1]} texte="résine" decalage="-6" marqueur="f-cube" />
+
+    <!-- Repères -->
+    <Bulle n="1" x="48" y="22" ax={iso(-16, -16, 60)[0]} ay={iso(-16, -16, 60)[1]} />
+    <Bulle n="2" x="176" y="54" ax={anneau[0] + 13} ay={anneau[1]} />
+    <Bulle n="3" x="40" y="70" ax={iso(-10, 2, 2)[0]} ay={iso(-10, 2, 2)[1]} />
+    <Bulle n="4" x="180" y="94" ax={iso(12, 0, -6)[0]} ay={iso(12, 0, -6)[1]} />
+    <Bulle n="5" x="40" y="122" ax={iso(-22, 10, -14)[0]} ay={iso(-22, 10, -14)[1]} />
+  </svg>
+  {legende && <figcaption>{legende}</figcaption>}
+</figure>

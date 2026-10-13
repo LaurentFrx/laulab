@@ -1,0 +1,11 @@
+[Unit]
+Description=laulab.feroux.fr — vérifie GitHub toutes les 5 minutes
+
+[Timer]
+OnBootSec=2min
+OnUnitActiveSec=5min
+RandomizedDelaySec=30s
+Unit=laulab-deploy.service
+
+[Install]
+WantedBy=timers.target

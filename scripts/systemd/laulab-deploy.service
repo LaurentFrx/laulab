@@ -1,0 +1,12 @@
+[Unit]
+Description=laulab.feroux.fr — déploiement depuis GitHub
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+# À adapter : utilisateur propriétaire du dépôt et chemin du clone
+User=laurent
+WorkingDirectory=/srv/laulab
+ExecStart=/srv/laulab/scripts/deploy-vps.sh
+Nice=10

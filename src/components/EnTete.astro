@@ -1,0 +1,56 @@
+---
+interface Props {
+  actif?: 'accueil' | 'projets' | 'methode' | 'a-propos';
+}
+const { actif } = Astro.props;
+const liens = [
+  { href: '/projets/', label: 'Nomenclature', cle: 'projets' },
+  { href: '/methode/', label: 'Méthode', cle: 'methode' },
+  { href: '/a-propos/', label: 'À propos', cle: 'a-propos' }
+] as const;
+---
+
+<header class="en-tete">
+  <div class="page">
+    <a class="marque" href="/" aria-label="L@uL@b, accueil">
+      L@uL@b
+      <small>Laurent Feroux · Sanguinet</small>
+    </a>
+    <nav class="nav" aria-label="Navigation principale">
+      {liens.map((l) => (
+        <a href={l.href} aria-current={actif === l.cle ? 'page' : undefined}>
+          {l.label}
+        </a>
+      ))}
+      <button class="bascule" type="button" data-bascule-theme aria-live="polite">
+        <svg viewBox="0 0 16 16" aria-hidden="true">
+          <circle cx="8" cy="8" r="6.5" fill="none" stroke="currentColor" stroke-width="1.2"></circle>
+          <path d="M8 1.5 A6.5 6.5 0 0 1 8 14.5 Z" fill="currentColor"></path>
+        </svg>
+        <span class="si-cyano">Calque</span>
+        <span class="si-calque">Cyanotype</span>
+      </button>
+    </nav>
+  </div>
+</header>
+
+<script>
+  function init() {
+    document.querySelectorAll<HTMLButtonElement>('[data-bascule-theme]').forEach((b) => {
+      if (b.dataset.pret) return;
+      b.dataset.pret = '1';
+      b.addEventListener('click', () => {
+        const html = document.documentElement;
+        const suivant = html.dataset.theme === 'calque' ? 'cyanotype' : 'calque';
+        html.dataset.theme = suivant;
+        try {
+          localStorage.setItem('laulab-theme', suivant);
+        } catch {
+          /* stockage indisponible : le choix ne survit pas à la page */
+        }
+      });
+    });
+  }
+  init();
+  document.addEventListener('astro:page-load', init);
+</script>

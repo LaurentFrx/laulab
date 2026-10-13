@@ -1,0 +1,279 @@
+---
+/**
+ * Dessin animé d'une patte de Jansen, cotée.
+ * Rendu côté serveur dans une pose fixe ; le script anime ensuite la manivelle.
+ */
+import { JANSEN, pose, trajectoire, SEGMENTS, valeur, milieuDecale } from '../../lib/jansen';
+
+interface Props {
+  mode?: 'planche' | 'vignette';
+  /** Tracé progressif à l'apparition */
+  tracer?: boolean;
+  /** Angle initial (degrés) */
+  angle?: number;
+  legende?: string;
+}
+const { mode = 'planche', tracer = true, angle = 32, legende } = Astro.props;
+const theta0 = (angle * Math.PI) / 180;
+const P = pose(theta0);
+const sy = (y: number) => -y; // repère maths (y en haut) → SVG
+const fmt = (n: number) => n.toFixed(2);
+const traj = trajectoire(144);
+const cheminTraj =
+  traj.map((p, k) => `${k === 0 ? 'M' : 'L'}${fmt(p[0])} ${fmt(sy(p[1]))}`).join(' ') + ' Z';
+const solY = sy(Math.min(...traj.map((p) => p[1]))) + 0.8;
+const DECALAGE: Record<string, number> = { m: 3.5, j: 3.5, k: -3.5, b: -3.5, e: 3.5, d: 3.5, c: 3.5, f: 3.5, g: -3.5, h: 3.5, i: -3.5 };
+const vb = mode === 'vignette' ? '-120 -44 156 146' : '-126 -50 166 156';
+const NOMBRES = (Object.keys(JANSEN) as (keyof typeof JANSEN)[]).map((k) => ({ k, v: valeur(k) }));
+---
+
+<figure class:list={['figure', 'jansen', { vignette: mode === 'vignette' }]} data-trace={tracer ? '' : undefined}>
+  <svg
+    viewBox={vb}
+    role="img"
+    aria-label="Patte de Jansen : une manivelle fait tourner deux triangles articulés, le pied décrit une trajectoire plate au sol"
+    data-jansen
+    data-angle={angle}
+  >
+    <defs>
+      <marker id="fleche-cote" viewBox="0 0 6 6" refX="5.5" refY="3" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+        <path d="M0 0.6 L6 3 L0 5.4 Z" class="dim-fleche"></path>
+      </marker>
+    </defs>
+
+    <!-- Sol et hachures -->
+    <g class="seulement-planche">
+      <line class="moyen" x1="-128" y1={fmt(solY)} x2="30" y2={fmt(solY)}></line>
+      {Array.from({ length: 27 }, (_, n) => -126 + n * 6).map((x) => (
+        <line class="hachure" x1={x} y1={fmt(solY + 0.4)} x2={x - 4} y2={fmt(solY + 4.4)}></line>
+      ))}
+      <text class="texte-legende" x="-128" y={fmt(solY + 8.5)}>sol</text>
+    </g>
+
+    <!-- Cercle de manivelle et axes -->
+    <circle class="axe" cx="0" cy="0" r={JANSEN.m}></circle>
+    <line class="axe" x1="-22" y1="0" x2="22" y2="0"></line>
+    <line class="axe" x1="0" y1="-22" x2="0" y2="22"></line>
+
+    <!-- Trajectoire du pied -->
+    <path class="cache trajectoire" d={cheminTraj}></path>
+    <text class="texte-legende" x={fmt(Math.max(...traj.map((p) => p[0])) + 3)} y={fmt(solY - 15)}>trajectoire</text>
+    <text class="texte-legende" x={fmt(Math.max(...traj.map((p) => p[0])) + 3)} y={fmt(solY - 10.5)}>du pied</text>
+
+    <!-- Cotes fixes a et l -->
+    <g class="cotes-fixes">
+      <line class="fin" x1={fmt(-JANSEN.a)} y1={fmt(sy(-JANSEN.l))} x2={fmt(-JANSEN.a)} y2="28"></line>
+      <line class="fin" x1="0" y1="0" x2="0" y2="28"></line>
+      <line class="dim" x1={fmt(-JANSEN.a + 1.2)} y1="25" x2="-1.2" y2="25" marker-start="url(#fleche-cote)" marker-end="url(#fleche-cote)"></line>
+      <text class="texte-cote" x={fmt(-JANSEN.a / 2)} y="23" text-anchor="middle">a = {valeur('a')}</text>
+      <line class="fin" x1="0" y1="0" x2="-52" y2="0"></line>
+      <line class="fin" x1={fmt(-JANSEN.a)} y1={fmt(sy(-JANSEN.l))} x2="-52" y2={fmt(sy(-JANSEN.l))}></line>
+      <line class="dim" x1="-49" y1="0" x2="-49" y2={fmt(sy(-JANSEN.l))}></line>
+      <line class="dim" x1="-49" y1="-5" x2="-49" y2="0" marker-end="url(#fleche-cote)"></line>
+      <line class="dim" x1="-49" y1={fmt(sy(-JANSEN.l) + 5)} x2="-49" y2={fmt(sy(-JANSEN.l))} marker-end="url(#fleche-cote)"></line>
+      <text class="texte-cote lettre" x="-51.5" y="5.6" text-anchor="end">l</text>
+    </g>
+
+    <!-- Triangles (surfaces voilées) -->
+    <polygon class="voile-cote" data-poly="FBD" points={`${fmt(P.F[0])},${fmt(sy(P.F[1]))} ${fmt(P.B[0])},${fmt(sy(P.B[1]))} ${fmt(P.D[0])},${fmt(sy(P.D[1]))}`}></polygon>
+    <polygon class="voile-cote" data-poly="EGH" points={`${fmt(P.E[0])},${fmt(sy(P.E[1]))} ${fmt(P.G[0])},${fmt(sy(P.G[1]))} ${fmt(P.H[0])},${fmt(sy(P.H[1]))}`}></polygon>
+
+    <!-- Bielles -->
+    {SEGMENTS.map(([p, q, cls, cle]) => (
+      <line class={cls} data-seg={`${p}${q}`} x1={fmt(P[p][0])} y1={fmt(sy(P[p][1]))} x2={fmt(P[q][0])} y2={fmt(sy(P[q][1]))}>
+        <title>{cle} = {valeur(cle as keyof typeof JANSEN)}</title>
+      </line>
+    ))}
+
+    <!-- Cotes mobiles -->
+    {SEGMENTS.map(([p, q, , cle]) => {
+      const m = milieuDecale(P[p], P[q], DECALAGE[cle] ?? 3.5);
+      return (
+        <text class="texte-cote lettre" data-cote={cle} data-decalage={DECALAGE[cle] ?? 3.5} x={fmt(m[0])} y={fmt(sy(m[1]) + 1.4)} text-anchor="middle">
+          {cle}
+        </text>
+      );
+    })}
+
+    <!-- Articulations -->
+    {(['C', 'B', 'D', 'E', 'G', 'H'] as const).map((n) => (
+      <circle class="articulation" data-art={n} cx={fmt(P[n][0])} cy={fmt(sy(P[n][1]))} r="1.7"></circle>
+    ))}
+    <circle class="articulation fixe" cx="0" cy="0" r="2"></circle>
+    <circle class="articulation fixe" cx={fmt(P.F[0])} cy={fmt(sy(P.F[1]))} r="2"></circle>
+    <text class="texte-legende" x="3" y="-3.5">O</text>
+    <text class="texte-legende" x={fmt(P.F[0] - 7)} y={fmt(sy(P.F[1]) - 3)}>F</text>
+
+    <!-- Repères (bulles) -->
+    <g class="bulle">
+      <line x1="10" y1="-12" x2="21" y2="-24"></line>
+      <circle cx="24" cy="-27" r="4"></circle>
+      <text x="24" y="-27">1</text>
+    </g>
+    <g class="bulle">
+      <line x1={fmt(P.F[0] + 2)} y1={fmt(sy(P.F[1]) + 2)} x2="-11" y2="33"></line>
+      <circle cx="-8" cy="36" r="4"></circle>
+      <text x="-8" y="36">2</text>
+    </g>
+    <g class="bulle">
+      <line data-suit="BD" x1={fmt((P.B[0] + P.D[0]) / 2)} y1={fmt(sy((P.B[1] + P.D[1]) / 2))} x2="-80" y2="-42"></line>
+      <circle cx="-83" cy="-45" r="4"></circle>
+      <text x="-83" y="-45">3</text>
+    </g>
+    <g class="bulle">
+      <line data-suit="EG" x1={fmt((P.E[0] + P.G[0]) / 2)} y1={fmt(sy((P.E[1] + P.G[1]) / 2))} x2="-104" y2="52"></line>
+      <circle cx="-107" cy="55" r="4"></circle>
+      <text x="-107" y="55">4</text>
+    </g>
+    <g class="bulle">
+      <line data-suit="H" x1={fmt(P.H[0])} y1={fmt(sy(P.H[1]))} x2="26" y2="78"></line>
+      <circle cx="29" cy="81" r="4"></circle>
+      <text x="29" y="81">5</text>
+    </g>
+  </svg>
+  {mode === 'planche' && (
+    <dl class="nombres" aria-label="Nombres de Jansen">
+      {NOMBRES.map(({ k, v }) => (
+        <div>
+          <dt>{k}</dt>
+          <dd>{v}</dd>
+        </div>
+      ))}
+    </dl>
+  )}
+  {legende && <figcaption>{legende}</figcaption>}
+</figure>
+
+<style>
+  .nombres {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(4.2rem, 1fr));
+    gap: 0.25rem 0.5rem;
+    margin: 0.9rem 0 0;
+    padding-top: 0.6rem;
+    border-top: var(--ep-fin) solid var(--trait-3);
+    font-family: var(--f-cote);
+    font-size: var(--t-0);
+    color: var(--encre-2);
+  }
+  .nombres div {
+    display: flex;
+    gap: 0.35rem;
+    align-items: baseline;
+  }
+  .nombres dt {
+    color: var(--cote);
+  }
+  .nombres dt::after {
+    content: ' =';
+  }
+  .nombres dd {
+    margin: 0;
+    color: var(--encre);
+  }
+</style>
+
+<script>
+  import { pose, SEGMENTS, milieuDecale } from '../../lib/jansen';
+
+  const TOUR_MS = 6000;
+  const reduit = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+  function animer(svg: SVGSVGElement) {
+    if ((svg as any).__jansen) return;
+    (svg as any).__jansen = true;
+
+    const segs = SEGMENTS.map(([p, q, , cle]) => ({
+      p,
+      q,
+      el: svg.querySelector<SVGLineElement>(`[data-seg="${p}${q}"]`),
+      cote: svg.querySelector<SVGTextElement>(`[data-cote="${cle}"]`),
+      dec: Number(svg.querySelector<SVGTextElement>(`[data-cote="${cle}"]`)?.dataset.decalage ?? 3.5)
+    }));
+    const arts = (['C', 'B', 'D', 'E', 'G', 'H'] as const).map((n) => ({
+      n,
+      el: svg.querySelector<SVGCircleElement>(`[data-art="${n}"]`)
+    }));
+    const suiveurs = Array.from(svg.querySelectorAll<SVGLineElement>('[data-suit]'));
+    const polyFBD = svg.querySelector<SVGPolygonElement>('[data-poly="FBD"]');
+    const polyEGH = svg.querySelector<SVGPolygonElement>('[data-poly="EGH"]');
+    const angle0 = (Number(svg.dataset.angle ?? 32) * Math.PI) / 180;
+
+    let theta = angle0;
+    let precedent: number | null = null;
+    let actif = false;
+
+    function dessiner(P: ReturnType<typeof pose>) {
+      for (const s of segs) {
+        const a = P[s.p];
+        const b = P[s.q];
+        s.el?.setAttribute('x1', a[0].toFixed(2));
+        s.el?.setAttribute('y1', (-a[1]).toFixed(2));
+        s.el?.setAttribute('x2', b[0].toFixed(2));
+        s.el?.setAttribute('y2', (-b[1]).toFixed(2));
+        if (s.cote) {
+          const m = milieuDecale(a, b, s.dec);
+          s.cote.setAttribute('x', m[0].toFixed(2));
+          s.cote.setAttribute('y', (-m[1] + 1.4).toFixed(2));
+        }
+      }
+      for (const a of arts) {
+        const p = P[a.n];
+        a.el?.setAttribute('cx', p[0].toFixed(2));
+        a.el?.setAttribute('cy', (-p[1]).toFixed(2));
+      }
+      polyFBD?.setAttribute('points', `${P.F[0]},${-P.F[1]} ${P.B[0]},${-P.B[1]} ${P.D[0]},${-P.D[1]}`);
+      polyEGH?.setAttribute('points', `${P.E[0]},${-P.E[1]} ${P.G[0]},${-P.G[1]} ${P.H[0]},${-P.H[1]}`);
+      for (const l of suiveurs) {
+        const cible = l.dataset.suit ?? '';
+        let x = 0;
+        let y = 0;
+        if (cible.length === 2) {
+          const a = P[cible[0] as keyof typeof P];
+          const b = P[cible[1] as keyof typeof P];
+          x = (a[0] + b[0]) / 2;
+          y = (a[1] + b[1]) / 2;
+        } else {
+          const a = P[cible as keyof typeof P];
+          x = a[0];
+          y = a[1];
+        }
+        l.setAttribute('x1', x.toFixed(2));
+        l.setAttribute('y1', (-y).toFixed(2));
+      }
+    }
+
+    function cadre(t: number) {
+      if (!actif || !svg.isConnected || reduit.matches) {
+        precedent = null;
+        return;
+      }
+      if (precedent !== null) theta -= ((t - precedent) / TOUR_MS) * Math.PI * 2;
+      precedent = t;
+      dessiner(pose(theta));
+      requestAnimationFrame(cadre);
+    }
+
+    // On n'anime que lorsque la figure est à l'écran.
+    const io = new IntersectionObserver((entries) => {
+      const visible = entries.some((e) => e.isIntersecting);
+      if (visible && !actif) {
+        actif = true;
+        requestAnimationFrame(cadre);
+      } else if (!visible) {
+        actif = false;
+      }
+    });
+    io.observe(svg);
+    reduit.addEventListener('change', () => {
+      if (reduit.matches) dessiner(pose(angle0));
+      else if (actif) requestAnimationFrame(cadre);
+    });
+  }
+
+  function init() {
+    document.querySelectorAll<SVGSVGElement>('svg[data-jansen]').forEach(animer);
+  }
+  init();
+  document.addEventListener('astro:page-load', init);
+</script>

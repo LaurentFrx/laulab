@@ -1,0 +1,90 @@
+---
+/** Éclairage de la terrasse : coupe du profilé, plan des six segments, chaîne de commande. */
+import Bulle from './Bulle.astro';
+import Cote from './Cote.astro';
+import Marqueur from './Marqueur.astro';
+
+interface Props {
+  mode?: 'planche' | 'vignette';
+  tracer?: boolean;
+  legende?: string;
+}
+const { mode = 'planche', tracer = true, legende } = Astro.props;
+const segments = [0, 1, 2, 3, 4, 5];
+---
+
+<figure class:list={['figure', 'led', { vignette: mode === 'vignette' }]} data-trace={tracer ? '' : undefined}>
+  <svg viewBox="0 0 220 150" role="img" aria-label="Coupe d'un profilé aluminium avec diffuseur et ruban COB, plan de six segments sur 3,2 m, et chaîne de commande : alimentation, contrôleur QuinLED sous WLED, flux audio Plexamp puis LedFx">
+    <defs><Marqueur id="f-led" /></defs>
+
+    <!-- Coupe du profilé (échelle agrandie) -->
+    <g transform="translate(36 40)">
+      <path class="fort" d="M-16 10 L-16 -6 L-13 -6 L-13 7 L13 7 L13 -6 L16 -6 L16 10 Z"></path>
+      <path class="moyen" d="M-14 -6 A14 14 0 0 1 14 -6"></path>
+      <rect class="fort" x="-11" y="4" width="22" height="3"></rect>
+      {[-8, -4, 0, 4, 8].map((x) => (
+        <circle class="fin" cx={x} cy="5.5" r="0.9"></circle>
+      ))}
+      {Array.from({ length: 7 }, (_, n) => -14 + n * 4.6).map((x) => (
+        <line class="hachure" x1={x} y1="10" x2={x + 2.4} y2="7.4"></line>
+      ))}
+      <line class="axe" x1="0" y1="-24" x2="0" y2="18"></line>
+    </g>
+    <text class="texte-legende" x="12" y="64">coupe A-A · profilé alu</text>
+    <text class="texte-legende" x="12" y="69">diffuseur opale</text>
+
+    <!-- Plan des segments -->
+    <g transform="translate(76 26)">
+      {segments.map((k) => (
+        <>
+          <rect class="fort" x={k * 22} y="0" width="19" height="6"></rect>
+          <line class="fin" x1={k * 22} y1="3" x2={k * 22 + 19} y2="3"></line>
+        </>
+      ))}
+      {segments.slice(0, -1).map((k) => (
+        <line class="cache" x1={k * 22 + 19} y1="3" x2={k * 22 + 22} y2="3"></line>
+      ))}
+      <Cote x1="0" y1="12" x2="129" y2="12" texte="3,2 m · 6 segments" decalage="4" marqueur="f-led" attache="4" />
+      <line class="fin" x1="-2" y1="-6" x2="-2" y2="10"></line>
+      <text class="texte-cote encre" x="-5" y="-2" font-size="3.6">A</text>
+      <line class="fin" x1="131" y1="-6" x2="131" y2="10"></line>
+      <text class="texte-cote encre" x="133" y="-2" font-size="3.6">A</text>
+    </g>
+
+    <!-- Chaîne de commande -->
+    <g transform="translate(76 70)">
+      <rect class="moyen" x="0" y="0" width="38" height="18"></rect>
+      <text class="texte-legende" x="3" y="7">Mean Well</text>
+      <text class="texte-legende" x="3" y="13">HLG-320H-24A</text>
+      <line class="moyen" x1="-20" y1="9" x2="0" y2="9"></line>
+      <text class="texte-legende" x="-22" y="6" font-size="3.4">230 V</text>
+      <line class="moyen" x1="38" y1="9" x2="56" y2="9"></line>
+      <text class="texte-legende" x="40" y="6" font-size="3.4">24 V</text>
+      <rect class="fort" x="56" y="0" width="38" height="18"></rect>
+      <text class="texte-legende" x="59" y="7">QuinLED</text>
+      <text class="texte-legende" x="59" y="13">Dig Uno v3 · WLED</text>
+      <polyline class="moyen" points="94,9 104,9 104,-38 107,-38"></polyline>
+      <text class="texte-legende" x="106" y="-30" font-size="3.4">GPIO 16</text>
+      <text class="texte-legende" x="106" y="-25" font-size="3.4">51 px · BRG</text>
+      <!-- audio -->
+      <rect class="moyen" x="0" y="36" width="38" height="18"></rect>
+      <text class="texte-legende" x="3" y="43">Raspberry Pi 4</text>
+      <text class="texte-legende" x="3" y="49">Plexamp</text>
+      <rect class="moyen" x="56" y="36" width="38" height="18"></rect>
+      <text class="texte-legende" x="59" y="43">LedFx</text>
+      <text class="texte-legende" x="59" y="49">analyse audio</text>
+      <line class="moyen" x1="38" y1="45" x2="56" y2="45"></line>
+      <polyline class="cache" points="94,45 110,45 110,18 75,18"></polyline>
+      <text class="texte-legende" x="112" y="34" font-size="3.4">DDP</text>
+      <text class="texte-legende" x="112" y="39" font-size="3.4">réseau</text>
+    </g>
+
+    <!-- Repères -->
+    <Bulle n="1" x="12" y="20" ax="22" ay="34" />
+    <Bulle n="2" x="60" y="20" ax="40" ay="44" />
+    <Bulle n="3" x="200" y="68" ax="170" ay="78" />
+    <Bulle n="4" x="56" y="104" ax="76" ay="86" />
+    <Bulle n="5" x="40" y="136" ax="76" ay="118" />
+  </svg>
+  {legende && <figcaption>{legende}</figcaption>}
+</figure>

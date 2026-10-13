@@ -1,0 +1,35 @@
+---
+/**
+ * Aiguillage vers le dessin d'un projet.
+ * Ajouter un dessin : créer figures/<Nom>.astro et l'inscrire dans la table ci-dessous.
+ */
+import Jansen from './figures/Jansen.astro';
+import Cumulus from './figures/Cumulus.astro';
+import Solaire from './figures/Solaire.astro';
+import Meteo from './figures/Meteo.astro';
+import Led from './figures/Led.astro';
+import Cube from './figures/Cube.astro';
+import Compteur from './figures/Compteur.astro';
+import ACompleter from './figures/ACompleter.astro';
+
+interface Props {
+  nom?: string;
+  mode?: 'planche' | 'vignette';
+  legende?: string;
+  titre?: string;
+  tracer?: boolean;
+}
+const { nom, mode = 'planche', legende, titre, tracer = true } = Astro.props;
+const figures: Record<string, any> = {
+  jansen: Jansen,
+  cumulus: Cumulus,
+  solaire: Solaire,
+  meteo: Meteo,
+  led: Led,
+  cube: Cube,
+  compteur: Compteur
+};
+const Composant = nom ? figures[nom] : undefined;
+---
+
+{Composant ? <Composant mode={mode} legende={legende} tracer={tracer} /> : <ACompleter mode={mode} titre={titre} />}
