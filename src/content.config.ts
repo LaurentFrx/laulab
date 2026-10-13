@@ -26,7 +26,7 @@ const projets = defineCollection({
     /** Matières : stack logicielle et matériel */
     matieres: z.array(z.string()),
     /** Liens externes (site, dépôt, documentation) */
-    liens: z.array(z.object({ label: z.string(), url: z.string().url() })).default([]),
+    liens: z.array(z.object({ label: z.string(), url: z.url() })).default([]),
     /** Nom du dessin SVG (src/components/figures/<nom>.astro) ; sinon vue à compléter */
     figure: z.string().optional(),
     /** Légende du dessin : repères numérotés */

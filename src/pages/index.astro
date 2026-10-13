@@ -2,7 +2,7 @@
 import { getCollection } from 'astro:content';
 import Planche from '../layouts/Planche.astro';
 import Figure from '../components/Figure.astro';
-import Jansen from '../components/figures/Jansen.astro';
+import Scene from '../components/Scene.astro';
 import Tampon from '../components/Tampon.astro';
 import Cartouche from '../components/Cartouche.astro';
 import { CATEGORIES, STATUTS, parCategorie, numeroPlanche, trierParRepere } from '../lib/nomenclature';
@@ -22,30 +22,7 @@ const nbTermine = projets.filter((p) => p.data.statut === 'termine').length;
   description="Les projets de Laurent Feroux, à Sanguinet : domotique et énergie solaire, robots marcheurs, capteurs, applications web, faits seul ou au FabLab BiscaLab, avec Claude comme copilote."
   actif="accueil"
 >
-  <section class="hero">
-    <div class="hero-tete">
-      <p class="cote">
-        <span>Planche 00</span>
-        <span>Vue d'ensemble</span>
-        <span>Sanguinet, Landes</span>
-      </p>
-      <h1>Capteurs, robots et applications.</h1>
-    </div>
-    <div class="hero-texte">
-      <p class="intro">
-        Autodidacte en informatique depuis 1981, ancien pilote d'hélicoptère. Je construis des
-        choses, seul ou au FabLab BiscaLab, avec Claude comme copilote. Ce site en est le jeu de plans.
-      </p>
-      <div class="actions">
-        <a class="bouton" href="/projets/">Voir la nomenclature</a>
-        <a class="bouton discret" href="/methode/">Comment je travaille</a>
-      </div>
-    </div>
-    <Jansen
-      mode="planche"
-      legende="Fig. 1 — Patte de Jansen, cotée aux nombres de Theo Jansen. La manivelle tourne, le pied avance à plat. Projet Jansenosaure, repère 05."
-    />
-  </section>
+  <Scene />
 
   <section class="section" aria-labelledby="vedettes">
     <div class="ligne-titre">

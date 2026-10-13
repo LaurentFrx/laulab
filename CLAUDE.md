@@ -9,6 +9,7 @@ Site statique Astro 7 (`output: 'static'`, `trailingSlash: 'always'`). Français
 - Les props numériques passées aux composants SVG (`Cote`, `Bulle`) arrivent en chaînes : elles sont converties avec `Number()`.
 - Pas de dépendance réseau au chargement : polices auto-hébergées, aucun CDN, aucun suivi.
 - Thème : `data-theme="cyanotype"` (défaut) ou `"calque"` sur `<html>`, mémorisé dans `localStorage` (`laulab-theme`). Toutes les couleurs sont des variables dans `src/styles/global.css`.
+- La scène 3D de l'accueil n'utilise aucune bibliothèque : projection maison sur Canvas 2D (`projection.ts`), géométrie en segments (`marcheur.ts`). Les couleurs du canvas sont lues dans les variables CSS, donc le thème s'applique. `prefers-reduced-motion` coupe tout et affiche la figure SVG.
 
 ## Où est quoi
 
@@ -17,6 +18,10 @@ Site statique Astro 7 (`output: 'static'`, `trailingSlash: 'always'`). Français
 | `src/content/projets/*.md` | Un projet par fichier, schéma dans `src/content.config.ts` |
 | `src/lib/nomenclature.ts` | Catégories, statuts, tri, numéros de planche |
 | `src/lib/jansen.ts` | Cinématique du mécanisme de Jansen (nombres de Theo Jansen) |
+| `src/lib/marcheur.ts` | Le Jansenosaure complet en segments 3D : 4 pattes phasées, châssis, vilebrequin, trajectoires |
+| `src/lib/projection.ts` | Caméra en orbite, projection perspective, bruit fractal, images-clés |
+| `src/lib/son.ts` | Pas synthétisés en Web Audio, sans fichier ; jamais sans clic |
+| `src/components/Scene.astro` | Scène d'accueil : canvas 2D collant, chapitres au défilement, étiquettes projetées, repli SVG |
 | `src/components/figures/` | Dessins SVG ; `Figure.astro` fait l'aiguillage par nom |
 | `src/components/Cartouche.astro` | Bloc d'identification en pied de page |
 | `src/layouts/Planche.astro` | Gabarit commun (cadre, en-tête, `<head>`) |

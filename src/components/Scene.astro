@@ -1,0 +1,743 @@
+---
+/**
+ * Scène d'accueil : le Jansenosaure en fil de fer, dessiné sur un canvas derrière le texte.
+ * Le défilement fait tourner la caméra, le curseur l'incline légèrement, un bruit fractal la fait respirer.
+ * Repli : la figure SVG cotée, si l'utilisateur préfère moins d'animations.
+ */
+import Jansen from './figures/Jansen.astro';
+---
+
+<section class="scene" data-scene aria-label="Le Jansenosaure en marche, vue de côté, en perspective puis de dessus">
+  <div class="scene-colle">
+    <canvas class="scene-canvas" aria-hidden="true"></canvas>
+    <div class="scene-etiquettes" aria-hidden="true">
+      <span data-etiquette="manivelle" data-chapitres="1">manivelle · m = 15</span>
+      <span data-etiquette="pivot" data-chapitres="1">pivot fixe · a = 38 · l = 7,8</span>
+      <span data-etiquette="pied" data-chapitres="1">pied</span>
+      <span data-etiquette="moteur-g" data-chapitres="2">moteur gauche</span>
+      <span data-etiquette="moteur-d" data-chapitres="2">moteur droit</span>
+      <span data-etiquette="trajectoire" data-chapitres="3">trajectoire du pied</span>
+    </div>
+    <p class="scene-figure cote" data-figure aria-live="polite">Fig. 1 — Élévation, côté droit</p>
+    <button class="son" type="button" data-son aria-pressed="false">
+      <svg viewBox="0 0 16 16" aria-hidden="true">
+        <path d="M2 6h3l4-3v10l-4-3H2z" fill="currentColor"></path>
+        <path class="son-ondes" d="M11 5.5a3 3 0 0 1 0 5M12.5 3.5a5.5 5.5 0 0 1 0 9" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"></path>
+        <path class="son-barre" d="M11 5l3 6" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"></path>
+      </svg>
+      <span class="si-coupe">Son coupé</span>
+      <span class="si-actif">Son actif</span>
+    </button>
+    <div class="scene-repli">
+      <Jansen mode="planche" legende="Fig. 1 — Patte de Jansen, cotée aux nombres de Theo Jansen. Projet Jansenosaure, repère 05." />
+    </div>
+  </div>
+
+  <div class="scene-chapitres">
+    <div class="chapitre" data-chapitre="1">
+      <div class="chapitre-texte premier">
+        <p class="cote">
+          <span>Planche 00</span>
+          <span>Vue d'ensemble</span>
+          <span>Sanguinet, Landes</span>
+        </p>
+        <h1>Capteurs, robots et applications.</h1>
+        <p class="intro">
+          Autodidacte en informatique depuis 1981, ancien pilote d'hélicoptère. Je construis des choses,
+          seul ou au FabLab BiscaLab, avec Claude comme copilote. Ce site en est le jeu de plans.
+        </p>
+        <div class="actions">
+          <a class="bouton" href="/projets/">Voir la nomenclature</a>
+          <a class="bouton discret" href="/methode/">Comment je travaille</a>
+        </div>
+        <p class="indice cote">
+          <svg viewBox="0 0 12 12" aria-hidden="true"><path d="M2 4l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.3"></path></svg>
+          Faire défiler pour tourner autour
+        </p>
+      </div>
+    </div>
+    <div class="chapitre" data-chapitre="2">
+      <div class="chapitre-texte">
+        <p class="cote"><span>Jansenosaure</span><span>Planche 05</span><span>À l'étude</span></p>
+        <h2>Quatre pattes, deux par côté.</h2>
+        <p>
+          Chaque côté a son moteur. Quand l'un ralentit, la bête tourne : direction par différentiel,
+          comme un char. Un seul vilebrequin par côté entraîne les deux pattes, calées à un demi-tour.
+        </p>
+      </div>
+    </div>
+    <div class="chapitre" data-chapitre="3">
+      <div class="chapitre-texte">
+        <p class="cote"><span>Trajectoires</span><span>Nombres de Jansen</span></p>
+        <h2>Le pied avance à plat, puis se relève.</h2>
+        <p>
+          Une manivelle de 15 donne un pas de 68. Avec quatre pattes calées au quart de tour, deux pieds
+          sont au sol la plupart du temps : c'est ce que ce dessin montre, et ce que le projet doit améliorer.
+        </p>
+        <p><a class="bouton" href="/projets/jansenosaure/">Ouvrir la planche 05</a></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .scene {
+    position: relative;
+    height: 330vh;
+    margin: 0 calc(-1 * var(--marge));
+  }
+  .scene-colle {
+    position: sticky;
+    top: calc(var(--cadre) + var(--bande));
+    height: calc(100dvh - 2 * (var(--cadre) + var(--bande)));
+    overflow: hidden;
+  }
+  .scene-canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+  .scene-etiquettes span {
+    position: absolute;
+    left: 0;
+    top: 0;
+    font-family: var(--f-cote);
+    font-size: var(--t-0);
+    color: var(--cote);
+    white-space: nowrap;
+    padding-left: 0.9rem;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+    will-change: transform;
+  }
+  .scene-etiquettes span::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    width: 0.55rem;
+    height: 1px;
+    background: var(--cote);
+  }
+  .scene-etiquettes span.visible {
+    opacity: 1;
+  }
+  .scene-figure {
+    position: absolute;
+    left: var(--marge);
+    bottom: 1rem;
+    margin: 0;
+    transition: opacity 0.4s ease;
+  }
+  .son {
+    position: absolute;
+    right: var(--marge);
+    bottom: 0.8rem;
+    appearance: none;
+    background: color-mix(in oklab, var(--papier) 85%, transparent);
+    color: var(--encre-2);
+    border: var(--ep-fin) solid var(--trait-3);
+    border-radius: 999px;
+    font-family: var(--f-cote);
+    font-size: var(--t-0);
+    letter-spacing: 0.03em;
+    padding: 0.35rem 0.75rem 0.35rem 0.6rem;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    line-height: 1;
+  }
+  .son:hover {
+    color: var(--encre);
+    border-color: var(--trait-2);
+  }
+  .son svg {
+    width: 14px;
+    height: 14px;
+  }
+  .son .si-actif,
+  .son .son-ondes {
+    display: none;
+  }
+  .son[aria-pressed='true'] .si-actif,
+  .son[aria-pressed='true'] .son-ondes {
+    display: inline;
+  }
+  .son[aria-pressed='true'] .si-coupe,
+  .son[aria-pressed='true'] .son-barre {
+    display: none;
+  }
+  .son[aria-pressed='true'] {
+    color: var(--cote);
+    border-color: var(--cote);
+  }
+  .scene-repli {
+    display: none;
+  }
+
+  .scene-chapitres {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+  .chapitre {
+    height: 110vh;
+    display: grid;
+    align-content: center;
+    padding: 0 var(--marge);
+  }
+  .chapitre:first-child {
+    height: 100vh;
+    align-content: start;
+    padding-top: clamp(4.5rem, 10vh, 7rem);
+  }
+  .chapitre-texte {
+    pointer-events: auto;
+    max-width: 30rem;
+    padding: 1.25rem 1.4rem 1.4rem;
+    margin-left: -1.4rem;
+    background: color-mix(in oklab, var(--papier) 78%, transparent);
+    backdrop-filter: blur(3px);
+    -webkit-backdrop-filter: blur(3px);
+    border-radius: 2px;
+  }
+  .chapitre-texte.premier {
+    max-width: 36rem;
+  }
+  .chapitre-texte .cote {
+    display: flex;
+    gap: 0.6rem 1.25rem;
+    flex-wrap: wrap;
+    margin-bottom: 0.9rem;
+  }
+  .chapitre-texte h1 {
+    font-size: clamp(2.6rem, 6vw, 4.6rem);
+    font-weight: 760;
+    font-stretch: 92%;
+    line-height: 0.95;
+    letter-spacing: -0.02em;
+  }
+  .chapitre-texte h2 {
+    font-size: clamp(1.8rem, 3.6vw, 2.6rem);
+    margin-bottom: 0.8rem;
+  }
+  .chapitre-texte .intro {
+    font-size: var(--t-2);
+    margin: 1.25rem 0 0;
+    max-width: 34ch;
+    text-wrap: pretty;
+  }
+  .chapitre-texte p {
+    margin: 0;
+    max-width: 38ch;
+    text-wrap: pretty;
+  }
+  .chapitre-texte p + p {
+    margin-top: 0.9rem;
+  }
+  .chapitre-texte .actions {
+    display: flex;
+    gap: 0.75rem 1.5rem;
+    flex-wrap: wrap;
+    margin-top: 1.5rem;
+  }
+  .chapitre-texte .indice {
+    margin-top: 2rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+  .chapitre-texte .indice svg {
+    width: 12px;
+    height: 12px;
+    animation: descendre 2.4s ease-in-out infinite;
+  }
+  @keyframes descendre {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(3px);
+    }
+  }
+
+  @media (max-width: 899px) {
+    .scene {
+      height: 300vh;
+    }
+    .chapitre,
+    .chapitre:first-child {
+      align-content: end;
+      padding-top: 0;
+      padding-bottom: 3.6rem;
+    }
+    .chapitre-texte {
+      max-width: none;
+      margin-left: 0;
+      padding: 1rem 1.1rem 1.2rem;
+      background: color-mix(in oklab, var(--papier) 86%, transparent);
+    }
+    .chapitre-texte h1 {
+      font-size: clamp(2.2rem, 11vw, 2.8rem);
+    }
+    .chapitre-texte .intro {
+      font-size: var(--t-1);
+      margin-top: 0.9rem;
+    }
+    .chapitre-texte .actions {
+      margin-top: 1.1rem;
+    }
+    .chapitre-texte .indice {
+      margin-top: 1.2rem;
+    }
+    .scene-figure {
+      display: none;
+    }
+  }
+
+  /* Repli : moins d'animations → figure fixe, un seul chapitre, pas de canvas */
+  @media (prefers-reduced-motion: reduce) {
+    .scene {
+      height: auto;
+      margin: 0;
+      display: grid;
+      gap: 2.5rem;
+    }
+    .scene-colle {
+      position: static;
+      height: auto;
+      overflow: visible;
+      order: 2;
+    }
+    .scene-canvas,
+    .scene-etiquettes,
+    .scene-figure,
+    .son {
+      display: none;
+    }
+    .scene-repli {
+      display: block;
+      max-width: 760px;
+      border: var(--ep-fin) solid var(--trait-3);
+      padding: clamp(1rem, 3vw, 2rem);
+    }
+    .scene-chapitres {
+      position: static;
+      pointer-events: auto;
+      order: 1;
+    }
+    .chapitre {
+      height: auto;
+      padding: 0;
+      display: block;
+    }
+    .chapitre:first-child {
+      padding-top: 1rem;
+    }
+    .chapitre:not(:first-child) {
+      display: none;
+    }
+    .chapitre-texte {
+      background: none;
+      padding: 0;
+      margin: 0;
+      backdrop-filter: none;
+    }
+    .chapitre-texte .indice {
+      display: none;
+    }
+  }
+</style>
+
+<script>
+  import { marcheur, pieds, point, trajectoirePied, vitesseAvance, SOL, LARGEUR, PATTES, type V3, type Trait } from '../lib/marcheur';
+  import { baseCamera, projeter, fbm, imagesCles, lerp, borne, type Camera, type Base, type Ecran } from '../lib/projection';
+  import { activerSon, couperSon, pas } from '../lib/son';
+
+  const TOUR_MS = 6000;
+  const reduit = window.matchMedia('(prefers-reduced-motion: reduce)');
+  const peutSurvoler = window.matchMedia('(hover: hover)');
+
+  type Cles = { lacet: number; tangage: number; distance: number; hauteur: number };
+  // Les chapitres de texte sont centrés à p ≈ 0 (titre), 0,5 (deux par côté) et 1 (trajectoires).
+  const IMAGES_CLES: { p: number; v: Cles }[] = [
+    { p: 0, v: { lacet: 0.08, tangage: 0.1, distance: 600, hauteur: -30 } },
+    { p: 0.5, v: { lacet: -0.8, tangage: 0.3, distance: 640, hauteur: -30 } },
+    { p: 0.76, v: { lacet: -0.55, tangage: 0.85, distance: 680, hauteur: -40 } },
+    { p: 1, v: { lacet: -0.25, tangage: 1.32, distance: 700, hauteur: -45 } }
+  ];
+  const FIGURES = ['Fig. 1 — Élévation, côté droit', 'Fig. 2 — Perspective, trois quarts avant', 'Fig. 3 — Vue de dessus, trajectoires des pieds'];
+  const LARGEURS: Record<Trait, number> = { fort: 1.7, moyen: 1.1, fin: 0.7, crayon: 1.9, cache: 0.8 };
+
+  class Scene {
+    section: HTMLElement;
+    colle: HTMLElement;
+    canvas: HTMLCanvasElement;
+    ctx: CanvasRenderingContext2D;
+    etiquettes: HTMLElement[];
+    figure: HTMLElement | null;
+    boutonSon: HTMLButtonElement | null;
+    couleurs = { trait: '#dce9f5', cote: '#8fd8ff', crayon: '#ff6a3d', encre2: '#a9c0d4', papier: '#0e2a47' };
+    ecran: Ecran = { w: 1, h: 1, cx: 0, cy: 0 };
+    dpr = 1;
+    theta = 0.5;
+    decalageSol = 0;
+    vitesse = vitesseAvance(TOUR_MS);
+    progression = 0;
+    progressionLisse = 0;
+    souris = { x: 0, y: 0, lx: 0, ly: 0 };
+    precedent: number | null = null;
+    actif = false;
+    detruit = false;
+    hautSection = 0;
+    hauteurScroll = 1;
+    chapitre = 0;
+    piedsAuSol = [false, false, false, false];
+    sonActif = false;
+    trajectoires: V3[][] = PATTES.map((_, k) => trajectoirePied(k));
+    leger = false;
+    dureeMoy = 16;
+    facteurDistance = 1;
+    observateur: IntersectionObserver;
+    observateurTheme: MutationObserver;
+    rafId = 0;
+
+    constructor(section: HTMLElement) {
+      this.section = section;
+      this.colle = section.querySelector('.scene-colle') as HTMLElement;
+      this.canvas = section.querySelector('canvas') as HTMLCanvasElement;
+      this.ctx = this.canvas.getContext('2d', { alpha: true }) as CanvasRenderingContext2D;
+      this.etiquettes = Array.from(section.querySelectorAll<HTMLElement>('[data-etiquette]'));
+      this.figure = section.querySelector('[data-figure]');
+      this.boutonSon = section.querySelector<HTMLButtonElement>('[data-son]');
+
+      this.lireCouleurs();
+      this.redimensionner();
+      this.mesurerScroll();
+      this.lireProgression();
+
+      window.addEventListener('resize', this.surRedimension, { passive: true });
+      window.addEventListener('scroll', this.surScroll, { passive: true });
+      if (peutSurvoler.matches) window.addEventListener('pointermove', this.surPointeur, { passive: true });
+      document.addEventListener('visibilitychange', this.surVisibilite);
+
+      this.observateur = new IntersectionObserver((entrees) => {
+        const visible = entrees.some((e) => e.isIntersecting);
+        if (visible && !this.actif) {
+          this.actif = true;
+          this.precedent = null;
+          this.rafId = requestAnimationFrame(this.boucle);
+        } else if (!visible) {
+          this.actif = false;
+        }
+      });
+      this.observateur.observe(section);
+
+      this.observateurTheme = new MutationObserver(() => this.lireCouleurs());
+      this.observateurTheme.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+
+      if (this.boutonSon) {
+        this.boutonSon.addEventListener('click', this.basculerSon);
+      }
+    }
+
+    lireCouleurs() {
+      const s = getComputedStyle(document.documentElement);
+      const lire = (n: string, defaut: string) => s.getPropertyValue(n).trim() || defaut;
+      this.couleurs = {
+        trait: lire('--trait', this.couleurs.trait),
+        cote: lire('--cote', this.couleurs.cote),
+        crayon: lire('--crayon', this.couleurs.crayon),
+        encre2: lire('--encre-2', this.couleurs.encre2),
+        papier: lire('--papier', this.couleurs.papier)
+      };
+    }
+
+    redimensionner() {
+      const r = this.colle.getBoundingClientRect();
+      const w = Math.max(1, Math.round(r.width));
+      const h = Math.max(1, Math.round(r.height));
+      this.dpr = Math.min(window.devicePixelRatio || 1, 2);
+      this.canvas.width = Math.round(w * this.dpr);
+      this.canvas.height = Math.round(h * this.dpr);
+      this.ctx.setTransform(this.dpr, 0, 0, this.dpr, 0, 0);
+      const large = w >= 900;
+      this.ecran = { w, h, cx: large ? w * 0.68 : w * 0.5, cy: large ? h * 0.52 : h * 0.34 };
+      // Écran étroit : on recule la caméra pour que la bête tienne en largeur
+      this.facteurDistance = large ? 1 : borne(1.1 * (h / w), 1, 2.2);
+    }
+
+    mesurerScroll() {
+      const r = this.section.getBoundingClientRect();
+      this.hautSection = r.top + window.scrollY;
+      this.hauteurScroll = Math.max(1, r.height - this.colle.getBoundingClientRect().height);
+    }
+
+    lireProgression() {
+      this.progression = borne((window.scrollY - this.hautSection) / this.hauteurScroll, 0, 1);
+    }
+
+    surRedimension = () => {
+      this.redimensionner();
+      this.mesurerScroll();
+      this.lireProgression();
+      if (!this.actif) this.dessiner();
+    };
+    surScroll = () => this.lireProgression();
+    surPointeur = (e: PointerEvent) => {
+      this.souris.x = (e.clientX / window.innerWidth - 0.5) * 2;
+      this.souris.y = (e.clientY / window.innerHeight - 0.5) * 2;
+    };
+    surVisibilite = () => {
+      if (document.hidden) this.precedent = null;
+    };
+
+    basculerSon = async () => {
+      if (!this.boutonSon) return;
+      if (this.sonActif) {
+        this.sonActif = false;
+        await couperSon();
+      } else {
+        this.sonActif = await activerSon();
+      }
+      this.boutonSon.setAttribute('aria-pressed', this.sonActif ? 'true' : 'false');
+      try {
+        localStorage.setItem('laulab-son', this.sonActif ? '1' : '0');
+      } catch {
+        /* sans importance */
+      }
+    };
+
+    boucle = (t: number) => {
+      if (this.detruit || !this.actif) return;
+      if (this.precedent !== null) {
+        const dt = Math.min(t - this.precedent, 50);
+        this.dureeMoy = this.dureeMoy * 0.95 + dt * 0.05;
+        this.leger = this.dureeMoy > 28;
+        this.theta -= (dt / TOUR_MS) * Math.PI * 2;
+        this.decalageSol = (this.decalageSol + this.vitesse * dt) % 20;
+        this.progressionLisse = lerp(this.progressionLisse, this.progression, 1 - Math.pow(0.001, dt / 1000));
+        this.souris.lx = lerp(this.souris.lx, this.souris.x, 1 - Math.pow(0.01, dt / 1000));
+        this.souris.ly = lerp(this.souris.ly, this.souris.y, 1 - Math.pow(0.01, dt / 1000));
+      } else {
+        this.progressionLisse = this.progression;
+      }
+      this.precedent = t;
+      this.dessiner(t);
+      this.rafId = requestAnimationFrame(this.boucle);
+    };
+
+    camera(t: number): Camera {
+      const c = imagesCles(IMAGES_CLES, this.progressionLisse);
+      const s = t / 1000;
+      return {
+        lacet: c.lacet + 0.03 * fbm(s * 0.07, 1) + 0.035 * this.souris.lx,
+        tangage: borne(c.tangage + 0.02 * fbm(s * 0.05, 2) - 0.02 * this.souris.ly, 0.02, 1.5),
+        distance: c.distance * this.facteurDistance,
+        cible: [0, c.hauteur + 3 * fbm(s * 0.04, 3), 0],
+        champ: 0.6
+      };
+    }
+
+    trait(a: V3, b: V3, base: Base, couleur: string, largeur: number, alpha: number, tirets?: number[]) {
+      const pa = projeter(a, base, this.ecran);
+      const pb = projeter(b, base, this.ecran);
+      if (!pa || !pb) return;
+      const ctx = this.ctx;
+      ctx.strokeStyle = couleur;
+      ctx.lineWidth = largeur;
+      ctx.globalAlpha = alpha;
+      ctx.setLineDash(tirets ?? []);
+      ctx.beginPath();
+      ctx.moveTo(pa.x, pa.y);
+      ctx.lineTo(pb.x, pb.y);
+      ctx.stroke();
+    }
+
+    dessiner(t = performance.now()) {
+      const ctx = this.ctx;
+      const { w, h } = this.ecran;
+      ctx.clearRect(0, 0, w, h);
+      const cam = this.camera(t);
+      const base = baseCamera(cam);
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+
+      // Sol : lignes dans le sens de la marche, et lignes en travers qui défilent
+      const zMin = -LARGEUR / 2 - 70;
+      const zMax = LARGEUR / 2 + 70;
+      const xMin = -250;
+      const xMax = 250;
+      for (let z = zMin; z <= zMax + 0.01; z += 20) {
+        this.trait([xMin, SOL, z], [xMax, SOL, z], base, this.couleurs.trait, 0.6, 0.16);
+      }
+      for (let x = xMin + ((this.decalageSol % 20) + 20) % 20; x <= xMax; x += 20) {
+        this.trait([x, SOL, zMin], [x, SOL, zMax], base, this.couleurs.trait, 0.6, 0.16);
+      }
+
+      // Trajectoires des pieds (fermées, en tirets)
+      if (!this.leger || this.chapitre === 2) {
+        ctx.strokeStyle = this.couleurs.cote;
+        ctx.lineWidth = 0.8;
+        ctx.globalAlpha = 0.55;
+        ctx.setLineDash([3, 3]);
+        for (const tr of this.trajectoires) {
+          ctx.beginPath();
+          let premier = true;
+          for (const p of tr) {
+            const q = projeter(p, base, this.ecran);
+            if (!q) continue;
+            if (premier) ctx.moveTo(q.x, q.y);
+            else ctx.lineTo(q.x, q.y);
+            premier = false;
+          }
+          ctx.closePath();
+          ctx.stroke();
+        }
+        ctx.setLineDash([]);
+      }
+
+      // Marcheur : segments triés du plus loin au plus près, atténués par la profondeur
+      const segs = marcheur(this.theta);
+      const projetes = segs
+        .map((s) => {
+          const pa = projeter(s.a, base, this.ecran);
+          const pb = projeter(s.b, base, this.ecran);
+          return pa && pb ? { pa, pb, t: s.t, z: (pa.z + pb.z) / 2 } : null;
+        })
+        .filter((x): x is NonNullable<typeof x> => x !== null)
+        .sort((a, b) => b.z - a.z);
+      if (projetes.length) {
+        const zProche = projetes[projetes.length - 1]!.z;
+        const zLoin = projetes[0]!.z;
+        const etendue = Math.max(1, zLoin - zProche);
+        for (const s of projetes) {
+          const prof = (zLoin - s.z) / etendue; // 0 loin → 1 proche
+          ctx.strokeStyle = s.t === 'crayon' ? this.couleurs.crayon : this.couleurs.trait;
+          ctx.lineWidth = LARGEURS[s.t];
+          ctx.globalAlpha = 0.4 + 0.6 * prof;
+          ctx.setLineDash(s.t === 'cache' ? [4, 3] : []);
+          ctx.beginPath();
+          ctx.moveTo(s.pa.x, s.pa.y);
+          ctx.lineTo(s.pb.x, s.pb.y);
+          ctx.stroke();
+        }
+      }
+
+      // Articulations et contacts au sol
+      ctx.setLineDash([]);
+      const P = pieds(this.theta);
+      P.forEach((p, k) => {
+        const auSol = p[1] < SOL + 1.5;
+        if (auSol && !this.piedsAuSol[k] && this.sonActif && document.visibilityState === 'visible') pas(k, 0.8);
+        this.piedsAuSol[k] = auSol;
+        if (auSol) {
+          const q = projeter([p[0], SOL, p[2]], base, this.ecran);
+          if (q) {
+            ctx.strokeStyle = this.couleurs.crayon;
+            ctx.lineWidth = 1;
+            ctx.globalAlpha = 0.9;
+            ctx.beginPath();
+            ctx.moveTo(q.x - 5, q.y);
+            ctx.lineTo(q.x + 5, q.y);
+            ctx.moveTo(q.x, q.y - 5);
+            ctx.lineTo(q.x, q.y + 5);
+            ctx.stroke();
+          }
+        }
+      });
+      if (!this.leger) {
+        ctx.fillStyle = this.couleurs.papier;
+        ctx.strokeStyle = this.couleurs.trait;
+        ctx.lineWidth = 0.9;
+        ctx.globalAlpha = 0.95;
+        for (let k = 0; k < PATTES.length; k++) {
+          for (const n of ['C', 'B', 'D', 'E', 'G', 'H'] as const) {
+            const q = projeter(point(this.theta, k, n), base, this.ecran);
+            if (!q) continue;
+            ctx.beginPath();
+            ctx.arc(q.x, q.y, 2, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+          }
+        }
+      }
+      ctx.globalAlpha = 1;
+
+      this.majEtiquettes(base);
+      this.majChapitre();
+    }
+
+    majChapitre() {
+      const p = this.progressionLisse;
+      const ch = p < 0.27 ? 0 : p < 0.76 ? 1 : 2;
+      if (ch !== this.chapitre) {
+        this.chapitre = ch;
+        if (this.figure) this.figure.textContent = FIGURES[ch] ?? '';
+        for (const e of this.etiquettes) {
+          const chapitres = (e.dataset.chapitres ?? '').split(' ');
+          e.classList.toggle('visible', chapitres.includes(String(ch + 1)));
+        }
+      }
+    }
+
+    majEtiquettes(base: Base) {
+      const th = this.theta;
+      const ancres: Record<string, V3> = {
+        manivelle: point(th, 2, 'C'),
+        pivot: point(th, 2, 'F'),
+        pied: point(th, 2, 'H'),
+        'moteur-g': [0, 10, -LARGEUR / 2 - 22],
+        'moteur-d': [0, 10, LARGEUR / 2 + 22],
+        trajectoire: this.trajectoires[3]![0]!
+      };
+      for (const e of this.etiquettes) {
+        const a = ancres[e.dataset.etiquette ?? ''];
+        if (!a) continue;
+        const q = projeter(a, base, this.ecran);
+        if (!q) {
+          e.style.opacity = '0';
+          continue;
+        }
+        e.style.removeProperty('opacity');
+        e.style.transform = `translate(${(q.x + 8).toFixed(1)}px, ${(q.y - 10).toFixed(1)}px)`;
+      }
+    }
+
+    detruire() {
+      this.detruit = true;
+      this.actif = false;
+      cancelAnimationFrame(this.rafId);
+      this.observateur.disconnect();
+      this.observateurTheme.disconnect();
+      window.removeEventListener('resize', this.surRedimension);
+      window.removeEventListener('scroll', this.surScroll);
+      window.removeEventListener('pointermove', this.surPointeur);
+      document.removeEventListener('visibilitychange', this.surVisibilite);
+      this.boutonSon?.removeEventListener('click', this.basculerSon);
+      if (this.sonActif) couperSon();
+    }
+  }
+
+  let scene: Scene | null = null;
+
+  function init() {
+    scene?.detruire();
+    scene = null;
+    if (reduit.matches) return;
+    const section = document.querySelector<HTMLElement>('[data-scene]');
+    if (!section) return;
+    scene = new Scene(section);
+  }
+
+  init();
+  document.addEventListener('astro:page-load', init);
+  document.addEventListener('astro:before-swap', () => {
+    scene?.detruire();
+    scene = null;
+  });
+</script>

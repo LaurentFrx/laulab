@@ -1253,63 +1253,6 @@ main.page {
 }
 
 /* --- Accueil -------------------------------------------------------------- */
-.hero {
-  display: grid;
-  gap: 1.5rem 2.5rem;
-  grid-template-columns: 1fr;
-  grid-template-areas:
-    'tete'
-    'texte'
-    'figure';
-  align-items: start;
-  padding: clamp(0.5rem, 2vw, 1.5rem) 0 0;
-}
-.hero > .hero-tete {
-  grid-area: tete;
-}
-.hero > .hero-texte {
-  grid-area: texte;
-}
-.hero > .figure {
-  grid-area: figure;
-}
-@media (min-width: 900px) {
-  .hero {
-    grid-template-columns: minmax(0, 4fr) minmax(0, 8fr);
-    grid-template-areas:
-      'tete tete'
-      'texte figure';
-    gap: 2rem 3rem;
-  }
-}
-.hero .cote {
-  display: flex;
-  gap: 0.6rem 1.25rem;
-  flex-wrap: wrap;
-  margin-bottom: 1rem;
-}
-.hero h1 {
-  font-size: var(--t-6);
-  font-weight: 760;
-  font-stretch: 92%;
-  line-height: 0.92;
-  letter-spacing: -0.02em;
-  text-wrap: balance;
-  max-width: 20ch;
-}
-.hero .intro {
-  font-size: var(--t-2);
-  margin-top: 0;
-  max-width: 34ch;
-  color: var(--encre);
-  text-wrap: pretty;
-}
-.hero .actions {
-  display: flex;
-  gap: 0.75rem 1.5rem;
-  flex-wrap: wrap;
-  margin-top: 1.75rem;
-}
 .bouton {
   display: inline-flex;
   align-items: center;
@@ -1336,10 +1279,6 @@ main.page {
   background: transparent;
   color: var(--encre);
   border-color: var(--trait);
-}
-.hero .figure {
-  border: var(--ep-fin) solid var(--trait-3);
-  padding: clamp(0.75rem, 2.5vw, 1.75rem);
 }
 
 .methode-apercu {

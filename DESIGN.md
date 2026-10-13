@@ -32,7 +32,19 @@ Page d'accueil : titre sur toute la largeur, puis texte (4/12) et figure de Jans
 
 - Les figures se tracent une fois à l'apparition (`stroke-dashoffset`), puis restent.
 - Le mécanisme de Jansen tourne en continu (un tour en 6 s), uniquement quand il est à l'écran.
-- `prefers-reduced-motion` : pas de tracé, mécanisme figé dans sa pose initiale, transitions de pages coupées.
+- `prefers-reduced-motion` : pas de tracé, mécanisme figé dans sa pose initiale, transitions de pages coupées, scène 3D remplacée par la figure SVG.
+
+## Scène d'accueil (techniques empruntées à Lusion et Immersive Garden, octobre 2026)
+
+- **Un canvas derrière le texte, le texte reste du HTML.** Le Jansenosaure (4 pattes, châssis, deux moteurs) est dessiné en fil de fer sur un Canvas 2D collant ; les chapitres de texte défilent par-dessus. Les étiquettes (manivelle, pivot, moteurs, trajectoire) sont des éléments HTML repositionnés chaque image à partir des points 3D projetés.
+- **Le défilement pilote la caméra.** Trois images-clés : élévation de côté (titre), perspective trois quarts (les deux moteurs), vue de dessus (les trajectoires des pieds). Interpolation lissée, avec un retard élastique plutôt qu'un détournement du scroll.
+- **La caméra respire.** Bruit fractal à trois octaves sur le lacet, le tangage et la hauteur de cible ; le curseur incline la vue de ±2° sur les écrans à survol.
+- **Précalculer.** Les trajectoires des pieds et les phases des pattes sont calculées une fois ; chaque image ne fait que 20 intersections de cercles et ~800 projections.
+- **Pas de bibliothèque 3D.** Tout est lignes : un moteur de projection de 100 lignes remplace Three.js. Pas de texture, pas de modèle, rien à télécharger.
+- **Son coupé par défaut.** Un bouton dans la scène ; les pas sont synthétisés (bruit filtré + toc grave) au contact de chaque pied, jamais sans action de l'utilisateur.
+- **Repli.** Sans animation (préférence système) : la figure SVG cotée et le seul premier chapitre.
+
+Le phasage des pattes est calé sur l'arc d'appui réel de la trajectoire de Jansen : avec quatre pattes au quart de tour, deux pieds sont au sol 92 % du temps, jamais zéro. C'est aussi un résultat pour le projet lui-même : trois pieds au sol demanderont six pattes ou un autre phasage.
 
 ## À ne pas faire
 
