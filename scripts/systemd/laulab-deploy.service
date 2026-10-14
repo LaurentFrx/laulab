@@ -5,8 +5,21 @@ Wants=network-online.target
 
 [Service]
 Type=oneshot
-# À adapter : utilisateur propriétaire du dépôt et chemin du clone
-User=laurent
+# Utilisateur système dédié, sans shell, sans sudo, hors docker ; propriétaire de /srv/laulab (groupe caddy)
+User=laulab
+Group=caddy
+Environment=HOME=/var/lib/laulab
+Environment=npm_config_cache=/var/lib/laulab/.npm
 WorkingDirectory=/srv/laulab
 ExecStart=/srv/laulab/scripts/deploy-vps.sh
 Nice=10
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+ReadWritePaths=/srv/laulab /var/lib/laulab
+PrivateTmp=yes
+PrivateDevices=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectControlGroups=yes
+LockPersonality=yes
