@@ -27,6 +27,13 @@ Site statique Astro 7 (`output: 'static'`, `trailingSlash: 'always'`). Français
 | `src/layouts/Planche.astro` | Gabarit commun (cadre, en-tête, `<head>`) |
 | `scripts/deploy-vps.sh` | Déploiement sur le VPS (git pull, build, remplacement atomique de `dist/`) |
 
+## Serveur (VPS tazieff-dev)
+
+- Le clone vit dans `/srv/laulab` (propriétaire `laurent`, groupe `caddy`) ; Caddy sert `/srv/laulab/dist`.
+- `laulab-deploy.timer` (systemd) lance `scripts/deploy-vps.sh` toutes les 5 minutes : `git reset --hard origin/main`, `npm ci` si le lockfile a changé, build dans `.dist-next`, puis remplacement de `dist/`. **Toute modification faite à la main dans `/srv/laulab` est écrasée** : on passe par un commit sur `main`.
+- Caddy : `scripts/Caddyfile.laulab` est une référence, `/etc/caddy/Caddyfile` fait foi (il garde en plus la directive `log` du serveur). Avant un `systemctl reload caddy`, valider sous l'utilisateur `caddy` : `sudo -u caddy caddy validate --config /etc/caddy/Caddyfile`. Ne pas renommer le journal existant. Sauvegarde datée du Caddyfile avant toute modification.
+- Sécurité : qui peut pousser sur `main` fait tourner `npm ci` et le build sur le VPS. Ne jamais ajouter de dépendance sans la vérifier ; le lockfile est engagé. Le durcissement prévu : exécuter le minuteur sous un utilisateur dédié sans sudo ni docker.
+
 ## Vérifier avant de livrer
 
 ```sh

@@ -1,9 +1,24 @@
-# Bloc Caddy pour laulab.feroux.fr — à fusionner dans le Caddyfile du VPS.
-# Le dossier dist/ est produit par scripts/deploy-vps.sh.
+# Bloc Caddy pour laulab.feroux.fr — référence. Le Caddyfile du VPS (/etc/caddy/Caddyfile) fait foi :
+# il peut contenir en plus la directive `log` du serveur. Le dossier dist/ est produit par scripts/deploy-vps.sh.
 laulab.feroux.fr {
 	root * /srv/laulab/dist
 	encode zstd gzip
-	file_server
+
+	# Fichiers commençant par un point (.git, .env…) : jamais servis
+	@point path /.* /*/.*
+	respond @point 404
+
+	# Assets empreintés et polices : cache long. Le HTML, lui, reste revalidé à chaque visite.
+	@assets path /_astro/* /fonts/*
+	header @assets Cache-Control "public, max-age=31536000, immutable"
+	@html path / /*/
+	header @html Cache-Control "no-cache"
+
+	header {
+		X-Content-Type-Options nosniff
+		Referrer-Policy strict-origin-when-cross-origin
+		-Server
+	}
 
 	# Page 404 du site
 	handle_errors {
@@ -12,12 +27,5 @@ laulab.feroux.fr {
 		file_server
 	}
 
-	header {
-		# Polices et assets fingerprintés : cache long
-		@assets path /_astro/* /fonts/*
-		Cache-Control "public, max-age=31536000, immutable"
-		X-Content-Type-Options nosniff
-		Referrer-Policy strict-origin-when-cross-origin
-		-Server
-	}
+	file_server
 }
