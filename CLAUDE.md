@@ -25,7 +25,7 @@ Site statique Astro 7 (`output: 'static'`, `trailingSlash: 'always'`). Français
 | `src/components/figures/` | Dessins SVG ; `Figure.astro` fait l'aiguillage par nom |
 | `src/components/Cartouche.astro` | Bloc d'identification en pied de page |
 | `src/layouts/Planche.astro` | Gabarit commun (cadre, en-tête, `<head>`) |
-| `scripts/icones/` | Logo LF source (`logo-lf.png`) et `generer.py` (Pillow) : favicon, icônes Android/iOS dans `public/`, à relancer si le logo change |
+| `scripts/icones/` | Logo LF source (`logo-lf.png`) et `generer.py` (Pillow) : favicon, icônes Android/iOS dans `public/` ; si le logo change, changer aussi le nom des fichiers (iOS garde ses icônes en cache par adresse) |
 | `scripts/deploy-vps.sh` | Déploiement sur le VPS (git pull, build, remplacement atomique de `dist/`) |
 
 ## Serveur (VPS tazieff-dev)

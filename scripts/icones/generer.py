@@ -4,10 +4,17 @@
 Le logo est posé sur le bleu de Prusse du thème cyanotype (#0e2a47) : le verre
 bleu clair y reste lisible jusqu'à 16 px, ce qui n'est pas le cas sur fond clair.
 
-- favicon.ico (16, 32, 48) et icon-192/512.png : carré à coins arrondis, comme
-  l'ancien favicon.svg (rayon 12,5 %), coins transparents ;
-- apple-touch-icon.png (180) et icon-512-maskable.png : fond plein, iOS et
-  Android découpent eux-mêmes la forme (zone sûre : cercle de 80 %).
+- favicon.ico (16, 32, 48) : carré à coins arrondis, comme l'ancien favicon.svg
+  (rayon 12,5 %), coins transparents — pour les onglets ;
+- icones/lf-*.png : carrés pleins, sans transparence. iOS et Android découpent
+  eux-mêmes la forme ; iOS (26 et plus) remplace par une lettre une icône qu'il
+  juge inutilisable. Zone sûre de la version maskable : cercle de 80 %.
+- apple-touch-icon.png et apple-touch-icon-precomposed.png à la racine : copies
+  de lf-180, adresses qu'iOS essaie de lui-même.
+
+iOS garde en cache une icône (ou un échec) par adresse : si le logo change,
+changer aussi le nom des fichiers (lf-… → autre préfixe) dans ce script, dans
+src/layouts/Planche.astro et dans public/manifest.json.
 
 Usage : python3 scripts/icones/generer.py   (nécessite Pillow ; écrit dans public/)
 """
@@ -40,8 +47,10 @@ def icone(taille: int, marge: float, arrondi: bool) -> Image.Image:
 # Petites tailles : marges réduites pour garder le dessin lisible
 petites = [icone(16, 0.04, True), icone(32, 0.08, True), icone(48, 0.1, True)]
 petites[2].save(PUBLIC / 'favicon.ico', sizes=[(16, 16), (32, 32), (48, 48)], append_images=petites[:2])
-icone(192, 0.14, True).save(PUBLIC / 'icon-192.png', optimize=True)
-icone(512, 0.14, True).save(PUBLIC / 'icon-512.png', optimize=True)
-icone(180, 0.16, False).convert('RGB').save(PUBLIC / 'apple-touch-icon.png', optimize=True)
-icone(512, 0.22, False).convert('RGB').save(PUBLIC / 'icon-512-maskable.png', optimize=True)
+(PUBLIC / 'icones').mkdir(exist_ok=True)
+for taille in (180, 192, 512):
+    icone(taille, 0.16, False).convert('RGB').save(PUBLIC / 'icones' / f'lf-{taille}.png', optimize=True)
+icone(512, 0.22, False).convert('RGB').save(PUBLIC / 'icones' / 'lf-512-maskable.png', optimize=True)
+for nom in ('apple-touch-icon.png', 'apple-touch-icon-precomposed.png'):
+    (PUBLIC / nom).write_bytes((PUBLIC / 'icones' / 'lf-180.png').read_bytes())
 print('Icônes écrites dans', PUBLIC)
