@@ -37,7 +37,7 @@ const dessine = d.collaboration.claude.length ? 'Laurent Feroux et Claude' : 'La
 
     <div class="planche-corps">
       <div>
-        <Figure nom={d.figure} mode="planche" titre={d.titre} legende={d.figure ? `Fig. 1 — ${d.titre}, repères 1 à ${d.reperes.length}.` : undefined} />
+        <Figure nom={d.figure} mode="planche" titre={d.titre} legende={d.figure ? `Fig. 1 — ${d.titre}${d.reperes.length ? `, repères 1 à ${d.reperes.length}` : ''}.` : undefined} />
         {d.reperes.length > 0 && (
           <ol class="liste-reperes" style="margin-top:1.25rem" aria-label="Légende des repères">
             {d.reperes.map((r, k) => (

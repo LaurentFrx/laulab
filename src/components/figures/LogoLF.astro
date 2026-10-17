@@ -1,0 +1,161 @@
+---
+/**
+ * Logo LF en verre : un tour complet sur son axe vertical, vidéo en boucle.
+ * La vidéo (public/videos/laulab/) a un fond blanc pur : en calque il disparaît
+ * par « multiply » ; en cyanotype la vidéo passe en négatif et se fond par « screen »,
+ * comme un tirage cyanotype de l'objet.
+ * Ne tourne que lorsqu'elle est à l'écran ; prefers-reduced-motion la laisse arrêtée.
+ */
+interface Props {
+  mode?: 'planche' | 'vignette';
+  tracer?: boolean;
+  legende?: string;
+}
+const { mode = 'planche', legende } = Astro.props;
+const video = '/videos/laulab/logo-lf.mp4';
+const affiche = '/videos/laulab/logo-lf.jpg';
+const description = 'Logo LF en verre, vu de trois quarts, tournant sur son axe vertical';
+---
+
+<figure class:list={['figure', 'logo-lf', { vignette: mode === 'vignette' }]} data-logo-lf data-etat="arret">
+  <div class="vue-logo">
+    {mode === 'vignette' ? (
+      <img src={affiche} alt={description} width="640" height="640" loading="lazy" decoding="async" />
+    ) : (
+      <video src={video} poster={affiche} width="640" height="640" muted loop playsinline preload="none" aria-label={description}></video>
+    )}
+    <svg viewBox="0 0 220 150" aria-hidden="true">
+      <line class="axe" x1="110" y1="3" x2="110" y2="147"></line>
+      {mode !== 'vignette' && (
+        <text class="texte-cote" x="113" y="7">axe de rotation · 1 tour en 16 s</text>
+      )}
+    </svg>
+    {mode !== 'vignette' && (
+      <button class="rotation" type="button" data-rotation>
+        <svg viewBox="0 0 16 16" aria-hidden="true">
+          <path class="si-marche" d="M4.5 3h2.5v10H4.5zM9 3h2.5v10H9z" fill="currentColor"></path>
+          <path class="si-arret" d="M5 3l8 5-8 5z" fill="currentColor"></path>
+        </svg>
+        <span class="si-marche">Arrêter</span>
+        <span class="si-arret">Faire tourner</span>
+      </button>
+    )}
+  </div>
+  {legende && <figcaption>{legende}</figcaption>}
+</figure>
+
+<script>
+  const reduit = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+  function brancher(fig: HTMLElement) {
+    const video = fig.querySelector('video');
+    const bouton = fig.querySelector<HTMLButtonElement>('[data-rotation]');
+    if (!video || !bouton || fig.dataset.pret) return;
+    fig.dataset.pret = '1';
+
+    // arret : demandé par la préférence système ou par le bouton
+    let arret = reduit.matches;
+    let visible = false;
+
+    function maj() {
+      fig.dataset.etat = arret ? 'arret' : 'marche';
+      if (!video) return;
+      if (visible && !arret) {
+        // Lecture refusée (mode économie d'énergie…) : on reste à l'arrêt
+        video.play().catch(() => {
+          arret = true;
+          fig.dataset.etat = 'arret';
+        });
+      } else if (!video.paused) {
+        video.pause();
+      }
+    }
+
+    // On ne fait tourner que lorsque la figure est à l'écran.
+    const io = new IntersectionObserver((entries) => {
+      visible = entries.some((e) => e.isIntersecting);
+      maj();
+    });
+    io.observe(video);
+    bouton.addEventListener('click', () => {
+      arret = !arret;
+      maj();
+    });
+    reduit.addEventListener('change', () => {
+      arret = reduit.matches;
+      maj();
+    });
+    maj();
+  }
+
+  function init() {
+    document.querySelectorAll<HTMLElement>('[data-logo-lf]').forEach(brancher);
+  }
+  init();
+  document.addEventListener('astro:page-load', init);
+</script>
+
+<style>
+  .vue-logo {
+    position: relative;
+    aspect-ratio: 220 / 150;
+  }
+  .vue-logo video,
+  .vue-logo img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+    /* Cyanotype : négatif éclairci, le fond devient noir et disparaît en « screen » */
+    filter: invert(1) hue-rotate(180deg) brightness(2.4) saturate(0.5);
+    mix-blend-mode: screen;
+  }
+  :global(:root[data-theme='calque']) .vue-logo video,
+  :global(:root[data-theme='calque']) .vue-logo img {
+    filter: none;
+    mix-blend-mode: multiply;
+  }
+  .vue-logo > svg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+  }
+  .rotation {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    appearance: none;
+    background: color-mix(in oklab, var(--papier) 85%, transparent);
+    color: var(--encre-2);
+    border: var(--ep-fin) solid var(--trait-3);
+    border-radius: 999px;
+    font-family: var(--f-cote);
+    font-size: var(--t-0);
+    letter-spacing: 0.03em;
+    padding: 0.35rem 0.75rem 0.35rem 0.6rem;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    line-height: 1;
+  }
+  .rotation:hover {
+    color: var(--encre);
+    border-color: var(--trait-2);
+  }
+  .rotation svg {
+    width: 14px;
+    height: 14px;
+  }
+  .rotation .si-arret,
+  [data-etat='arret'] .rotation .si-marche {
+    display: none;
+  }
+  [data-etat='arret'] .rotation .si-arret {
+    display: inline;
+  }
+</style>

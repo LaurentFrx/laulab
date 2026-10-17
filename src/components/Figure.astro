@@ -10,6 +10,7 @@ import Meteo from './figures/Meteo.astro';
 import Led from './figures/Led.astro';
 import Cube from './figures/Cube.astro';
 import Compteur from './figures/Compteur.astro';
+import LogoLF from './figures/LogoLF.astro';
 import ACompleter from './figures/ACompleter.astro';
 
 interface Props {
@@ -27,7 +28,8 @@ const figures: Record<string, any> = {
   meteo: Meteo,
   led: Led,
   cube: Cube,
-  compteur: Compteur
+  compteur: Compteur,
+  logo: LogoLF
 };
 const Composant = nom ? figures[nom] : undefined;
 ---

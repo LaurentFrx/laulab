@@ -6,6 +6,7 @@ statut: en-chantier
 periode: depuis octobre 2026
 debut: 2026-10
 repere: 19
+figure: logo
 lieu: VPS
 matieres:
   - Astro
