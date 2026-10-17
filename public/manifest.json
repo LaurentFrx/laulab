@@ -3,6 +3,7 @@
   "short_name": "L@uL@b",
   "description": "Les projets de Laurent Feroux, dessinés comme un jeu de plans d'ingénieur.",
   "lang": "fr",
+  "id": "/laulab",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
