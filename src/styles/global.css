@@ -411,47 +411,25 @@ code {
   text-decoration: none;
   color: var(--cote);
 }
-/* Logo LF de l'en-tête : vidéo à fond blanc, fondue dans le papier (voir figures/LogoLF.astro).
-   Le fond opaque évite que le flou de l'en-tête ne laisse voir un carré plus sombre. */
+/* Logo LF de l'en-tête : la vidéo (cachée) est détourée dans le canvas, voir lib/verre.ts */
 .marque-logo {
   align-self: center;
   flex: none;
+  position: relative;
   width: 2.5rem;
   height: 2.5rem;
   margin-right: -0.2rem;
-  background: var(--papier);
 }
-.marque-logo video {
-  display: block;
+.marque-logo video,
+.marque-logo canvas {
+  position: absolute;
+  inset: 0;
   width: 100%;
   height: 100%;
-  /* contrast : ramène au blanc pur le léger bruit de compression du fond ;
-     plus éclairci que la figure de la planche 19 pour rester lisible à 40 px */
-  filter: contrast(1.06) invert(1) hue-rotate(180deg) brightness(6) saturate(0.5);
-  mix-blend-mode: screen;
+  display: block;
 }
-:root[data-theme='calque'] .marque-logo video {
-  filter: contrast(1.06) url(#marque-gamma);
-  mix-blend-mode: multiply;
-}
-.en-tete .filtres {
-  position: absolute;
-  width: 0;
-  height: 0;
-  overflow: hidden;
-}
-.marque small {
-  font-family: var(--f-cote);
-  font-weight: 400;
-  font-size: var(--t-0);
-  color: var(--encre-2);
-  letter-spacing: 0.04em;
-  display: none;
-}
-@media (min-width: 640px) {
-  .marque small {
-    display: inline;
-  }
+.marque-logo video {
+  opacity: 0;
 }
 .nav {
   display: flex;

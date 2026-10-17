@@ -20,6 +20,7 @@ Site statique Astro 7 (`output: 'static'`, `trailingSlash: 'always'`). Français
 | `src/lib/jansen.ts` | Cinématique du mécanisme de Jansen (nombres de Theo Jansen) |
 | `src/lib/marcheur.ts` | Le Jansenosaure complet en segments 3D : 4 pattes phasées, châssis, vilebrequin, trajectoires |
 | `src/lib/projection.ts` | Caméra en orbite, projection perspective, bruit fractal, images-clés |
+| `src/lib/verre.ts` | Logo LF en verre : la vidéo à fond blanc est détourée image par image dans un canvas (Safari n'applique pas `mix-blend-mode` aux vidéos) |
 | `src/lib/son.ts` | Pas synthétisés en Web Audio, sans fichier ; jamais sans clic |
 | `src/components/Scene.astro` | Scène d'accueil : canvas 2D collant, chapitres au défilement, étiquettes projetées, repli SVG |
 | `src/components/figures/` | Dessins SVG ; `Figure.astro` fait l'aiguillage par nom |

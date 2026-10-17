@@ -1,9 +1,9 @@
 ---
 /**
  * Logo LF en verre : un tour complet sur son axe vertical, vidéo en boucle.
- * La vidéo (public/videos/laulab/) a un fond blanc pur : en calque il disparaît
- * par « multiply » ; en cyanotype la vidéo passe en négatif et se fond par « screen »,
- * comme un tirage cyanotype de l'objet.
+ * La vidéo (public/videos/laulab/, fond blanc pur) reste cachée : chaque image est
+ * détourée dans un canvas (lib/verre.ts), négatif éclairci en cyanotype, comme un
+ * tirage cyanotype de l'objet, verre tel quel en calque.
  * Ne tourne que lorsqu'elle est à l'écran ; prefers-reduced-motion la laisse arrêtée.
  */
 interface Props {
@@ -22,7 +22,8 @@ const description = 'Logo LF en verre, vu de trois quarts, tournant sur son axe 
     {mode === 'vignette' ? (
       <img src={affiche} alt={description} width="640" height="640" loading="lazy" decoding="async" />
     ) : (
-      <video src={video} poster={affiche} width="640" height="640" muted loop playsinline preload="none" aria-label={description}></video>
+      <video class="source" src={video} width="640" height="640" muted loop playsinline preload="none" aria-hidden="true" data-affiche={affiche}></video>
+      <canvas width="640" height="640" role="img" aria-label={description}></canvas>
     )}
     <svg viewBox="0 0 220 150" aria-hidden="true">
       <line class="axe" x1="110" y1="3" x2="110" y2="147"></line>
@@ -45,13 +46,17 @@ const description = 'Logo LF en verre, vu de trois quarts, tournant sur son axe 
 </figure>
 
 <script>
+  import { detourer } from '../../lib/verre';
+
   const reduit = window.matchMedia('(prefers-reduced-motion: reduce)');
 
   function brancher(fig: HTMLElement) {
     const video = fig.querySelector('video');
+    const canvas = fig.querySelector('canvas');
     const bouton = fig.querySelector<HTMLButtonElement>('[data-rotation]');
-    if (!video || !bouton || fig.dataset.pret) return;
+    if (!video || !canvas || !bouton || fig.dataset.pret) return;
     fig.dataset.pret = '1';
+    detourer(video, canvas, video.dataset.affiche ?? '', { gain: 2.4, saturation: 0.5, gamma: [1, 1, 1] });
 
     // arret : demandé par la préférence système ou par le bouton
     let arret = reduit.matches;
@@ -76,7 +81,7 @@ const description = 'Logo LF en verre, vu de trois quarts, tournant sur son axe 
       visible = entries.some((e) => e.isIntersecting);
       maj();
     });
-    io.observe(video);
+    io.observe(canvas);
     bouton.addEventListener('click', () => {
       arret = !arret;
       maj();
@@ -101,6 +106,7 @@ const description = 'Logo LF en verre, vu de trois quarts, tournant sur son axe 
     aspect-ratio: 220 / 150;
   }
   .vue-logo video,
+  .vue-logo canvas,
   .vue-logo img {
     position: absolute;
     inset: 0;
@@ -108,11 +114,18 @@ const description = 'Logo LF en verre, vu de trois quarts, tournant sur son axe 
     height: 100%;
     object-fit: contain;
     display: block;
-    /* Cyanotype : négatif éclairci, le fond devient noir et disparaît en « screen » */
+  }
+  /* La vidéo ne sert que de source au canvas ; elle reste dans la page pour que
+     les navigateurs continuent de la décoder */
+  .vue-logo .source {
+    opacity: 0;
+    pointer-events: none;
+  }
+  /* Vignette (image fixe) : fondu CSS, que Safari applique aux images */
+  .vue-logo img {
     filter: invert(1) hue-rotate(180deg) brightness(2.4) saturate(0.5);
     mix-blend-mode: screen;
   }
-  :global(:root[data-theme='calque']) .vue-logo video,
   :global(:root[data-theme='calque']) .vue-logo img {
     filter: none;
     mix-blend-mode: multiply;
