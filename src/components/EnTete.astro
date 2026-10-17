@@ -11,8 +11,22 @@ const liens = [
 ---
 
 <header class="en-tete">
+  {/* Correction gamma du logo en calque : fonce le verre, garde le fond blanc pur (donc invisible en multiply) */}
+  <svg class="filtres" width="0" height="0" aria-hidden="true" focusable="false">
+    <filter id="marque-gamma" color-interpolation-filters="sRGB">
+      <feComponentTransfer>
+        <feFuncR type="gamma" exponent="2.2"></feFuncR>
+        <feFuncG type="gamma" exponent="2.2"></feFuncG>
+        <feFuncB type="gamma" exponent="1.6"></feFuncB>
+      </feComponentTransfer>
+    </filter>
+  </svg>
   <div class="page">
     <a class="marque" href="/" aria-label="L@uL@b, accueil">
+      {/* Logo LF en rotation, la marque de fabrique : gardé d'une page à l'autre, il ne repart pas de zéro */}
+      <span class="marque-logo" aria-hidden="true" transition:persist="marque-logo">
+        <video src="/videos/marque/logo-lf.mp4" poster="/videos/marque/logo-lf.jpg" width="120" height="120" muted loop playsinline preload="auto" data-marque-logo></video>
+      </span>
       L@uL@b
       <small>Laurent Feroux · Sanguinet</small>
     </a>
@@ -35,7 +49,26 @@ const liens = [
 </header>
 
 <script>
+  const reduit = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+  // Le logo ne tourne que lorsqu'il est à l'écran ; prefers-reduced-motion le laisse arrêté.
+  function brancherLogo(video: HTMLVideoElement) {
+    if (video.dataset.pret) return;
+    video.dataset.pret = '1';
+    let visible = false;
+    const maj = () => {
+      if (visible && !reduit.matches) video.play().catch(() => {});
+      else if (!video.paused) video.pause();
+    };
+    new IntersectionObserver((entries) => {
+      visible = entries.some((e) => e.isIntersecting);
+      maj();
+    }).observe(video);
+    reduit.addEventListener('change', maj);
+  }
+
   function init() {
+    document.querySelectorAll<HTMLVideoElement>('[data-marque-logo]').forEach(brancherLogo);
     document.querySelectorAll<HTMLButtonElement>('[data-bascule-theme]').forEach((b) => {
       if (b.dataset.pret) return;
       b.dataset.pret = '1';
