@@ -48,7 +48,7 @@ def icone(taille: int, marge: float, arrondi: bool) -> Image.Image:
 petites = [icone(16, 0.04, True), icone(32, 0.08, True), icone(48, 0.1, True)]
 petites[2].save(PUBLIC / 'favicon.ico', sizes=[(16, 16), (32, 32), (48, 48)], append_images=petites[:2])
 (PUBLIC / 'icones').mkdir(exist_ok=True)
-for taille in (180, 192, 512):
+for taille in (152, 167, 180, 192, 512):  # 152 et 167 : iPad, comme Domo
     icone(taille, 0.16, False).convert('RGB').save(PUBLIC / 'icones' / f'lf-{taille}.png', optimize=True)
 icone(512, 0.22, False).convert('RGB').save(PUBLIC / 'icones' / 'lf-512-maskable.png', optimize=True)
 for nom in ('apple-touch-icon.png', 'apple-touch-icon-precomposed.png'):

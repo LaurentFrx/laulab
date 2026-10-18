@@ -11,8 +11,13 @@ laulab.feroux.fr {
 	# Assets empreintés et polices : cache long. Le HTML, lui, reste revalidé à chaque visite.
 	@assets path /_astro/* /fonts/*
 	header @assets Cache-Control "public, max-age=31536000, immutable"
-	@html path / /*/
-	header @html Cache-Control "no-cache"
+	# Icônes et manifeste : un jour de cache. iOS relit les icônes dans son cache au
+	# moment de « Sur l'écran d'accueil » : servies en no-cache, il dessinait une lettre.
+	@icones path /icones/* /apple-touch-icon.png /apple-touch-icon-precomposed.png /favicon.ico /manifest.json
+	header @icones Cache-Control "public, max-age=86400, stale-while-revalidate=604800"
+	header /manifest.json >Content-Type "application/manifest+json"
+	@pas_assets not path /_astro/* /fonts/* /icones/* /apple-touch-icon.png /apple-touch-icon-precomposed.png /favicon.ico /manifest.json
+	header @pas_assets Cache-Control "no-cache"
 
 	header {
 		X-Content-Type-Options nosniff
