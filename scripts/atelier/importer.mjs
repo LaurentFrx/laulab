@@ -35,6 +35,8 @@ export const PAGE_DEPOT = 'https://github.com/LaurentFrx/atelier-jansenosaure';
 export const BASE_ATELIER = '/projets/jansenosaure/atelier/';
 
 const PORTEE = '.atelier';
+/** Classes de three.js dont l'habillage du site (src/atelier/habillage.ts) a besoin, en plus de celles du visualiseur */
+const EXTRAS_THREE_SITE = ['LineBasicMaterial', 'LineSegments', 'EdgesGeometry', 'MeshBasicMaterial', 'BufferAttribute'];
 const ICI = path.dirname(fileURLToPath(import.meta.url));
 
 // ---------------------------------------------------------------------------- outils
@@ -270,11 +272,23 @@ export async function importerAtelier({ racine, source, maj = false, force = fal
   if (!Array.isArray(D.meshes) || !D.meshes.length) throw new Error('données du modèle sans pièces (meshes)');
   if (!Array.isArray(D.thetas) || typeof D.frames !== 'object') throw new Error('données du modèle sans poses (thetas, frames)');
 
-  // --- visualiseur : quelques raccords, chacun contrôlé
+  // --- visualiseur : quelques raccords, chacun contrôlé ; ceux qui prennent sont notés dans le sommaire
+  // (raccords), le client s'adapte à ceux qui manquent (il garde alors le comportement d'origine)
   let vis = renommer(visualiseur);
   if (!/getElementById\(\s*["']donnees["']\s*\)/.test(vis)) {
     throw new Error('le visualiseur ne lit plus #donnees : adapter scripts/atelier/importer.mjs');
   }
+  const raccords = { matieres: false, surligne: false, pret: false, donnees: false, boucle: false };
+  // 0. le modèle, déjà analysé par le site (window.__atelierDonnees) plutôt que relu dans un <script>
+  const reDonnees = /const n = document\.getElementById\("donnees"\); D = JSON\.parse\(n\.textContent\); n\.remove\(\);/;
+  if (reDonnees.test(vis)) {
+    vis = vis.replace(
+      reDonnees,
+      'if (window.__atelierDonnees) { D = window.__atelierDonnees; window.__atelierDonnees = null; }   // [site] modèle déjà lu\n' +
+        '  else { const n = document.getElementById("donnees"); D = JSON.parse(n.textContent); n.remove(); }'
+    );
+    raccords.donnees = true;
+  } else avertir('lecture du modèle non raccordée : le modèle passera par un <script id="donnees">');
   // 1. palette des matières : le site la règle avant la construction des pièces
   const mMat = vis.match(/const\s+MAT\s*=\s*\{/);
   if (mMat) {
@@ -294,32 +308,51 @@ export async function importerAtelier({ racine, source, maj = false, force = fal
         vis.slice(0, pv + 1) +
         '\nif (typeof window.__atelierMatieres === "function") window.__atelierMatieres(MAT);   // [site] palette du thème\n' +
         vis.slice(pv + 1);
+      raccords.matieres = true;
     } else avertir('palette MAT non raccordée : la 3D garde les couleurs d\'origine');
   } else avertir('palette MAT introuvable : la 3D garde les couleurs d\'origine');
   // 2. couleur de surlignage des pièces
   const nSurligne = (vis.match(/0xD8601F/gi) || []).length;
-  if (nSurligne) vis = vis.replace(/0xD8601F/gi, '(window.__atelierSurligne || 0xD8601F)');
-  else avertir('couleur de surlignage introuvable : surlignage d\'origine');
-  // 3. signal « modèle construit », pour l'habillage (arêtes, lumières, changement de thème)
+  if (nSurligne) {
+    vis = vis.replace(/0xD8601F/gi, '(window.__atelierSurligne || 0xD8601F)');
+    raccords.surligne = true;
+  } else avertir('couleur de surlignage introuvable : surlignage d\'origine');
+  // 3. la boucle d'affichage s'arrête quand le site quitte l'atelier (sinon elle tourne à vide)
+  const reBoucle = /requestAnimationFrame\(boucle\)/g;
+  const nBoucle = (vis.match(reBoucle) || []).length;
+  if (nBoucle >= 2) {
+    vis = 'let __arret = false;   // [site] vrai quand le site a quitté l\'atelier\n' + vis.replace(reBoucle, 'if (!__arret) requestAnimationFrame(boucle)');
+    raccords.boucle = true;
+  } else avertir('boucle d\'affichage non raccordée : elle tournera à vide après la 3D');
+  // 4. signal « modèle construit », pour l'habillage (arêtes, lumières, changement de thème, arrêt)
   const iConstruire = vis.lastIndexOf('construire();');
   if (iConstruire >= 0 && !/function\s+$/.test(vis.slice(0, iConstruire))) {
     const apres = iConstruire + 'construire();'.length;
     vis =
       vis.slice(0, apres) +
       '\ntry {   // [site] le modèle est construit : l\'habillage du site s\'y branche\n' +
-      '  const d = { THREE, scene, pieces, MAT, redessiner };\n' +
+      '  const d = { THREE, scene, pieces, MAT, redessiner, rendu };\n' +
       '  try { d.orb = orb; d.poseCam = poseCam; } catch (e) { /* cadrage d\'origine */ }\n' +
+      (raccords.boucle ? '  d.arreter = () => { __arret = true; };\n' : '') +
       '  window.dispatchEvent(new CustomEvent("atelier:pret", { detail: d }));\n' +
       '} catch (e) { console.warn("atelier : habillage non raccordé", e); }\n' +
       vis.slice(apres);
+    raccords.pret = true;
   } else avertir('appel construire() introuvable : pas d\'habillage de la 3D');
+
+  // --- three.js : imports nommés (le site n'embarque que ce que le visualiseur et l'habillage utilisent)
+  const nomsThree = new Set([...vis.matchAll(/\bTHREE\.([A-Za-z_$][\w$]*)/g)].map((m) => m[1]));
+  for (const n of EXTRAS_THREE_SITE) nomsThree.add(n);
+  const listeThree = [...nomsThree].sort().join(', ');
 
   const entete = (quoi) =>
     `/* Généré par scripts/atelier/importer.mjs depuis ${PAGE_DEPOT} — ${quoi}. Ne pas modifier : refait à chaque build. */\n`;
   const visualiseurTs =
     '// @ts-nocheck\n' +
-    entete('visualiseur 3D, enveloppé en module ; three.js est fourni par le site') +
-    'export default function demarrer(THREE) {\n' +
+    entete('visualiseur 3D, enveloppé en module ; three.js est fourni par le site, élagué à ce qui est utilisé') +
+    `import { ${listeThree} } from 'three';\n` +
+    `export const THREE = { ${listeThree} };\n` +
+    'export default function demarrer() {\n' +
     vis.trim() +
     '\n}\n';
 
@@ -424,10 +457,11 @@ export async function importerAtelier({ racine, source, maj = false, force = fal
     titre,
     surtitre,
     three: rThree,
+    raccords,
     base: BASE_ATELIER,
     onglets: onglets.map((o) => ({ id: o.id, label: o.label, h1: o.h1, url: urlOnglet(o.id) })),
     fichiers: [...fichiers].map(([fichier, f]) => ({ fichier, nom: f.nom, type: f.type, taille: f.donnees.length })),
-    modele: { pieces: D.meshes.length, poses: D.thetas.length },
+    modele: { pieces: D.meshes.length, poses: D.thetas.length, octets: Buffer.byteLength(donnees.trim()) },
     avertissements
   };
   await writeFile(path.join(tmp, 'sommaire.json'), JSON.stringify(sommaire, null, 2) + '\n');

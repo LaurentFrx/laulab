@@ -106,6 +106,9 @@
 }
 
 /* Feuilles : une par onglet de l'atelier, numérotées comme les feuilles d'une liasse */
+.atelier-tete > nav {
+  min-width: 0; /* sinon la grille s'élargit au bandeau qui ne se replie pas (téléphone) */
+}
 .atelier-onglets {
   display: flex;
   flex-wrap: wrap;
@@ -187,11 +190,34 @@
 }
 
 /* --- 3. Voir : la scène 3D et ses commandes --------------------------------- */
+/* La section est sur toutes les feuilles (persistée d'une page à l'autre) ; seule « Voir » la montre */
+.atelier:not([data-onglet='voir']) #voir {
+  display: none !important;
+}
 .atelier #voir {
   display: flex;
   flex-direction: row;
   height: clamp(540px, calc(100dvh - 9rem), 880px);
   border: var(--ep-fin) solid var(--trait-3);
+}
+/* Plein écran : la scène et ses commandes, sur le papier du thème */
+.atelier #voir:fullscreen,
+.atelier #voir:-webkit-full-screen {
+  height: 100%;
+  width: 100%;
+  border: 0;
+  background: var(--papier);
+}
+.atelier #voir:fullscreen aside,
+.atelier #voir:-webkit-full-screen aside {
+  width: 360px;
+}
+.atelier #vues .plein-ecran {
+  margin-left: 0.5rem;
+}
+.atelier #vues .plein-ecran[aria-pressed='true'] {
+  color: var(--crayon);
+  border-color: var(--crayon);
 }
 .atelier #scene {
   min-height: 0;

@@ -30,8 +30,9 @@ Site statique Astro 7 (`output: 'static'`, `trailingSlash: 'always'`). Français
 | `scripts/deploy-vps.sh` | Déploiement sur le VPS : suit ce dépôt **et** le dépôt de l'atelier, build, remplacement atomique de `dist/` |
 | `scripts/atelier/importer.mjs` | Import de l'Atelier Jansenosaure (page unique de LaurentFrx/atelier-jansenosaure) vers `src/atelier/genere/` ; lancé par l'intégration `integration.mjs` à chaque build/dev/check |
 | `scripts/atelier/css.mjs` | Confine les styles de l'atelier sous `.atelier` (préfixe, retire `:root`/`html`/`body`) |
-| `src/atelier/` | `atelier.ts` (sommaire, contenu des onglets, adresses des fichiers), `atelier.css` (jetons `--at-*` pris dans ceux du site), `habillage.ts` (palette, arêtes, lumière et cadrage de la 3D), `demarrer.ts` (charge three.js, le visualiseur et le modèle) |
-| `src/layouts/Atelier.astro`, `src/pages/projets/jansenosaure/atelier/` | Une page par onglet de l'atelier ; « Voir » (la 3D) sans transitions de pages |
+| `src/atelier/` | `atelier.ts` (sommaire, contenu des onglets, adresses des fichiers — côté build seulement), `atelier.css` (jetons `--at-*` pris dans ceux du site), `habillage.ts` (palette, arêtes, lumière, cadrage, plein écran, libération de la 3D), `demarrer.ts` (cycle de vie : chargement en flux, persistance entre feuilles, arrêt en quittant l'atelier) |
+| `src/layouts/Atelier.astro`, `src/pages/projets/jansenosaure/atelier/[...feuille].astro` | Une page par onglet de l'atelier ; la section « Voir » (la 3D) est sur chaque feuille, `transition:persist`, cachée hors de « Voir » |
+| `scripts/precompression.mjs` | Après le build, jumeaux `.br` et `.gz` de chaque fichier texte de `dist/` (Caddy `precompressed`) |
 
 ## Serveur (VPS tazieff-dev)
 
@@ -49,6 +50,8 @@ Site statique Astro 7 (`output: 'static'`, `trailingSlash: 'always'`). Français
 - Erreurs bloquantes (le build échoue, le VPS garde l'ancien site) : onglets ou sections introuvables, données du modèle absentes ou illisibles, visualiseur qui ne lit plus `#donnees`, version de three.js différente de celle du site (`three` est épinglé à 0.128.0, la version que charge l'atelier).
 - Les jetons de l'atelier (`--papier`, `--encre`…) entrent en collision avec ceux du site : l'import les renomme `--at-*` partout (CSS, HTML, visualiseur). Les couleurs de la scène (`--at-sol`, `--at-grille`) sont des valeurs linéaires (three r128 sans gestion des couleurs).
 - Les figures techniques (plateaux de découpe, schémas des études) gardent un papier clair dans les deux thèmes : leurs textes nomment leurs couleurs.
+- L'atelier est un document vivant : les feuilles s'enchaînent par le `ClientRouter`, et `#voir` (la 3D) est persisté d'une page à l'autre. `demarrer.ts` démarre la 3D à la première feuille « Voir » affichée, la met en veille (`data-actif="0"`) sur les autres feuilles, la libère (`habillage.arreter()` : géométries, contexte WebGL, boucle) quand on quitte l'atelier, et la relance au retour. `atelier.ts` ne doit jamais être importé côté client (il embarque tous les fragments HTML).
+- Le visualiseur reçoit three.js par imports nommés générés (élagage) ; `EXTRAS_THREE_SITE` dans l'import liste les classes que l'habillage ajoute.
 
 ## Vérifier avant de livrer
 

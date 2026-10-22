@@ -41,6 +41,8 @@ Les pages `/projets/jansenosaure/atelier/` reprennent l'atelier du robot : une p
 - Nouvelle version de l'atelier poussée sur GitHub → en ligne au plus 5 minutes plus tard, sans commit dans ce dépôt.
 - Structure de l'atelier changée au point que l'import ne la comprend plus → la construction échoue avec un message clair, et le site en ligne reste tel quel. Il faut alors adapter l'import.
 - three.js est épinglé sur la version que charge l'atelier (r128) ; si l'atelier en change, l'import le dit et indique la commande.
+- Dans le site, l'atelier reste un seul document : on passe d'une feuille à l'autre sans rechargement, la 3D (chargée à la première feuille « Voir », avec un pourcentage) reste vivante d'une feuille à l'autre, se libère quand on quitte l'atelier, et peut passer en plein écran.
+- Le build écrit un jumeau `.br` et `.gz` de chaque fichier texte de `dist/` (le modèle 3D passe de 4,6 Mo à 0,3 Mo) ; Caddy les sert avec `file_server { precompressed br gzip }` (voir `scripts/Caddyfile.laulab`).
 
 ## Déploiement
 

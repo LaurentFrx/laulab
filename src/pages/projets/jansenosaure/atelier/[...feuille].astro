@@ -1,0 +1,18 @@
+---
+/**
+ * Atelier Jansenosaure : une page par onglet de l'atelier. La feuille « Voir » (la 3D) est la page
+ * d'entrée (/projets/jansenosaure/atelier/) ; les autres sont /…/atelier/<onglet>/.
+ */
+import Atelier from '../../../../layouts/Atelier.astro';
+import { sommaire, contenu } from '../../../../atelier/atelier';
+
+export function getStaticPaths() {
+  return sommaire.onglets.map((o) => ({ params: { feuille: o.id === 'voir' ? undefined : o.id }, props: { onglet: o.id } }));
+}
+
+const { onglet } = Astro.props;
+---
+
+<Atelier onglet={onglet}>
+  {onglet !== 'voir' && <section id={onglet} class="at-onglet" set:html={contenu(onglet)} />}
+</Atelier>

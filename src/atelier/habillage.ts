@@ -2,12 +2,14 @@
  * Habillage « plan d'ingénieur » de la vue 3D de l'atelier.
  *
  * Le visualiseur vient tel quel de l'atelier (src/atelier/genere/visualiseur.ts). L'import y pose
- * trois raccords, et ce module s'y branche :
+ * quelques raccords, et ce module s'y branche :
  *  - window.__atelierMatieres(MAT) : appelé avant la construction des pièces, règle la palette ;
  *  - window.__atelierSurligne : couleur de surlignage d'une pièce survolée ou cliquée ;
  *  - l'évènement « atelier:pret » : le modèle est construit, on ajoute les arêtes, on règle la
- *    lumière, et on suit le changement de thème (cyanotype / calque).
+ *    lumière, on cadre pour l'écran, et on suit le changement de thème (cyanotype / calque).
  * Si un raccord manque (l'atelier a changé), la 3D marche quand même, avec ses couleurs d'origine.
+ *
+ * Une instance par démarrage du visualiseur ; `arreter()` libère tout (voir demarrer.ts).
  */
 
 type Theme = 'cyanotype' | 'calque';
@@ -73,14 +75,14 @@ const PALETTES: Record<Theme, Palette> = {
 
 /** Angle (en degrés) au-delà duquel deux faces voisines dessinent une arête */
 const SEUIL_ARETES = 30;
+/** Forme d'écran pour laquelle les points de vue de l'atelier sont réglés (largeur / hauteur) */
+const ASPECT_REFERENCE = 1.25;
 
 const theme = (): Theme => (document.documentElement.dataset.theme === 'calque' ? 'calque' : 'cyanotype');
 
-const versNombre = (hex: string) => parseInt(hex.slice(1), 16);
-
 /** three.js r128 sans gestion des couleurs : une teinte sRGB doit être passée en linéaire. */
 function lineaire(hex: string): number {
-  const n = versNombre(hex);
+  const n = parseInt(hex.slice(1), 16);
   const canal = (v: number) => {
     const c = v / 255;
     const l = c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
@@ -101,25 +103,26 @@ interface Piece {
   m: { mat: string; id: string };
 }
 
-interface Pret {
+/** Ce que le visualiseur livre dans l'évènement « atelier:pret » (les champs optionnels dépendent des raccords) */
+export interface Pret {
   THREE: any;
   scene: any;
   pieces: Map<string, Piece>;
   MAT: Record<string, Matiere>;
   redessiner: () => void;
-  /** caméra en orbite du visualiseur (absente si l'atelier a changé) */
+  rendu?: any;
   orb?: { dist: number };
   poseCam?: () => void;
+  arreter?: () => void;
 }
-
-/** Forme d'écran pour laquelle les points de vue de l'atelier sont réglés (largeur / hauteur) */
-const ASPECT_REFERENCE = 1.25;
 
 declare global {
   interface Window {
     __atelierMatieres?: (mat: Record<string, Matiere>) => void;
     __atelierSurligne?: number;
+    __atelierDonnees?: unknown;
     __panne?: (titre: string, detail?: string) => void;
+    __charge?: boolean;
   }
 }
 
@@ -134,13 +137,22 @@ function appliquerPalette(MAT: Record<string, Matiere>, p: Palette) {
   }
 }
 
-export function preparerHabillage() {
+/** À appeler avant chaque démarrage du visualiseur : pose les raccords de palette. */
+export function preparerPalette() {
   window.__atelierMatieres = (MAT) => appliquerPalette(MAT, PALETTES[theme()]);
   window.__atelierSurligne = lineaire(PALETTES[theme()].surligne);
-  window.addEventListener('atelier:pret', (e) => habiller((e as CustomEvent<Pret>).detail), { once: true });
 }
 
-function habiller({ THREE, scene, pieces, MAT, redessiner, orb, poseCam }: Pret) {
+export interface Habillage {
+  /** Libère la 3D : arrête la boucle, détruit géométries, matériaux et contexte WebGL. */
+  arreter(): void;
+}
+
+/** Branche l'habillage sur un modèle construit. `voir` est la section qui contient la scène. */
+export function habiller(pret: Pret, voir: HTMLElement): Habillage {
+  const { THREE, scene, pieces, MAT, redessiner, orb, poseCam } = pret;
+  const defaire: (() => void)[] = [];
+  let arrete = false;
   const materielAretes = new THREE.LineBasicMaterial({ transparent: true, depthWrite: false });
 
   // Le sol devient une surface sans éclairage : il prend exactement la couleur demandée
@@ -164,6 +176,7 @@ function habiller({ THREE, scene, pieces, MAT, redessiner, orb, poseCam }: Pret)
   }
 
   function recolorer() {
+    if (arrete) return;
     const p = PALETTES[theme()];
     appliquerPalette(MAT, p);
     window.__atelierSurligne = lineaire(p.surligne);
@@ -175,7 +188,7 @@ function habiller({ THREE, scene, pieces, MAT, redessiner, orb, poseCam }: Pret)
       mesh.material.metalness = spec.m;
     }
     // la légende des matières suit l'ordre de MAT
-    const pastilles = document.querySelectorAll<HTMLElement>('#legende i');
+    const pastilles = voir.querySelectorAll<HTMLElement>('#legende i');
     Object.keys(MAT).forEach((k, i) => {
       if (pastilles[i]) pastilles[i].style.background = MAT[k].css;
     });
@@ -196,7 +209,9 @@ function habiller({ THREE, scene, pieces, MAT, redessiner, orb, poseCam }: Pret)
 
   // Arêtes : calculées par petits lots après le premier affichage, pour ne pas figer la page
   const file = [...pieces.values()];
+  let minuteur = 0;
   const lot = () => {
+    if (arrete) return;
     const fin = performance.now() + 12;
     while (file.length && performance.now() < fin) {
       const { mesh } = file.shift()!;
@@ -205,15 +220,18 @@ function habiller({ THREE, scene, pieces, MAT, redessiner, orb, poseCam }: Pret)
       mesh.add(lignes);
     }
     redessiner();
-    if (file.length) setTimeout(lot, 0);
+    if (file.length) minuteur = window.setTimeout(lot, 0);
   };
-  setTimeout(lot, 50);
+  minuteur = window.setTimeout(lot, 50);
+  defaire.push(() => clearTimeout(minuteur));
 
-  new MutationObserver(recolorer).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+  const observateur = new MutationObserver(recolorer);
+  observateur.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+  defaire.push(() => observateur.disconnect());
 
   // Écran en hauteur (téléphone) : les points de vue de l'atelier coupent le robot ; on recule la
   // caméra d'autant que l'écran est étroit. Appliqué au départ et après chaque bouton de vue.
-  const scene3d = document.getElementById('scene');
+  const scene3d = voir.querySelector<HTMLElement>('#scene');
   if (orb && poseCam && scene3d) {
     const cadrer = () => {
       const aspect = scene3d.clientWidth / Math.max(1, scene3d.clientHeight);
@@ -222,6 +240,62 @@ function habiller({ THREE, scene, pieces, MAT, redessiner, orb, poseCam }: Pret)
       poseCam();
     };
     cadrer();
-    document.querySelectorAll('#vues button').forEach((b) => b.addEventListener('click', cadrer));
+    const boutons = voir.querySelectorAll<HTMLButtonElement>('#vues button[data-vue]');
+    boutons.forEach((b) => b.addEventListener('click', cadrer));
+    defaire.push(() => boutons.forEach((b) => b.removeEventListener('click', cadrer)));
   }
+
+  // Plein écran, quand le navigateur le permet (pas l'iPhone) : la scène et ses commandes
+  const vues = voir.querySelector<HTMLElement>('#vues');
+  const demande = (voir as any).requestFullscreen ?? (voir as any).webkitRequestFullscreen;
+  const permis = document.fullscreenEnabled ?? (document as any).webkitFullscreenEnabled;
+  if (vues && demande && permis) {
+    const bouton = document.createElement('button');
+    bouton.type = 'button';
+    bouton.className = 'plein-ecran';
+    const libelle = () => {
+      const plein = (document.fullscreenElement ?? (document as any).webkitFullscreenElement) === voir;
+      bouton.textContent = plein ? 'Quitter le plein écran' : 'Plein écran';
+      bouton.setAttribute('aria-pressed', String(plein));
+    };
+    const basculer = () => {
+      const plein = (document.fullscreenElement ?? (document as any).webkitFullscreenElement) === voir;
+      if (plein) (document.exitFullscreen ?? (document as any).webkitExitFullscreen).call(document);
+      else demande.call(voir);
+    };
+    bouton.addEventListener('click', basculer);
+    document.addEventListener('fullscreenchange', libelle);
+    document.addEventListener('webkitfullscreenchange', libelle);
+    libelle();
+    vues.append(bouton);
+    defaire.push(() => {
+      document.removeEventListener('fullscreenchange', libelle);
+      document.removeEventListener('webkitfullscreenchange', libelle);
+      bouton.remove();
+    });
+  }
+
+  return {
+    arreter() {
+      if (arrete) return;
+      arrete = true;
+      defaire.forEach((f) => f());
+      pret.arreter?.();
+      // Libération : géométries, matériaux (y compris les arêtes ajoutées ici), puis le contexte WebGL
+      scene.traverse((o: any) => {
+        if (o.geometry) {
+          o.geometry.dispose();
+          o.geometry.index = null;
+          o.geometry.attributes = {};
+        }
+        if (o.material && o.material !== materielAretes) o.material.dispose();
+      });
+      materielAretes.dispose();
+      pieces.clear();
+      if (pret.rendu) {
+        pret.rendu.dispose();
+        pret.rendu.forceContextLoss();
+      }
+    }
+  };
 }

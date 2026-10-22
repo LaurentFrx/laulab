@@ -41,6 +41,7 @@ const nbTermine = projets.filter((p) => p.data.statut === 'termine').length;
           </div>
           <h3><a href={`/projets/${p.id}/`}>{p.data.titre}</a></h3>
           <p>{p.data.accroche}</p>
+          {p.data.atelier && <a class="lien-atelier" href={p.data.atelier.url}>Atelier : le dossier de fabrication</a>}
         </li>
       ))}
     </ul>
@@ -74,6 +75,7 @@ const nbTermine = projets.filter((p) => p.data.statut === 'termine').length;
                 <th scope="row" class="rep">{numeroPlanche(p)}</th>
                 <td class="design">
                   <a href={`/projets/${p.id}/`}>{p.data.titre}</a>
+                  {p.data.atelier && <a class="lien-atelier" href={p.data.atelier.url}>Atelier</a>}
                 </td>
                 <td class="statut">
                   <Tampon statut={p.data.statut} droit petit />

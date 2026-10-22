@@ -62,6 +62,7 @@ const statutsPresents = (Object.keys(STATUTS) as (keyof typeof STATUTS)[]).filte
               <td class="design">
                 <a href={`/projets/${p.id}/`}>{p.data.titre}</a>
                 <span class="accroche">{p.data.accroche}</span>
+                {p.data.atelier && <a class="lien-atelier" href={p.data.atelier.url}>Atelier : le dossier de fabrication</a>}
               </td>
               <td class="statut"><Tampon statut={p.data.statut} droit petit /></td>
               <td class="mat">{p.data.matieres.slice(0, 4).join(', ')}</td>

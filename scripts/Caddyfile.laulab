@@ -32,5 +32,8 @@ laulab.feroux.fr {
 		file_server
 	}
 
-	file_server
+	# Jumeaux .br / .gz écrits au build (scripts/precompression.mjs) : servis tels quels, sans recompression
+	file_server {
+		precompressed br gzip
+	}
 }

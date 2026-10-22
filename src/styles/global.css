@@ -791,6 +791,28 @@ main.page {
   margin-top: 0.15rem;
   max-width: 60ch;
 }
+/* Renvoi vers l'atelier d'un projet, dans les listes */
+.lien-atelier {
+  display: inline-block;
+  font-family: var(--f-cote);
+  font-size: var(--t-0);
+  letter-spacing: 0.02em;
+  color: var(--cote);
+  margin-top: 0.3rem;
+}
+.nomenclature .design a.lien-atelier {
+  font-family: var(--f-cote);
+  font-weight: 400;
+  font-size: var(--t-0);
+  color: var(--cote);
+  text-decoration: underline;
+  text-decoration-color: color-mix(in oklab, var(--cote) 50%, transparent);
+  text-underline-offset: 0.2em;
+}
+.nomenclature .design a.lien-atelier:hover {
+  text-decoration-color: var(--cote);
+}
+
 .nomenclature .mat {
   color: var(--encre-2);
   font-size: 0.92rem;

@@ -1,22 +1,23 @@
 ---
 /**
- * Gabarit des feuilles de l'Atelier Jansenosaure : une feuille par onglet de l'atelier,
- * avec l'en-tête commun (renvoi à la planche, titre, feuilles) et le cartouche.
+ * Gabarit des feuilles de l'Atelier Jansenosaure : une feuille par onglet de l'atelier, avec
+ * l'en-tête commun (renvoi à la planche, titre, feuilles), la section « Voir » (présente sur
+ * chaque feuille et persistée d'une page à l'autre : la 3D reste vivante, voir
+ * src/atelier/demarrer.ts) et le cartouche.
  */
 import { getEntry } from 'astro:content';
 import Planche from './Planche.astro';
 import Cartouche from '../components/Cartouche.astro';
 import { numeroPlanche } from '../lib/nomenclature';
-import { sommaire, feuille, dateVersion, contenu } from '../atelier/atelier';
+import { sommaire, feuille, dateVersion, contenu, scriptPanne } from '../atelier/atelier';
+import donneesUrl from '../atelier/genere/donnees.json?url';
 import '../atelier/genere/atelier.css';
 import '../atelier/atelier.css';
 
 interface Props {
   onglet: string;
-  /** Une phrase sous le titre (feuille « Voir » seulement) */
-  accroche?: string;
 }
-const { onglet, accroche } = Astro.props;
+const { onglet } = Astro.props;
 
 const projet = await getEntry('projets', 'jansenosaure');
 if (!projet) throw new Error('atelier : la planche « jansenosaure » est introuvable');
@@ -36,10 +37,18 @@ const description =
   onglet === 'voir'
     ? `${sommaire.titre} : le robot en 3D, qui marche, pièce par pièce. ${sommaire.surtitre}.`
     : `${sommaire.titre}, feuille ${numero}/${total} : ${courant.label}.`;
+const accroche =
+  onglet === 'voir'
+    ? "Le dossier de fabrication du robot, tel que le produit son générateur : le modèle 3D qui marche, l'ordre de montage, les achats, les plateaux de découpe et les études. Il se met à jour seul à chaque nouvelle version."
+    : undefined;
+const raccords = Object.entries(sommaire.raccords)
+  .filter(([, ok]) => ok)
+  .map(([nom]) => nom)
+  .join(' ');
 ---
 
-<Planche titre={titrePage} description={description} actif="projets" transitions={onglet !== 'voir'}>
-  <div class="atelier" data-onglet={onglet}>
+<Planche titre={titrePage} description={description} actif="projets">
+  <div class="atelier" data-onglet={onglet} data-donnees={donneesUrl} data-octets={sommaire.modele.octets} data-raccords={raccords}>
     <header class="atelier-tete">
       <p class="cote">
         <a href={`/projets/${projet.id}/`}>Planche {planche} — {projet.data.titre}</a>
@@ -72,6 +81,16 @@ const description =
       </nav>
     </header>
 
+    {/* La 3D : sur toutes les feuilles, cachée hors de « Voir », gardée telle quelle d'une page à l'autre */}
+    <section
+      id="voir"
+      class="at-onglet"
+      data-actif={onglet === 'voir' ? '1' : '0'}
+      aria-label="Le robot en 3D"
+      transition:persist="atelier-3d"
+      set:html={contenu('voir')}
+    />
+
     <slot />
   </div>
 
@@ -84,4 +103,10 @@ const description =
     date={version?.iso ?? projet.data.debut}
     echelle={onglet === 'voir' ? 'variable' : '1:1'}
   />
+
+  {/* Affichage des pannes de la 3D (script de l'atelier) : identique sur chaque feuille, exécuté une fois */}
+  {scriptPanne && <script is:inline set:html={scriptPanne} />}
+  <script>
+    import '../atelier/demarrer';
+  </script>
 </Planche>

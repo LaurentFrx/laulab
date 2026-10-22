@@ -54,6 +54,8 @@ La 3D garde ses matières, dans les bleus du plan : chaque matière tient sa pla
 
 Exception assumée : les plateaux de découpe et les figures des études restent sur papier clair, dans leurs couleurs d'origine, parce que leurs textes les nomment (« en brun les contours », « la ligne noire ») et que ce sont celles des calques du laser.
 
+Comme l'original, l'atelier est un seul document : les feuilles s'enchaînent sans rechargement et le robot 3D, une fois chargé, reste vivant d'une feuille à l'autre. Un bouton « Plein écran » (là où le navigateur le permet) rend la scène et ses commandes seules à l'écran. Sur téléphone, le bandeau des feuilles défile et se centre sur la feuille ouverte.
+
 ## À ne pas faire
 
 Cartes à ombre portée, dégradés décoratifs, coins arrondis généralisés, étiquettes en capitales au-dessus de chaque titre, flèches « → » collées aux liens. Si un élément n'encode pas une information, il est retiré.
