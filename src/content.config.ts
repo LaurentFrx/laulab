@@ -40,6 +40,15 @@ const projets = defineCollection({
       laurent: z.array(z.string()),
       claude: z.array(z.string())
     }),
+    /** Atelier du projet (pages du site qui en reprennent le dossier de fabrication) */
+    atelier: z
+      .object({
+        /** Adresse dans le site, ex. « /projets/jansenosaure/atelier/ » */
+        url: z.string().regex(/^\/.*\/$/),
+        /** Une phrase : ce qu'on y trouve */
+        description: z.string()
+      })
+      .optional(),
     /** Révision de la planche (lettre) */
     revision: z.string().default('A')
   })

@@ -8,8 +8,11 @@ interface Props {
   titre: string;
   description: string;
   actif?: 'accueil' | 'projets' | 'methode' | 'a-propos';
+  /** Transitions de pages (ClientRouter). Sans elles, aller et venir sur la page la recharge
+   *  entièrement : c'est voulu pour la vue 3D de l'atelier, qui ne doit vivre qu'une fois par document. */
+  transitions?: boolean;
 }
-const { titre, description, actif } = Astro.props;
+const { titre, description, actif, transitions = true } = Astro.props;
 const titreComplet = actif === 'accueil' ? titre : `${titre} — L@uL@b`;
 const url = new URL(Astro.url.pathname, Astro.site);
 ---
@@ -54,7 +57,7 @@ const url = new URL(Astro.url.pathname, Astro.site);
         } catch (e) {}
       });
     </script>
-    <ClientRouter />
+    {transitions && <ClientRouter />}
   </head>
   <body>
     <a class="passer" href="#contenu">Aller au contenu</a>

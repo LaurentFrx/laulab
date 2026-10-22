@@ -46,6 +46,14 @@ Page d'accueil : titre sur toute la largeur, puis texte (4/12) et figure de Jans
 
 Le phasage des pattes est calé sur l'arc d'appui réel de la trajectoire de Jansen : avec quatre pattes au quart de tour, deux pieds sont au sol 92 % du temps, jamais zéro. C'est aussi un résultat pour le projet lui-même : trois pieds au sol demanderont six pattes ou un autre phasage.
 
+## Atelier Jansenosaure (octobre 2026)
+
+L'atelier du robot, une application produite à part, est repris au plan : jetons et polices du site, feuilles numérotées 1/6 à 6/6 dans l'en-tête et le cartouche, boutons en filet fin et lettrage osifont. Le bouton « Marcher » est au crayon rouge, puisqu'il fait tourner la manivelle ; les autres actions sont aux couleurs des cotes.
+
+La 3D garde ses matières, dans les bleus du plan : chaque matière tient sa place dans l'échelle des valeurs (corps plus clair que les pattes, acier plus clair que le bois, PETG et courroies sombres), les douilles de laiton prennent la couleur des cotes, et toutes les pièces sont cernées de leurs arêtes, ce qui donne à la vue « à travers le bois » l'allure d'une radiographie. Le sol se confond avec le papier, seule la grille le dessine. La pièce choisie se surligne au crayon.
+
+Exception assumée : les plateaux de découpe et les figures des études restent sur papier clair, dans leurs couleurs d'origine, parce que leurs textes les nomment (« en brun les contours », « la ligne noire ») et que ce sont celles des calques du laser.
+
 ## À ne pas faire
 
 Cartes à ombre portée, dégradés décoratifs, coins arrondis généralisés, étiquettes en capitales au-dessus de chaque titre, flèches « → » collées aux liens. Si un élément n'encode pas une information, il est retiré.

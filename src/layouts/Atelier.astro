@@ -1,0 +1,87 @@
+---
+/**
+ * Gabarit des feuilles de l'Atelier Jansenosaure : une feuille par onglet de l'atelier,
+ * avec l'en-tête commun (renvoi à la planche, titre, feuilles) et le cartouche.
+ */
+import { getEntry } from 'astro:content';
+import Planche from './Planche.astro';
+import Cartouche from '../components/Cartouche.astro';
+import { numeroPlanche } from '../lib/nomenclature';
+import { sommaire, feuille, dateVersion, contenu } from '../atelier/atelier';
+import '../atelier/genere/atelier.css';
+import '../atelier/atelier.css';
+
+interface Props {
+  onglet: string;
+  /** Une phrase sous le titre (feuille « Voir » seulement) */
+  accroche?: string;
+}
+const { onglet, accroche } = Astro.props;
+
+const projet = await getEntry('projets', 'jansenosaure');
+if (!projet) throw new Error('atelier : la planche « jansenosaure » est introuvable');
+const planche = numeroPlanche(projet);
+const courant = sommaire.onglets.find((o) => o.id === onglet);
+if (!courant) throw new Error(`atelier : onglet inconnu ${onglet}`);
+const { numero, total } = feuille(onglet);
+const version = dateVersion();
+// Les feuilles lourdes (Découper : ~1 Mo de plateaux en SVG) ne sont pas préchargées au passage
+const LOURDE = 200_000;
+const precharger = (id: string) => (contenu(id).length > LOURDE ? 'false' : undefined);
+const sha = sommaire.source.sha?.slice(0, 7);
+// La feuille a son propre titre (h1 venu de l'atelier) : le nom de l'atelier n'est alors qu'un rappel
+const titreEnH1 = !courant.h1;
+const titrePage = onglet === 'voir' ? sommaire.titre : `${courant.label} · ${sommaire.titre}`;
+const description =
+  onglet === 'voir'
+    ? `${sommaire.titre} : le robot en 3D, qui marche, pièce par pièce. ${sommaire.surtitre}.`
+    : `${sommaire.titre}, feuille ${numero}/${total} : ${courant.label}.`;
+---
+
+<Planche titre={titrePage} description={description} actif="projets" transitions={onglet !== 'voir'}>
+  <div class="atelier" data-onglet={onglet}>
+    <header class="atelier-tete">
+      <p class="cote">
+        <a href={`/projets/${projet.id}/`}>Planche {planche} — {projet.data.titre}</a>
+        <span>Atelier, feuille {numero}/{total}</span>
+        {version && <span>Version du <time datetime={version.iso}>{version.lisible}</time></span>}
+      </p>
+      {titreEnH1 ? (
+        <h1 class="atelier-titre">
+          {sommaire.titre}
+          {sommaire.surtitre && <small>{sommaire.surtitre}</small>}
+        </h1>
+      ) : (
+        <p class="atelier-titre">
+          {sommaire.titre}
+          {sommaire.surtitre && <small>{sommaire.surtitre}</small>}
+        </p>
+      )}
+      {accroche && <p class="accroche">{accroche}</p>}
+      <nav aria-label="Feuilles de l'atelier">
+        <ol class="atelier-onglets">
+          {sommaire.onglets.map((o, k) => (
+            <li>
+              <a href={o.url} aria-current={o.id === onglet ? 'page' : undefined} data-astro-prefetch={precharger(o.id)}>
+                <span>{k + 1}</span>
+                {o.label}
+              </a>
+            </li>
+          ))}
+        </ol>
+      </nav>
+    </header>
+
+    <slot />
+  </div>
+
+  <Cartouche
+    planche={`${planche} · f. ${numero}/${total}`}
+    titre={`${sommaire.titre} — ${courant.label}`}
+    sousTitre={`Dossier de fabrication tiré du dépôt atelier-jansenosaure${sha ? `, version ${sha}` : ''}`}
+    revision={projet.data.revision}
+    statut={projet.data.statut}
+    date={version?.iso ?? projet.data.debut}
+    echelle={onglet === 'voir' ? 'variable' : '1:1'}
+  />
+</Planche>

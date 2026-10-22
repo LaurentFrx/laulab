@@ -5,3 +5,8 @@ dist/
 *.log
 .env
 .env.*
+
+# Atelier Jansenosaure : importé à chaque build (scripts/atelier/importer.mjs), source en cache
+src/atelier/genere/
+src/atelier/genere.tmp/
+.cache/

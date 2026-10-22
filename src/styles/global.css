@@ -1236,6 +1236,31 @@ main.page {
   font-size: 0.97rem;
 }
 
+/* Renvoi vers l'atelier d'un projet (dossier de fabrication) */
+.renvoi-atelier {
+  margin-top: 2rem;
+  border: var(--ep-fin) solid var(--trait-2);
+  border-left: var(--ep-fort) solid var(--cote);
+  padding: 1rem 1.25rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem 1.5rem;
+}
+.renvoi-atelier > div {
+  flex: 1 1 22rem;
+}
+.renvoi-atelier h2 {
+  font-size: var(--t-2);
+  margin-bottom: 0.35rem;
+}
+.renvoi-atelier p {
+  margin: 0;
+  color: var(--encre-2);
+  font-size: 0.97rem;
+}
+
 .voisins {
   display: flex;
   justify-content: space-between;

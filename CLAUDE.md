@@ -27,15 +27,28 @@ Site statique Astro 7 (`output: 'static'`, `trailingSlash: 'always'`). Français
 | `src/components/Cartouche.astro` | Bloc d'identification en pied de page |
 | `src/layouts/Planche.astro` | Gabarit commun (cadre, en-tête, `<head>`) |
 | `scripts/icones/` | Logo LF source (`logo-lf.png`) et `generer.py` (Pillow) : favicon, icônes Android/iOS dans `public/` ; si le logo change, changer aussi le nom des fichiers (iOS garde ses icônes en cache par adresse) |
-| `scripts/deploy-vps.sh` | Déploiement sur le VPS (git pull, build, remplacement atomique de `dist/`) |
+| `scripts/deploy-vps.sh` | Déploiement sur le VPS : suit ce dépôt **et** le dépôt de l'atelier, build, remplacement atomique de `dist/` |
+| `scripts/atelier/importer.mjs` | Import de l'Atelier Jansenosaure (page unique de LaurentFrx/atelier-jansenosaure) vers `src/atelier/genere/` ; lancé par l'intégration `integration.mjs` à chaque build/dev/check |
+| `scripts/atelier/css.mjs` | Confine les styles de l'atelier sous `.atelier` (préfixe, retire `:root`/`html`/`body`) |
+| `src/atelier/` | `atelier.ts` (sommaire, contenu des onglets, adresses des fichiers), `atelier.css` (jetons `--at-*` pris dans ceux du site), `habillage.ts` (palette, arêtes, lumière et cadrage de la 3D), `demarrer.ts` (charge three.js, le visualiseur et le modèle) |
+| `src/layouts/Atelier.astro`, `src/pages/projets/jansenosaure/atelier/` | Une page par onglet de l'atelier ; « Voir » (la 3D) sans transitions de pages |
 
 ## Serveur (VPS tazieff-dev)
 
 - Le clone vit dans `/srv/laulab` (propriétaire `laulab`, utilisateur système dédié sans shell ni sudo, groupe `caddy`) ; Caddy sert `/srv/laulab/dist`. Le HOME et le cache npm de `laulab` sont dans `/var/lib/laulab`.
 - `laulab-deploy.timer` (systemd) lance `scripts/deploy-vps.sh` toutes les 5 minutes : `git reset --hard origin/main`, `npm ci` si le lockfile a changé, build dans `.dist-next`, puis remplacement de `dist/`. **Toute modification faite à la main dans `/srv/laulab` est écrasée** : on passe par un commit sur `main`.
+- Le script suit aussi l'atelier : clone superficiel dans `/var/lib/laulab/atelier-jansenosaure` (fetch + reset, la branche y est réécrite), passé au build par `ATELIER_SOURCE`. Il reconstruit si l'un des deux dépôts a changé. État dans `/var/lib/laulab/laulab-deploye` (dernière version en ligne) et `laulab-echec` (version qui a échoué, pas retentée) ; `--force` passe outre. Journal : `journalctl -u laulab-deploy`.
 - Caddy : `scripts/Caddyfile.laulab` est une référence, `/etc/caddy/Caddyfile` fait foi (il garde en plus la directive `log` du serveur). Avant un `systemctl reload caddy`, valider sous l'utilisateur `caddy` : `sudo -u caddy caddy validate --config /etc/caddy/Caddyfile`. Ne pas renommer le journal existant. Sauvegarde datée du Caddyfile avant toute modification.
 - Sécurité : qui peut pousser sur `main` fait tourner `npm ci` et le build sur le VPS, sous `laulab` (unité systemd durcie : NoNewPrivileges, ProtectSystem=strict…). Ne jamais ajouter de dépendance sans la vérifier ; le lockfile est engagé.
 - La copie de travail est un clone sur le PC ou Claude Code en ligne, jamais `/srv/laulab`.
+
+## Atelier Jansenosaure
+
+- `src/atelier/genere/` est **généré, hors Git** : ne jamais le modifier ni le versionner. La source vient de `ATELIER_SOURCE` (posé par `deploy-vps.sh`) ou du clone `.cache/atelier-jansenosaure` (créé au premier build ; `npm run atelier` le met à jour).
+- Le visualiseur 3D de l'atelier est repris tel quel, avec trois raccords posés par l'import et marqués `[site]` : `window.__atelierMatieres(MAT)`, `window.__atelierSurligne`, l'évènement `atelier:pret`. Un raccord qui ne trouve plus son point d'ancrage donne un avertissement, pas une erreur : la 3D garde alors ses couleurs d'origine.
+- Erreurs bloquantes (le build échoue, le VPS garde l'ancien site) : onglets ou sections introuvables, données du modèle absentes ou illisibles, visualiseur qui ne lit plus `#donnees`, version de three.js différente de celle du site (`three` est épinglé à 0.128.0, la version que charge l'atelier).
+- Les jetons de l'atelier (`--papier`, `--encre`…) entrent en collision avec ceux du site : l'import les renomme `--at-*` partout (CSS, HTML, visualiseur). Les couleurs de la scène (`--at-sol`, `--at-grille`) sont des valeurs linéaires (three r128 sans gestion des couleurs).
+- Les figures techniques (plateaux de découpe, schémas des études) gardent un papier clair dans les deux thèmes : leurs textes nomment leurs couleurs.
 
 ## Vérifier avant de livrer
 

@@ -1,0 +1,553 @@
+/* ==========================================================================
+   Atelier Jansenosaure — habillage « plan d'ingénieur »
+   Chargée après src/atelier/genere/atelier.css (styles d'origine de l'atelier, confinés
+   sous .atelier et dont les jetons sont renommés --at-*). Ici :
+   1. les jetons --at-* pris dans ceux du site (cyanotype / calque) ;
+   2. les quelques règles où l'atelier s'écarte de la direction artistique.
+   Les figures techniques (plateaux de découpe, schémas et graphiques des études) gardent un
+   papier clair dans les deux thèmes : leurs textes nomment leurs couleurs (« en brun les
+   contours », « la ligne noire »), et ce sont celles des fichiers envoyés au laser.
+   ========================================================================== */
+
+/* --- 1. Jetons -------------------------------------------------------------- */
+:root {
+  --at-papier: var(--papier);
+  --at-panneau: var(--papier);
+  --at-encre: var(--encre);
+  --at-encre2: var(--encre-2);
+  --at-trait: var(--trait-3);
+  --at-bois: var(--cote);
+  --at-brule: var(--encre-2);
+  --at-acier: var(--encre-2);
+  --at-accent: var(--crayon);
+  --at-accent-encre: var(--papier);
+  --at-ok: var(--cote);
+  --at-display: var(--f-titre);
+  --at-body: var(--f-texte);
+  --at-mono: var(--f-cote);
+
+  /* Scène 3D. Le visualiseur lit ces trois valeurs sur <html> et les passe à three.js r128,
+     qui traite les couleurs comme linéaires : --at-sol et --at-grille sont donc les valeurs
+     linéaires des teintes voulues (indiquées en commentaire). --at-scene, couleur de fond
+     posée telle quelle, reste en sRGB. */
+  --at-scene: #0a2038; /* --papier-2 */
+  --at-sol: #01040a; /* teinte voulue #0a2038 : le sol se confond avec le fond */
+  --at-grille: #04112c; /* teinte voulue #244a73 */
+  --at-grille2: #0a2038;
+}
+:root[data-theme='calque'] {
+  --at-scene: #e8edf3; /* --papier-2 */
+  --at-sol: #ced8e5; /* teinte voulue #e8edf3 */
+  --at-grille: #8ea6c2; /* teinte voulue #c5d3e2 */
+  --at-grille2: #e8edf3;
+}
+
+/* --- 2. En-tête commun aux feuilles de l'atelier ------------------------------ */
+.atelier-tete {
+  display: grid;
+  gap: 0.6rem;
+  margin-bottom: 1.5rem;
+}
+.atelier-tete .cote {
+  display: flex;
+  gap: 0.4rem 1rem;
+  flex-wrap: wrap;
+  max-width: none;
+  margin: 0;
+}
+.atelier-tete .cote a {
+  color: var(--encre-2);
+}
+.atelier-tete .cote a:hover {
+  color: var(--cote);
+}
+.atelier .atelier-titre {
+  font-family: var(--f-titre);
+  font-weight: 650;
+  font-size: clamp(1.9rem, 4.5vw, 2.8rem);
+  line-height: 1.05;
+  margin: 0;
+  max-width: none;
+  text-wrap: balance;
+}
+.atelier-titre small {
+  display: block;
+  font-family: var(--f-cote);
+  font-weight: 400;
+  font-size: var(--t-0);
+  letter-spacing: 0.03em;
+  color: var(--encre-2);
+  margin-top: 0.4rem;
+}
+.atelier-tete .accroche {
+  color: var(--encre-2);
+  margin: 0.25rem 0 0;
+  max-width: 62ch;
+}
+/* Sur les feuilles qui ont leur propre titre, le nom de l'atelier n'est qu'un rappel */
+.atelier p.atelier-titre {
+  font-size: var(--t-3);
+}
+/* Voir, grand écran : l'accroche à côté du titre, pour que la 3D monte dans l'écran */
+@media (min-width: 1000px) {
+  .atelier[data-onglet='voir'] .atelier-tete {
+    grid-template-columns: max-content minmax(0, 1fr);
+    column-gap: 3rem;
+    align-items: end;
+  }
+  .atelier[data-onglet='voir'] .atelier-tete > .cote,
+  .atelier[data-onglet='voir'] .atelier-tete > nav {
+    grid-column: 1 / -1;
+  }
+  .atelier[data-onglet='voir'] .accroche {
+    margin: 0;
+    font-size: 0.97rem;
+  }
+}
+
+/* Feuilles : une par onglet de l'atelier, numérotées comme les feuilles d'une liasse */
+.atelier-onglets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin: 0.75rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+.atelier-onglets li {
+  margin: 0;
+}
+.atelier-onglets a {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.45rem;
+  border: var(--ep-fin) solid var(--trait-2);
+  color: var(--encre-2);
+  font-family: var(--f-cote);
+  font-size: 0.86rem;
+  letter-spacing: 0.02em;
+  padding: 0.42rem 0.75rem;
+  text-decoration: none;
+  border-radius: 2px;
+}
+.atelier-onglets a span {
+  font-size: var(--t-0);
+  opacity: 0.75;
+}
+.atelier-onglets a:hover {
+  color: var(--encre);
+  border-color: var(--trait);
+}
+.atelier-onglets a[aria-current='page'] {
+  color: var(--papier);
+  background: var(--cote);
+  border-color: var(--cote);
+}
+/* Téléphone : les feuilles en bandeau qui défile, l'accroche de « Voir » passe sous la 3D */
+@media (max-width: 640px) {
+  .atelier-onglets {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    margin-inline: calc(-1 * var(--marge));
+    padding-inline: var(--marge);
+    scrollbar-width: none;
+  }
+  .atelier-onglets::-webkit-scrollbar {
+    display: none;
+  }
+  .atelier-onglets a {
+    white-space: nowrap;
+  }
+  .atelier[data-onglet='voir'] {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+  }
+  .atelier[data-onglet='voir'] .atelier-tete {
+    display: contents;
+  }
+  .atelier[data-onglet='voir'] #voir {
+    order: 1;
+    margin-top: 0.4rem;
+  }
+  .atelier[data-onglet='voir'] .accroche {
+    order: 2;
+    margin-top: 0.75rem;
+  }
+}
+
+/* Le titre des feuilles (h1 venu de l'atelier) */
+.atelier .doc .prose h1,
+.atelier .etude .e-main > h1:first-child {
+  font-family: var(--f-titre);
+  font-weight: 650;
+  font-size: var(--t-4);
+  line-height: 1.1;
+  margin: 0 0 0.75rem;
+}
+
+/* --- 3. Voir : la scène 3D et ses commandes --------------------------------- */
+.atelier #voir {
+  display: flex;
+  flex-direction: row;
+  height: clamp(540px, calc(100dvh - 9rem), 880px);
+  border: var(--ep-fin) solid var(--trait-3);
+}
+.atelier #scene {
+  min-height: 0;
+  background: var(--at-scene);
+}
+.atelier #chargement {
+  background: var(--at-scene);
+  font-family: var(--f-cote);
+  font-weight: 400;
+  font-size: 0.95rem;
+  color: var(--encre-2);
+}
+.atelier #chargement.panne {
+  font-family: var(--f-texte);
+  font-size: 1rem;
+  color: var(--encre);
+}
+.atelier #chargement.panne code {
+  font-family: var(--f-cote);
+  color: var(--cote);
+}
+.atelier #vues {
+  left: 12px;
+  top: 12px;
+}
+.atelier #vues button,
+.atelier .btn {
+  appearance: none;
+  background: color-mix(in oklab, var(--papier) 86%, transparent);
+  border: var(--ep-fin) solid var(--trait-2);
+  border-radius: 2px;
+  color: var(--encre);
+  font-family: var(--f-cote);
+  font-weight: 400;
+  font-size: 0.82rem;
+  letter-spacing: 0.02em;
+  text-transform: none;
+  padding: 0.38rem 0.7rem;
+  cursor: pointer;
+}
+.atelier #vues button:hover,
+.atelier .btn:hover {
+  border-color: var(--trait);
+}
+.atelier .btn {
+  background: transparent;
+  text-decoration: none;
+  display: inline-block;
+}
+.atelier .btn.prim,
+.atelier .pdfbar a.btn.prim {
+  background: var(--cote);
+  border-color: var(--cote);
+  color: var(--papier);
+}
+.atelier .btn.prim:hover {
+  background: color-mix(in oklab, var(--cote) 82%, var(--encre));
+}
+/* « Marcher » fait tourner la manivelle : le crayon rouge, comme sur toutes les planches */
+.atelier #lecture {
+  background: var(--crayon);
+  border-color: var(--crayon);
+  color: var(--papier);
+}
+.atelier #lecture:hover {
+  background: color-mix(in oklab, var(--crayon) 85%, var(--encre));
+}
+.atelier #lecture[aria-pressed='true'] {
+  background: transparent;
+  color: var(--crayon);
+  border-color: var(--crayon);
+}
+.atelier .btn:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+.atelier #astuce {
+  left: 12px;
+  bottom: 10px;
+  font-family: var(--f-cote);
+  font-size: var(--t-0);
+  color: var(--encre-2);
+  background: color-mix(in oklab, var(--at-scene) 85%, transparent);
+  border-radius: 0;
+  padding: 0.3rem 0.5rem;
+}
+.atelier aside {
+  width: 340px;
+  background: transparent;
+  border-left: var(--ep-fin) solid var(--trait-3);
+  padding: 1rem 1.1rem 1.5rem;
+  gap: 1.35rem;
+}
+.atelier .carte {
+  border-left: var(--ep-fort) solid var(--cote);
+  padding: 0.1rem 0 0.1rem 0.85rem;
+  min-height: 6rem;
+}
+.atelier .carte .quoi {
+  font-family: var(--f-titre);
+  font-weight: 650;
+  font-size: var(--t-2);
+  line-height: 1.15;
+}
+.atelier .carte .quoi.vide {
+  font-family: var(--f-texte);
+  font-weight: 400;
+  font-size: 0.95rem;
+  font-style: normal;
+  color: var(--encre-2);
+}
+.atelier .carte p {
+  font-size: 0.95rem;
+}
+.atelier .carte .cote {
+  font-family: var(--f-cote);
+  font-size: var(--t-0);
+}
+.atelier .puce,
+.atelier .ctrl h2,
+.atelier .ctrl summary {
+  font-family: var(--f-cote);
+  font-weight: 400;
+  font-size: var(--t-0);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--encre-2);
+}
+.atelier .puce i,
+.atelier .legende i {
+  border-radius: 0;
+  border-color: var(--trait-2);
+}
+.atelier .angle {
+  font-family: var(--f-cote);
+  color: var(--crayon);
+}
+.atelier input[type='range'] {
+  accent-color: var(--crayon);
+}
+.atelier label.case input {
+  accent-color: var(--cote);
+}
+.atelier label.case,
+.atelier .etiq,
+.atelier .legende,
+.atelier .info,
+.atelier .mots dl {
+  font-size: 0.92rem;
+}
+.atelier select {
+  background: transparent;
+  border: var(--ep-fin) solid var(--trait-2);
+  border-radius: 2px;
+  font-size: 0.92rem;
+}
+.atelier select option {
+  background: var(--papier);
+  color: var(--encre);
+}
+.atelier .info {
+  color: var(--encre-2);
+}
+
+@media (max-width: 900px) {
+  .atelier #voir {
+    flex-direction: column;
+    height: auto;
+  }
+  .atelier #scene {
+    min-height: max(340px, 58vh);
+  }
+  .atelier aside {
+    width: auto;
+    border-left: 0;
+    border-top: var(--ep-fin) solid var(--trait-3);
+  }
+}
+
+/* --- 4. Feuilles de texte (Monter, Acheter, Découper, Où sont les fichiers) --- */
+.atelier .doc {
+  overflow: visible;
+  padding: 0;
+}
+.atelier .doc .prose,
+.atelier .pdfbar {
+  max-width: none;
+  margin-left: 0;
+  margin-right: 0;
+}
+.atelier .prose p,
+.atelier .prose li {
+  max-width: var(--largeur-texte);
+}
+.atelier .prose h2 {
+  font-family: var(--f-titre);
+  font-weight: 650;
+  font-size: var(--t-3);
+  color: var(--encre);
+  margin: 2.5rem 0 0.75rem;
+  padding-top: 0.9rem;
+  border-top: var(--ep-moyen) solid var(--trait-2);
+}
+.atelier .prose h3 {
+  font-family: var(--f-titre);
+  font-weight: 650;
+  font-size: var(--t-2);
+  margin: 1.75rem 0 0.5rem;
+}
+.atelier .prose code {
+  font: inherit;
+  font-family: var(--f-cote);
+  font-size: 0.95em;
+  color: var(--cote);
+  background: none;
+  padding: 0;
+}
+.atelier .prose pre {
+  background: var(--papier-2);
+  border: var(--ep-fin) solid var(--trait-3);
+  border-radius: 0;
+}
+.atelier .prose blockquote {
+  background: none;
+  border-left: var(--ep-fort) solid var(--cote);
+  border-radius: 0;
+  color: var(--encre-2);
+  padding: 0.2rem 0 0.2rem 1rem;
+  margin: 1.25rem 0;
+}
+.atelier .tab {
+  margin: 0.75rem 0 1.75rem;
+}
+.atelier .prose table {
+  max-width: none;
+  font-size: 0.93rem;
+}
+.atelier .prose th {
+  font-family: var(--f-cote);
+  font-weight: 400;
+  font-size: var(--t-0);
+  letter-spacing: 0.03em;
+  text-transform: none;
+  color: var(--encre-2);
+  border-bottom: var(--ep-moyen) solid var(--trait-2);
+}
+.atelier .prose td {
+  border-bottom: var(--ep-fin) solid var(--trait-3);
+}
+.atelier .pdfbar {
+  border: var(--ep-fin) solid var(--trait-3);
+  border-radius: 0;
+  background: transparent;
+  padding: 0.75rem 1rem;
+  gap: 0.6rem 1rem;
+  margin-bottom: 1rem;
+}
+.atelier .pdfbar span {
+  color: var(--encre-2);
+  font-size: 0.95rem;
+}
+.atelier .fichier code {
+  font-family: var(--f-cote);
+  color: var(--cote);
+}
+
+/* Plateaux de découpe : papier clair, couleurs des calques du laser */
+.atelier .plateau h3 {
+  margin-top: 2rem;
+}
+.atelier .plateau .bord {
+  background: #f7f5f0;
+  border: var(--ep-fin) solid var(--trait-2);
+  border-radius: 0;
+  padding: 0.6rem;
+}
+.atelier .plateau .n {
+  font-family: var(--f-cote);
+  font-size: var(--t-0);
+  color: var(--encre-2);
+}
+
+/* --- 5. Études ----------------------------------------------------------------- */
+/* Le texte suit le thème du site ; les figures gardent leur papier (voir l'en-tête). */
+.atelier .etude {
+  --e-fond: transparent;
+  --e-papier: var(--papier-2);
+  --e-encre: var(--encre);
+  --e-encre2: var(--encre-2);
+  --e-trait: var(--trait-3);
+  --e-bleu: var(--cote);
+  --e-orange: var(--cote);
+  --e-ambre: var(--cote-voile);
+  --e-ambre2: var(--cote);
+  --e-note: var(--cote-voile);
+  --e-note-bord: var(--cote);
+  --e-alerte: var(--crayon);
+  --e-ok: #6cc486;
+  --e-vert: #6cc486;
+  color-scheme: inherit;
+  padding-inline: 0;
+  font-size: var(--t-1);
+}
+:root[data-theme='calque'] .atelier .etude {
+  --e-ok: #2f8a48;
+  --e-vert: #2f8a48;
+}
+.atelier .etude .e-main {
+  max-width: 960px;
+  margin: 0;
+}
+.atelier .etude h2 {
+  font-family: var(--f-titre);
+  font-weight: 650;
+  font-size: var(--t-3);
+  border-top: var(--ep-moyen) solid var(--trait-2);
+}
+.atelier .etude h3 {
+  font-family: var(--f-titre);
+  font-weight: 650;
+}
+.atelier .etude .resume,
+.atelier .etude .sommaire,
+.atelier .etude .tab {
+  border-radius: 0;
+}
+.atelier .etude th {
+  background: transparent;
+  color: var(--encre-2);
+  font-family: var(--f-cote);
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: 0.03em;
+  border-bottom: var(--ep-moyen) solid var(--trait-2);
+}
+.atelier .etude figure,
+.atelier .etude .gwrap {
+  /* papier clair : valeurs d'origine de l'étude */
+  --e-papier: #ffffff;
+  --e-encre: #2a2420;
+  --e-encre2: #5c534b;
+  --e-trait: #ddd5c8;
+  --e-bois: #8a5a2b;
+  --e-bleu: #1e5aaa;
+  --e-orange: #c9561f;
+  --e-vert: #2f8a48;
+  --e-ok: #2f8a48;
+  --e-alerte: #b8451d;
+  color-scheme: light;
+}
+.atelier .etude figure {
+  background: #ffffff;
+  border: var(--ep-fin) solid var(--trait-2);
+  border-radius: 0;
+  color: #2a2420;
+}
+.atelier .etude figure figcaption {
+  color: #5c534b;
+}

@@ -48,6 +48,15 @@ const dessine = d.collaboration.claude.length ? 'Laurent Feroux et Claude' : 'La
             ))}
           </ol>
         )}
+        {d.atelier && (
+          <section class="renvoi-atelier" aria-labelledby="renvoi-atelier">
+            <div>
+              <h2 id="renvoi-atelier">Atelier</h2>
+              <p>{d.atelier.description}</p>
+            </div>
+            <a class="bouton" href={d.atelier.url}>Ouvrir l'atelier</a>
+          </section>
+        )}
         <div class="prose" style="margin-top:2.5rem">
           <Content />
         </div>

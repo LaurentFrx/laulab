@@ -15,7 +15,10 @@ npm run dev       # serveur de développement, http://localhost:4321
 npm run build     # génère dist/
 npm run preview   # sert dist/ pour vérification
 npm run check     # vérification TypeScript / Astro
+npm run atelier   # réimporte l'Atelier Jansenosaure depuis GitHub (voir plus bas)
 ```
+
+Le premier `build`, `dev` ou `check` clone l'Atelier Jansenosaure dans `.cache/` (Git requis).
 
 ## Ajouter un projet
 
@@ -31,9 +34,17 @@ Les photos iront dans `public/photos/<slug>/` ; un composant d'affichage sera aj
 
 Créer `src/components/figures/<Nom>.astro` sur le modèle de `Cumulus.astro` (viewBox `0 0 220 150`, classes de traits de `global.css`, repères avec `Bulle`, cotes avec `Cote`), puis l'inscrire dans la table de `src/components/Figure.astro`. Les repères numérotés doivent correspondre à la liste `reperes` du fichier Markdown.
 
+## Atelier Jansenosaure
+
+Les pages `/projets/jansenosaure/atelier/` reprennent l'atelier du robot : une page unique produite par `GENERER.cmd` (sur le PC, dans Nextcloud) et poussée dans le dépôt public [LaurentFrx/atelier-jansenosaure](https://github.com/LaurentFrx/atelier-jansenosaure). Le site n'en garde aucune copie : à chaque construction, `scripts/atelier/importer.mjs` la découpe (un onglet par page, modèle 3D et fichiers servis à part, styles confinés et habillés au plan) dans `src/atelier/genere/`, hors Git.
+
+- Nouvelle version de l'atelier poussée sur GitHub → en ligne au plus 5 minutes plus tard, sans commit dans ce dépôt.
+- Structure de l'atelier changée au point que l'import ne la comprend plus → la construction échoue avec un message clair, et le site en ligne reste tel quel. Il faut alors adapter l'import.
+- three.js est épinglé sur la version que charge l'atelier (r128) ; si l'atelier en change, l'import le dit et indique la commande.
+
 ## Déploiement
 
-`scripts/deploy-vps.sh` tire la branche `main`, reconstruit et remplace `dist/` de façon atomique. Un minuteur systemd (voir `scripts/systemd/`) l'exécute toutes les cinq minutes ; il ne reconstruit que si un nouveau commit est arrivé.
+`scripts/deploy-vps.sh` suit la branche `main` de ce dépôt et celle de l'atelier, reconstruit si l'une a changé et remplace `dist/` de façon atomique. Un minuteur systemd (voir `scripts/systemd/`) l'exécute toutes les cinq minutes. Une version qui échoue à la construction n'est pas retentée : le commit suivant, sur l'un ou l'autre dépôt, relance.
 
 ## Polices
 

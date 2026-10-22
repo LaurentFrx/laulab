@@ -1,0 +1,15 @@
+---
+/** Atelier Jansenosaure, feuilles 2 et suivantes : une page par onglet de l'atelier. */
+import Atelier from '../../../../layouts/Atelier.astro';
+import { sommaire, contenu } from '../../../../atelier/atelier';
+
+export function getStaticPaths() {
+  return sommaire.onglets.filter((o) => o.id !== 'voir').map((o) => ({ params: { onglet: o.id } }));
+}
+
+const onglet = Astro.params.onglet as string;
+---
+
+<Atelier onglet={onglet}>
+  <section id={onglet} class="at-onglet" set:html={contenu(onglet)} />
+</Atelier>
