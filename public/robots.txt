@@ -1,4 +1,33 @@
+# Moteurs de recherche et usages normaux : autorisés.
+# Pour les robots non nommés plus bas, Content-Signal (contentsignals.org) précise :
+# indexation oui, entraînement d'IA non.
 User-agent: *
+Content-Signal: search=yes, ai-train=no
 Allow: /
+
+# Entraînement d'IA et collecte en masse : refusés.
+# Google-Extended et Applebot-Extended sont des jetons de refus, pas des robots :
+# ils n'enlèvent rien à Google Search ni à la recherche d'Apple.
+User-agent: GPTBot
+User-agent: ClaudeBot
+User-agent: Google-Extended
+User-agent: Applebot-Extended
+User-agent: meta-externalagent
+User-agent: FacebookBot
+User-agent: Amazonbot
+User-agent: Bytespider
+User-agent: PanguBot
+User-agent: PerplexityBot
+User-agent: cohere-ai
+User-agent: cohere-training-data-crawler
+User-agent: AI2Bot
+User-agent: CCBot
+User-agent: Diffbot
+User-agent: Omgilibot
+User-agent: Webzio-Extended
+User-agent: Timpibot
+User-agent: ImagesiftBot
+User-agent: Scrapy
+Disallow: /
 
 Sitemap: https://laulab.feroux.fr/sitemap-index.xml
