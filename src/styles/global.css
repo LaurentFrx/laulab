@@ -1057,6 +1057,38 @@ main.page {
   display: none;
 }
 
+/* Photo à la place d'un dessin (projets antérieurs aux planches) */
+.figure.photo img,
+.prose .galerie img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: var(--ep-fin) solid var(--trait-2);
+}
+
+/* Galerie de photos légendées dans le texte d'une planche */
+.prose .galerie {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 16rem), 1fr));
+  gap: 1.5rem 1.25rem;
+  margin: 1rem 0 1.5rem;
+}
+.prose .galerie figure {
+  margin: 0;
+}
+/* Même cadre 4:3 pour toutes les vignettes, quelle que soit la photo d'origine */
+.prose .galerie img {
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+}
+.prose .galerie figcaption {
+  font-family: var(--f-cote);
+  font-size: var(--t-0);
+  color: var(--encre-2);
+  margin-top: 0.5rem;
+  letter-spacing: 0.02em;
+}
+
 /* Dessin « à compléter » */
 .a-completer {
   border: var(--ep-fin) dashed var(--trait-2);

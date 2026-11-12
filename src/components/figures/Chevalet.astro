@@ -1,0 +1,26 @@
+---
+/**
+ * Chevalet de table pour l'aquarelle : photo du chevalet en service.
+ * Projet de 2021, antérieur aux dessins du site : la vue est une photo d'époque
+ * (public/photos/chevalet-aquarelle/, métadonnées retirées), pas un SVG.
+ * En vignette, une version réduite à 640 px.
+ */
+interface Props {
+  mode?: 'planche' | 'vignette';
+  tracer?: boolean;
+  legende?: string;
+}
+const { mode = 'planche', legende } = Astro.props;
+const vignette = mode === 'vignette';
+const description =
+  'Le chevalet en hêtre incliné sur une table, une aquarelle de ciel en cours de peinture, avec la palette, les tubes et les pinceaux autour';
+---
+
+<figure class:list={['figure', 'photo', { vignette }]}>
+  {vignette ? (
+    <img src="/photos/chevalet-aquarelle/en-service-640.jpg" alt={description} width="640" height="476" loading="lazy" decoding="async" />
+  ) : (
+    <img src="/photos/chevalet-aquarelle/en-service.jpg" alt={description} width="1600" height="1190" decoding="async" />
+  )}
+  {legende && <figcaption>{legende}</figcaption>}
+</figure>
