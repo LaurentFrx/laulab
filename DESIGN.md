@@ -26,7 +26,7 @@ Les épaisseurs de traits suivent l'esprit ISO 128 : fort 1,5 px (contours), moy
 
 Contenu aligné à gauche, largeur 1 240 px maximum, cadre fixe à 10 px du bord sur grand écran (double filet avec la bande des zones), simple filet sur mobile. En-tête collant sur grand écran, statique sur mobile.
 
-Page d'accueil : titre sur toute la largeur, puis texte (4/12) et figure de Jansen animée (8/12). La figure est la seule chose qui bouge sur le site, parce qu'elle est le sujet.
+Page d'accueil : voir « Accueil : la table à plans ». (Avant novembre 2026 : un titre, un texte et la figure de Jansen animée ; Laurent a jugé cet écran « très loin d'un site qui montre tout mon travail ».)
 
 ## Mouvement
 
@@ -67,6 +67,17 @@ Une planche peut s'ouvrir sur un film : l'objet en volumes sur un canvas collant
 - **Les titres entrent en scène** mot à mot derrière un cache, le tampon s'abat, le reste suit en fondu ; en quittant l'étape, tout s'efface vite.
 - **Les photos sont des tirages** : elles arrivent derrière un volet, en bleu de cyanotype, puis se développent en couleurs ; un clic les agrandit. En fin de planche, la planche contact les reprend toutes, légendées.
 - **Repli** (moins d'animations, pas de script) : pas de canvas, les étapes à la suite avec leurs photos, puis la figure SVG cotée.
+
+## Accueil : la table à plans (novembre 2026)
+
+L'accueil doit montrer tout le travail d'un coup d'œil. Il s'ouvre sur une table vue en perspective où les vingt planches sont posées, une feuille par projet : son dessin (ou son numéro au trait), son repère, son titre, son tampon.
+
+- **À l'arrivée**, les feuilles sont distribuées une à une sur la table.
+- **En faisant défiler**, la table se redresse face à nous et devient une grille lisible : la vue d'ensemble se change en liste.
+- **Une feuille touchée s'ouvre** : la planche se pose sur la table.
+- Tout tient sur le premier écran, sur tablette comme sur téléphone (où le texte de présentation passe sous la table).
+- Dessous : le Jansenosaure en vedette (la scène en fil de fer qui ouvrait l'accueil auparavant), puis la nomenclature en tableau.
+- Un seul plan incliné, des feuilles à plat dedans : la 3D la plus simple, sûre dans tous les navigateurs.
 
 ## Jeu de plans : passer d'une planche à l'autre (novembre 2026)
 

@@ -3,7 +3,8 @@
  * Jeu de plans en plein écran : la liasse de la page (Liasse.astro), agrandie, ouverte depuis
  * n'importe où par un élément `[data-jeu-de-plans]` (barre du téléphone, en-tête).
  * Une page n'a qu'une liasse : à l'ouverture, on l'emprunte à sa place dans la page, et on l'y
- * remet à la fermeture. Sur une page sans liasse, l'élément reste un lien vers la nomenclature.
+ * remet à la fermeture. Une page qui n'en montre pas (l'accueil, qui a sa table à plans) peut
+ * loger la sienne ici, par le slot. Sans liasse du tout, l'élément reste un lien vers la nomenclature.
  */
 ---
 
@@ -18,7 +19,7 @@
       <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 3.5l9 9M12.5 3.5l-9 9" fill="none" stroke="currentColor" stroke-width="1.4"></path></svg>
     </button>
   </div>
-  <div class="jeu-place" data-jeu-place></div>
+  <div class="jeu-place" data-jeu-place><slot /></div>
   <p class="jeu-aide cote">Glisser pour feuilleter · toucher la feuille de face pour l'ouvrir</p>
 </dialog>
 
@@ -153,11 +154,13 @@
     const place = d?.querySelector<HTMLElement>('[data-jeu-place]');
     if (!d || !section || !place || typeof d.showModal !== 'function') return false;
     if (d.open) return true;
-    const repere = document.createComment('liasse');
-    section.replaceWith(repere);
-    place.append(section);
-    emprunt = { section, repere };
-    d.addEventListener('close', rendre, { once: true });
+    if (!place.contains(section)) {
+      const repere = document.createComment('liasse');
+      section.replaceWith(repere);
+      place.append(section);
+      emprunt = { section, repere };
+      d.addEventListener('close', rendre, { once: true });
+    }
     d.showModal();
     // La liasse rejoue son entrée (les feuilles glissent jusqu'à leur place) et prend le clavier
     section.dispatchEvent(new CustomEvent('liasse:rejouer'));

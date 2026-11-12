@@ -22,11 +22,12 @@ Site statique Astro 7 (`output: 'static'`, `trailingSlash: 'always'`). Français
 | `src/lib/projection.ts` | Caméra en orbite, projection perspective, bruit fractal, images-clés |
 | `src/lib/verre.ts` | Logo LF en verre : la vidéo à fond blanc est détourée image par image dans un canvas (Safari n'applique pas `mix-blend-mode` aux vidéos) |
 | `src/lib/son.ts` | Pas synthétisés en Web Audio, sans fichier ; jamais sans clic |
-| `src/components/Scene.astro` | Scène d'accueil : canvas 2D collant, chapitres au défilement, étiquettes projetées, repli SVG |
+| `src/components/Scene.astro` | Scène du Jansenosaure, sur l'accueil sous la table à plans (elle ouvrait l'accueil avant novembre 2026) : canvas 2D collant, chapitres au défilement, étiquettes projetées, repli SVG |
 | `src/components/figures/` | Dessins SVG ; `Figure.astro` fait l'aiguillage par nom |
 | `src/components/Cartouche.astro` | Bloc d'identification en pied de page |
 | `src/components/Film.astro`, `src/components/films/` | Film de montage d'un projet (`film: <nom>` dans son Markdown) : il remplace l'en-tête de la planche. `Film.astro` fait l'aiguillage par nom ; sans film, la planche garde son en-tête ordinaire |
 | `src/lib/chevalet.ts` | Le chevalet d'aquarelle en volumes : faces planes posées selon l'étape (`poser()`), cinématique de la planchette et de la pente |
+| `src/components/TablePlans.astro` | Ouverture de l'accueil : les vingt planches sur une table en perspective (un plan incliné, `perspective` sur le parent), distribuées à l'arrivée, redressées en grille au défilement. Porte le `<h1>` de l'accueil |
 | `src/components/Liasse.astro` | Jeu de plans en volume (CSS 3D) : navigation entre planches, en bas de chaque planche et en tête de la nomenclature. La pose des feuilles est calculée en CSS depuis `--k` (rang) et `--pos` (position) ; le script n'écrit que `--pos`. Pose `data-tourne` sur `<html>` pour la transition « tourner la planche » (fin de `global.css`) |
 | `src/components/Dock.astro` | Barre de navigation du téléphone (≤ 640 px), fixe en bas : Accueil, planche précédente, Jeu de plans, planche suivante. Rendue par le gabarit `Planche.astro` sur toutes les pages ; sa hauteur est dans `--dock` (ce qui est collé en bas remonte d'autant) |
 | `src/components/JeuDePlans.astro` | Jeu de plans en plein écran (`<dialog>`), ouvert par tout élément `[data-jeu-de-plans]` (barre, en-tête). Il emprunte la liasse de la page et la remet à sa place en fermant |

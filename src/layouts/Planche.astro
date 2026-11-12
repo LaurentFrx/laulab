@@ -68,6 +68,6 @@ const url = new URL(Astro.url.pathname, Astro.site);
       <slot />
     </main>
     <Dock actif={actif} planche={planche} />
-    <JeuDePlans />
+    <JeuDePlans><slot name="jeu" /></JeuDePlans>
   </body>
 </html>

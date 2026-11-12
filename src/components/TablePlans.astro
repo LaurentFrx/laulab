@@ -1,0 +1,456 @@
+---
+/**
+ * Table à plans : l'ouverture de l'accueil. Toutes les planches sont posées sur une table vue en
+ * perspective, une feuille par projet, pour que tout le travail se voie d'un coup d'œil.
+ * À l'arrivée les feuilles sont distribuées une à une ; en faisant défiler, la table se redresse
+ * face à nous et devient une grille lisible. Une feuille touchée s'ouvre (la page se pose).
+ *
+ * Un seul plan incliné, ses feuilles posées à plat dedans : perspective sur le parent, rotation
+ * sur l'enfant, rien d'autre. C'est la 3D la plus simple, celle que tous les navigateurs savent faire.
+ * Repli (pas de script, ou moins d'animations) : la grille à plat, tout de suite.
+ */
+import { getCollection } from 'astro:content';
+import Figure from './Figure.astro';
+import Tampon from './Tampon.astro';
+import { CATEGORIES, numeroPlanche, trierParRepere } from '../lib/nomenclature';
+
+const projets = trierParRepere(await getCollection('projets'));
+---
+
+<section class="table-plans" data-table-plans aria-labelledby="titre-accueil">
+  <header class="table-tete">
+    <div class="table-titre">
+      <p class="cote">
+        <span>Planche 00</span>
+        <span>Vue d'ensemble</span>
+        <span>Sanguinet, Landes</span>
+      </p>
+      <h1 id="titre-accueil">Capteurs, robots et applications.</h1>
+    </div>
+    <p class="table-texte">
+      Autodidacte en informatique depuis 1981, ancien pilote d'hélicoptère. Je construis des choses, seul ou
+      au FabLab BiscaLab, avec Claude comme copilote. Ce site en est le jeu de plans.
+    </p>
+    <p class="table-compte cote">{projets.length} planches sur la table · toucher une feuille pour l'ouvrir</p>
+  </header>
+
+  <div class="table-vue">
+    <ol class="table-plan" data-plan>
+      {projets.map((p, k) => (
+        <li style={`--k:${k}`}>
+          <a class="plan" href={`/projets/${p.id}/`} data-tourne="ouvrir" aria-label={`Planche ${numeroPlanche(p)} : ${p.data.titre}`}>
+            <span class="plan-dessin" aria-hidden="true">
+              {p.data.figure ? (
+                <Figure nom={p.data.figure} mode="vignette" titre={p.data.titre} tracer={false} />
+              ) : (
+                <span class="plan-numero">{numeroPlanche(p)}</span>
+              )}
+            </span>
+            <span class="plan-cartouche">
+              <span class="plan-repere">{numeroPlanche(p)}</span>
+              <span class="plan-titre">
+                <span class="cote">{CATEGORIES[p.data.categorie].label}</span>
+                <strong>{p.data.titre}</strong>
+              </span>
+            </span>
+            <Tampon statut={p.data.statut} droit petit />
+          </a>
+        </li>
+      ))}
+    </ol>
+  </div>
+
+  <p class="table-actions">
+    <a class="bouton" href="/projets/">Voir la nomenclature</a>
+    <a class="bouton discret" href="/methode/">Comment je travaille</a>
+  </p>
+</section>
+
+<script is:inline data-astro-rerun>
+  // Posé avant le premier affichage : la table apparaît tout de suite inclinée, sans passer par la grille à plat.
+  (function () {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    var s = document.querySelector('[data-table-plans]:not([data-pret])');
+    if (!s) return;
+    s.setAttribute('data-pret', '');
+    var p = s.querySelector('[data-plan]');
+    if (p && window.scrollY < 4) {
+      var a = (56 * Math.PI) / 180;
+      p.style.transform = 'translateZ(' + (-p.offsetHeight * Math.sin(a)).toFixed(1) + 'px) rotateX(56deg)';
+    }
+  })();
+</script>
+
+<style>
+  .table-plans {
+    --col: 5;
+    --ecart: 0.9rem;
+    padding-top: clamp(1rem, 3vh, 2.25rem);
+  }
+  /* Grand écran : le titre à gauche, le texte et le compte à droite, la table dessous */
+  .table-tete {
+    display: grid;
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+    gap: 0.7rem clamp(1.5rem, 5vw, 4rem);
+    align-items: end;
+    margin-bottom: clamp(1.25rem, 3.5vh, 2.25rem);
+  }
+  .table-titre {
+    grid-row: 1 / 3;
+  }
+  .table-titre .cote {
+    display: flex;
+    gap: 0.4rem 1.25rem;
+    flex-wrap: wrap;
+    margin: 0 0 0.8rem;
+  }
+  .table-tete h1 {
+    font-size: clamp(2.1rem, 4.7vw, 3.7rem);
+    font-weight: 760;
+    font-stretch: 92%;
+    line-height: 0.98;
+    letter-spacing: -0.02em;
+    margin: 0;
+    text-wrap: balance;
+  }
+  .table-texte {
+    margin: 0;
+    max-width: 44ch;
+    text-wrap: pretty;
+  }
+  .table-compte {
+    margin: 0;
+    color: var(--cote);
+  }
+
+  /* La table : un plan incliné, vu depuis son bord avant */
+  .table-vue {
+    perspective: 1500px;
+    perspective-origin: 50% 0%;
+  }
+  .table-plan {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(var(--col), minmax(0, 1fr));
+    gap: var(--ecart);
+    transform-origin: 50% 0;
+  }
+  .table-plan li {
+    margin: 0;
+    min-width: 0;
+  }
+  .table-plans[data-pret] .table-plan {
+    will-change: transform;
+  }
+
+  /* Une feuille : le dessin, un cartouche réduit, le tampon dans le coin */
+  .plan {
+    position: relative;
+    display: grid;
+    grid-template-rows: minmax(0, 1fr) auto;
+    aspect-ratio: 25 / 18;
+    background: var(--papier-2);
+    border: var(--ep-moyen) solid var(--trait-2);
+    color: var(--encre);
+    text-decoration: none;
+    -webkit-tap-highlight-color: transparent;
+    transition:
+      border-color 0.2s ease,
+      translate 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+  .plan:hover,
+  .plan:focus-visible {
+    border-color: var(--cote);
+    translate: 0 -5px;
+  }
+  .plan:focus-visible {
+    outline: 2px solid var(--cote);
+    outline-offset: 3px;
+  }
+  .plan-dessin {
+    display: grid;
+    place-items: center;
+    min-height: 0;
+    padding: 0.55rem 0.7rem 0.4rem;
+    overflow: hidden;
+  }
+  .plan-dessin :global(.figure) {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+    display: grid;
+    place-items: center;
+  }
+  .plan-dessin :global(.figure > svg) {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+  .plan-dessin :global(.figure > div) {
+    height: 100%;
+    max-height: 100%;
+    aspect-ratio: 1;
+  }
+  /* Pas encore de dessin : le numéro de la planche, au trait, sur des hachures */
+  .plan-numero {
+    width: 100%;
+    height: 100%;
+    display: grid;
+    place-items: center;
+    font-family: var(--f-titre);
+    font-weight: 760;
+    font-stretch: 92%;
+    font-size: clamp(1.8rem, 5vw, 3.6rem);
+    line-height: 1;
+    letter-spacing: -0.02em;
+    color: transparent;
+    -webkit-text-stroke: 1.3px var(--trait-2);
+    background-image: repeating-linear-gradient(-45deg, transparent 0 11px, var(--trait-4) 11px 12px);
+  }
+  .plan-cartouche {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: center;
+    gap: 0.55rem;
+    padding: 0.35rem 0.55rem 0.4rem;
+    border-top: var(--ep-fin) solid var(--trait-3);
+  }
+  .plan-repere {
+    font-family: var(--f-cote);
+    font-size: 0.95rem;
+    line-height: 1;
+    color: var(--cote);
+    padding-right: 0.55rem;
+    border-right: var(--ep-fin) solid var(--trait-3);
+    align-self: stretch;
+    display: grid;
+    place-items: center;
+  }
+  .plan-titre {
+    display: grid;
+    gap: 0.05rem;
+    min-width: 0;
+  }
+  .plan-titre .cote {
+    font-size: 0.62rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .plan-titre strong {
+    font-family: var(--f-titre);
+    font-weight: 700;
+    font-size: 0.82rem;
+    line-height: 1.12;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    overflow-wrap: anywhere;
+  }
+  .plan :global(.tampon) {
+    position: absolute;
+    right: 0.4rem;
+    top: 0.4rem;
+    background: var(--papier-2);
+    font-size: 0.5rem;
+    padding: 0.28em 0.4em 0.22em;
+    border-width: 1px;
+  }
+
+  .table-actions {
+    display: flex;
+    gap: 0.75rem 1.5rem;
+    flex-wrap: wrap;
+    margin: clamp(1.5rem, 4vh, 2.5rem) 0 0;
+  }
+
+  /* Les feuilles sont distribuées sur la table, une à une */
+  @media (prefers-reduced-motion: no-preference) {
+    .table-plans[data-pret] .table-plan li {
+      animation: distribuer 0.75s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+      animation-delay: calc(0.25s + var(--k) * 45ms);
+    }
+    .table-plans[data-pret] .table-tete h1 {
+      animation: lever 0.95s cubic-bezier(0.2, 0.8, 0.2, 1) 0.05s both;
+    }
+    .table-plans[data-pret] .table-texte,
+    .table-plans[data-pret] .table-compte {
+      animation: glisser 0.85s cubic-bezier(0.2, 0.8, 0.2, 1) 0.3s both;
+    }
+  }
+  @keyframes distribuer {
+    from {
+      opacity: 0;
+      transform: translate(34vw, -60vh) rotate(16deg) scale(1.25);
+    }
+    60% {
+      opacity: 1;
+    }
+  }
+
+  @media (max-width: 899px) {
+    .table-plans {
+      --col: 4;
+      --ecart: 0.7rem;
+    }
+    .table-tete {
+      grid-template-columns: minmax(0, 1fr);
+      align-items: start;
+    }
+    .table-titre {
+      grid-row: auto;
+    }
+    .plan-titre .cote {
+      display: none;
+    }
+  }
+  @media (max-width: 640px) {
+    /* Téléphone : le titre, puis tout de suite la table ; le texte de présentation passe dessous */
+    .table-plans {
+      --col: 3;
+      --ecart: 0.5rem;
+      display: flex;
+      flex-direction: column;
+    }
+    .table-tete {
+      display: contents;
+    }
+    .table-titre {
+      order: 1;
+    }
+    .table-compte {
+      order: 2;
+      margin: 0.6rem 0 0.9rem;
+    }
+    .table-vue {
+      order: 3;
+    }
+    .table-texte {
+      order: 4;
+      margin-top: 1.5rem;
+    }
+    .table-actions {
+      order: 5;
+    }
+    .table-tete h1 {
+      font-size: clamp(1.9rem, 9vw, 2.5rem);
+    }
+    .plan {
+      aspect-ratio: 5 / 4;
+    }
+    .plan-dessin {
+      padding: 0.35rem 0.4rem 0.25rem;
+    }
+    /* Feuille étroite : le numéro monte dans le coin du dessin, le titre garde toute la largeur */
+    .plan-cartouche {
+      display: block;
+      padding: 0.25rem 0.35rem 0.3rem;
+    }
+    .plan-repere {
+      position: absolute;
+      left: 0.3rem;
+      top: 0.25rem;
+      font-size: 0.66rem;
+      padding: 0;
+      border: 0;
+    }
+    .plan-titre strong {
+      font-size: 0.62rem;
+      line-height: 1.1;
+      hyphens: auto;
+      overflow-wrap: break-word;
+    }
+    .plan :global(.tampon) {
+      display: none;
+    }
+  }
+</style>
+
+<script>
+  const reduit = window.matchMedia('(prefers-reduced-motion: reduce)');
+  const INCLINAISON = 56;
+
+  class Table {
+    section: HTMLElement;
+    vue: HTMLElement;
+    plan: HTMLElement;
+    hauteur = 0;
+    /** Défilement au bout duquel la table est redressée : quand son haut arrive sous l'en-tête */
+    course = 200;
+    attente = 0;
+    abandon = new AbortController();
+    observateur: ResizeObserver;
+
+    constructor(section: HTMLElement) {
+      this.section = section;
+      this.vue = section.querySelector('.table-vue') as HTMLElement;
+      this.plan = section.querySelector('[data-plan]') as HTMLElement;
+      const signal = this.abandon.signal;
+      window.addEventListener('scroll', this.demander, { passive: true, signal });
+      window.addEventListener('resize', this.remesurer, { passive: true, signal });
+      this.observateur = new ResizeObserver(this.remesurer);
+      this.observateur.observe(this.plan);
+      this.remesurer();
+    }
+
+    remesurer = () => {
+      this.hauteur = this.plan.offsetHeight;
+      const haut = this.vue.getBoundingClientRect().top + window.scrollY;
+      const enTete = document.querySelector<HTMLElement>('.en-tete');
+      const colle = enTete && getComputedStyle(enTete).position === 'sticky' ? enTete.getBoundingClientRect().bottom : 0;
+      this.course = Math.max(140, haut - colle - 16);
+      this.poser();
+    };
+
+    demander = () => {
+      if (this.attente) return;
+      this.attente = requestAnimationFrame(() => {
+        this.attente = 0;
+        this.poser();
+      });
+    };
+
+    /** L'inclinaison suit le défilement : 56° en haut de page, à plat quand la table arrive sous l'en-tête. */
+    poser() {
+      const t = Math.min(1, Math.max(0, window.scrollY / this.course));
+      const angle = INCLINAISON * (1 - t * t * (3 - 2 * t));
+      if (angle < 0.05) {
+        this.plan.style.transform = 'none';
+        return;
+      }
+      // Le bord avant (le bas) reste à sa taille ; le fond de la table s'éloigne
+      const recul = this.hauteur * Math.sin((angle * Math.PI) / 180);
+      this.plan.style.transform = `translateZ(${(-recul).toFixed(1)}px) rotateX(${angle.toFixed(2)}deg)`;
+    }
+
+    detruire() {
+      this.abandon.abort();
+      this.observateur.disconnect();
+      cancelAnimationFrame(this.attente);
+    }
+  }
+
+  let table: Table | null = null;
+
+  function init() {
+    table?.detruire();
+    table = null;
+    const section = document.querySelector<HTMLElement>('[data-table-plans]');
+    if (!section || reduit.matches) return;
+    section.setAttribute('data-pret', '');
+    table = new Table(section);
+  }
+
+  init();
+  document.addEventListener('astro:page-load', init);
+  document.addEventListener('astro:before-swap', () => {
+    table?.detruire();
+    table = null;
+  });
+</script>

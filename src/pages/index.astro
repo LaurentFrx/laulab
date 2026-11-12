@@ -1,15 +1,14 @@
 ---
 import { getCollection } from 'astro:content';
 import Planche from '../layouts/Planche.astro';
-import Figure from '../components/Figure.astro';
 import Liasse from '../components/Liasse.astro';
 import Scene from '../components/Scene.astro';
+import TablePlans from '../components/TablePlans.astro';
 import Tampon from '../components/Tampon.astro';
 import Cartouche from '../components/Cartouche.astro';
-import { CATEGORIES, STATUTS, parCategorie, numeroPlanche, trierParRepere } from '../lib/nomenclature';
+import { CATEGORIES, STATUTS, parCategorie, numeroPlanche } from '../lib/nomenclature';
 
 const projets = await getCollection('projets');
-const vedettes = trierParRepere(projets.filter((p) => p.data.vedette));
 const groupes = parCategorie(projets);
 const nb = projets.length;
 const nbEnService = projets.filter((p) => ['en-ligne', 'en-service'].includes(p.data.statut)).length;
@@ -23,32 +22,12 @@ const nbTermine = projets.filter((p) => p.data.statut === 'termine').length;
   description="Les projets de Laurent Feroux, à Sanguinet : domotique et énergie solaire, robots marcheurs, capteurs, applications web, faits seul ou au FabLab BiscaLab, avec Claude comme copilote."
   actif="accueil"
 >
+  {/* La liasse de l'accueil ne se montre qu'en plein écran : dans la page, c'est la table à plans */}
+  <Liasse enTete slot="jeu" />
+
+  <TablePlans />
+
   <Scene />
-
-  <Liasse />
-
-  <section class="section" aria-labelledby="vedettes">
-    <div class="ligne-titre">
-      <h2 id="vedettes">Vues principales</h2>
-      <span class="cote">{vedettes.length} planches sur {nb}</span>
-    </div>
-    <ul class="vues">
-      {vedettes.map((p) => (
-        <li class="vue">
-          <a href={`/projets/${p.id}/`} aria-label={`Planche ${numeroPlanche(p)} : ${p.data.titre}`} tabindex="-1">
-            <Figure nom={p.data.figure} mode="vignette" titre={p.data.titre} tracer={false} />
-          </a>
-          <div class="ligne-vue">
-            <span class="cote">Planche {numeroPlanche(p)}</span>
-            <Tampon statut={p.data.statut} droit petit />
-          </div>
-          <h3><a href={`/projets/${p.id}/`}>{p.data.titre}</a></h3>
-          <p>{p.data.accroche}</p>
-          {p.data.atelier && <a class="lien-atelier" href={p.data.atelier.url}>Atelier : le dossier de fabrication</a>}
-        </li>
-      ))}
-    </ul>
-  </section>
 
   <section class="section" aria-labelledby="nomenclature">
     <div class="ligne-titre">

@@ -111,6 +111,34 @@
     display: none;
   }
 }
+/* Tablette et petit ordinateur : l'en-tête doit tenir sur une ligne. L'accès au jeu de plans se
+   réduit à son icône ; plus étroit encore, le bouton de thème aussi. */
+@media (min-width: 641px) and (max-width: 1100px) {
+  .nav {
+    gap: 0.25rem 0.95rem;
+  }
+  .bascule span {
+    display: none;
+  }
+  .bascule {
+    padding: 0.4rem;
+  }
+}
+@media (min-width: 641px) and (max-width: 1320px) {
+  .nav .lien-jeu {
+    font-size: 0;
+    gap: 0;
+    width: 2.1rem;
+    height: 2.1rem;
+    justify-content: center;
+    padding: 0;
+    border: var(--ep-fin) solid var(--trait-3);
+    border-radius: 999px;
+  }
+  .nav .lien-jeu:hover {
+    border-color: var(--cote);
+  }
+}
 
 /* --- Base ----------------------------------------------------------------- */
 *,
@@ -1127,58 +1155,6 @@ main.page {
 }
 
 /* --- Grilles de vues ------------------------------------------------------ */
-.vues {
-  display: grid;
-  gap: 2.5rem 2rem;
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-.vue {
-  display: grid;
-  gap: 0.75rem;
-  margin: 0;
-}
-.vue .figure {
-  border: var(--ep-fin) solid var(--trait-3);
-  padding: 1rem;
-  aspect-ratio: 4 / 3;
-  display: grid;
-  place-items: center;
-}
-.vue .figure svg {
-  width: 100%;
-  height: 100%;
-}
-.vue .figure.a-completer {
-  padding: 0;
-}
-.vue h3 {
-  font-size: var(--t-2);
-}
-.vue h3 a {
-  color: var(--encre);
-  text-decoration: none;
-}
-.vue h3 a:hover {
-  color: var(--cote);
-}
-.vue .ligne-vue {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  flex-wrap: wrap;
-}
-.vue p {
-  color: var(--encre-2);
-  margin: 0;
-  font-size: 0.97rem;
-}
-.vue:hover .figure {
-  border-color: var(--trait-2);
-}
-
 /* --- Planche projet ------------------------------------------------------- */
 .planche-tete {
   display: grid;
