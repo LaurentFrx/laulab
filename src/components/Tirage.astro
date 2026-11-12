@@ -1,0 +1,168 @@
+---
+/**
+ * Tirage : une photo d'un projet, posée sur le plan comme une épreuve.
+ * Elle apparaît en bleu de cyanotype, se « développe » en couleurs, et s'agrandit au clic
+ * (Visionneuse.astro). L'apparition est commandée par un parent : chapitre de film actif
+ * (`.film[data-pret] .chapitre.actif`) ou case de planche contact vue (`.vu`).
+ * Convention : chaque photo `nom.jpg` a une version réduite `nom-800.jpg` à côté d'elle.
+ */
+export interface Photo {
+  id: string;
+  src: string;
+  alt: string;
+  legende?: string | undefined;
+  largeur: number;
+  hauteur: number;
+}
+interface Props {
+  photo: Photo;
+  /** Afficher la légende sous la photo */
+  legende?: boolean;
+  /** Attribut `sizes` de l'image */
+  tailles?: string;
+}
+const { photo, legende = false, tailles = '(min-width: 900px) 20rem, 44vw' } = Astro.props;
+const petite = photo.src.replace(/\.jpg$/, '-800.jpg');
+---
+
+<figure class="tirage">
+  <div class="tirage-cadre">
+    <button
+      class="tirage-vue"
+      type="button"
+      data-photo
+      data-src={photo.src}
+      data-largeur={photo.largeur}
+      data-hauteur={photo.hauteur}
+      data-legende={photo.legende ?? ''}
+      data-alt={photo.alt}
+      aria-label={`Agrandir la photo : ${photo.alt}`}
+    >
+      <img
+        src={petite}
+        srcset={`${petite} 800w, ${photo.src} ${photo.largeur}w`}
+        sizes={tailles}
+        alt={photo.alt}
+        width={photo.largeur}
+        height={photo.hauteur}
+        loading="lazy"
+        decoding="async"
+      />
+    </button>
+  </div>
+  {legende && photo.legende && <figcaption>{photo.legende}</figcaption>}
+</figure>
+
+<style>
+  .tirage {
+    margin: 0;
+    --bleu: grayscale(1) sepia(1) hue-rotate(172deg) saturate(2.4) brightness(0.82) contrast(1.15);
+    /* Décalage d'apparition : le parent pose --i (rang dans une rangée) */
+    --retard: calc(var(--i, 0) * 90ms);
+  }
+  .tirage-cadre {
+    position: relative;
+  }
+  /* Repères de coupe, aux deux coins opposés */
+  .tirage-cadre::before,
+  .tirage-cadre::after {
+    content: '';
+    position: absolute;
+    width: 9px;
+    height: 9px;
+    border: 0 solid var(--cote);
+    opacity: 0.85;
+    pointer-events: none;
+    transition: opacity 0.4s ease calc(var(--retard) + 0.7s);
+  }
+  .tirage-cadre::before {
+    left: -5px;
+    top: -5px;
+    border-left-width: 1px;
+    border-top-width: 1px;
+  }
+  .tirage-cadre::after {
+    right: -5px;
+    bottom: -5px;
+    border-right-width: 1px;
+    border-bottom-width: 1px;
+  }
+  .tirage-vue {
+    appearance: none;
+    display: block;
+    width: 100%;
+    padding: 0;
+    margin: 0;
+    background: var(--papier-3);
+    border: var(--ep-fin) solid var(--trait-2);
+    cursor: zoom-in;
+    overflow: hidden;
+    clip-path: inset(0 0 0 0);
+    transition:
+      clip-path 0.9s cubic-bezier(0.7, 0, 0.2, 1) var(--retard),
+      border-color 0.2s ease;
+  }
+  .tirage-vue:hover,
+  .tirage-vue:focus-visible {
+    border-color: var(--cote);
+  }
+  .tirage-vue:focus-visible {
+    outline: 2px solid var(--cote);
+    outline-offset: 3px;
+  }
+  .tirage img {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+    transition:
+      filter 1.3s ease calc(var(--retard) + 0.4s),
+      transform 1.4s cubic-bezier(0.2, 0.7, 0.2, 1) var(--retard);
+  }
+  .tirage-vue:hover img {
+    transform: scale(1.045);
+    transition-duration: 0.5s;
+    transition-delay: 0s;
+  }
+  .tirage figcaption {
+    font-family: var(--f-cote);
+    font-size: var(--t-0);
+    color: var(--encre-2);
+    margin-top: 0.6rem;
+    letter-spacing: 0.02em;
+    text-wrap: pretty;
+    transition: opacity 0.6s ease calc(var(--retard) + 0.6s);
+  }
+
+  /* Avant l'apparition : volet fermé, image en bleu, un peu agrandie */
+  :global(.film[data-pret] .chapitre:not(.actif)) .tirage-vue,
+  :global(.planche-contact[data-pret] li:not(.vu)) .tirage-vue {
+    clip-path: inset(0 100% 0 0);
+  }
+  :global(.film[data-pret] .chapitre:not(.actif)) .tirage img,
+  :global(.planche-contact[data-pret] li:not(.vu)) .tirage img {
+    filter: var(--bleu);
+    transform: scale(1.14);
+  }
+  :global(.film[data-pret] .chapitre:not(.actif)) .tirage-cadre::before,
+  :global(.film[data-pret] .chapitre:not(.actif)) .tirage-cadre::after,
+  :global(.planche-contact[data-pret] li:not(.vu)) .tirage-cadre::before,
+  :global(.planche-contact[data-pret] li:not(.vu)) .tirage-cadre::after,
+  :global(.film[data-pret] .chapitre:not(.actif)) .tirage figcaption,
+  :global(.planche-contact[data-pret] li:not(.vu)) .tirage figcaption {
+    opacity: 0;
+  }
+  /* En quittant un chapitre, tout se referme vite et sans attendre */
+  :global(.film[data-pret] .chapitre:not(.actif)) .tirage * {
+    transition-duration: 0.3s;
+    transition-delay: 0s;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .tirage *,
+    .tirage-cadre::before,
+    .tirage-cadre::after {
+      transition: none;
+    }
+  }
+</style>

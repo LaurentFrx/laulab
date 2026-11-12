@@ -1,0 +1,219 @@
+---
+/**
+ * Visionneuse : agrandit les tirages de la page (tout bouton `[data-photo]`).
+ * Une seule par page. Flèches du clavier pour passer d'une photo à l'autre, Échap pour fermer.
+ */
+---
+
+<dialog class="visionneuse" data-visionneuse aria-label="Photo agrandie">
+  <figure>
+    <div class="visionneuse-cadre">
+      <img alt="" decoding="async" />
+    </div>
+    <figcaption>
+      <span class="cote" data-compteur></span>
+      <span data-legende></span>
+    </figcaption>
+  </figure>
+  <div class="visionneuse-commandes">
+    <button type="button" data-precedente aria-label="Photo précédente">
+      <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M10 3L5 8l5 5" fill="none" stroke="currentColor" stroke-width="1.4"></path></svg>
+    </button>
+    <button type="button" data-suivante aria-label="Photo suivante">
+      <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6 3l5 5-5 5" fill="none" stroke="currentColor" stroke-width="1.4"></path></svg>
+    </button>
+    <button type="button" data-fermer aria-label="Fermer" autofocus>
+      <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 3.5l9 9M12.5 3.5l-9 9" fill="none" stroke="currentColor" stroke-width="1.4"></path></svg>
+    </button>
+  </div>
+</dialog>
+
+<style>
+  .visionneuse {
+    border: 0;
+    padding: 0;
+    margin: 0;
+    width: 100vw;
+    height: 100dvh;
+    max-width: none;
+    max-height: none;
+    background: transparent;
+    color: var(--encre);
+    overflow: hidden;
+  }
+  .visionneuse[open] {
+    display: grid;
+    place-items: center;
+  }
+  .visionneuse::backdrop {
+    background: color-mix(in oklab, var(--papier-3) 94%, transparent);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    opacity: 1;
+    transition: opacity 0.35s ease;
+  }
+  .visionneuse figure {
+    margin: 0;
+    display: grid;
+    gap: 0.9rem;
+    justify-items: start;
+    max-width: min(92vw, 1400px);
+    opacity: 1;
+    transform: none;
+    transition:
+      opacity 0.35s ease,
+      transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+  @starting-style {
+    .visionneuse[open] figure {
+      opacity: 0;
+      transform: scale(0.95) translateY(10px);
+    }
+    .visionneuse[open]::backdrop {
+      opacity: 0;
+    }
+  }
+  .visionneuse-cadre {
+    border: var(--ep-fin) solid var(--trait-2);
+    background: var(--papier-3);
+    line-height: 0;
+  }
+  .visionneuse img {
+    display: block;
+    max-width: min(92vw, 1400px);
+    max-height: calc(100dvh - 9rem);
+    width: auto;
+    height: auto;
+  }
+  .visionneuse img.arrive {
+    animation: developper 0.9s ease both;
+  }
+  @keyframes developper {
+    from {
+      filter: grayscale(1) sepia(1) hue-rotate(172deg) saturate(2.4) brightness(0.82) contrast(1.15);
+      opacity: 0.2;
+    }
+    to {
+      filter: none;
+      opacity: 1;
+    }
+  }
+  .visionneuse figcaption {
+    display: flex;
+    gap: 0.4rem 1rem;
+    flex-wrap: wrap;
+    align-items: baseline;
+    font-size: var(--t-1);
+    max-width: 70ch;
+  }
+  .visionneuse-commandes {
+    position: fixed;
+    right: clamp(0.75rem, 3vw, 2rem);
+    top: clamp(0.75rem, 3vw, 2rem);
+    display: flex;
+    gap: 0.5rem;
+  }
+  .visionneuse-commandes button {
+    appearance: none;
+    width: 2.6rem;
+    height: 2.6rem;
+    display: grid;
+    place-items: center;
+    border-radius: 999px;
+    border: var(--ep-fin) solid var(--trait-3);
+    background: color-mix(in oklab, var(--papier) 85%, transparent);
+    color: var(--encre-2);
+    cursor: pointer;
+  }
+  .visionneuse-commandes button:hover,
+  .visionneuse-commandes button:focus-visible {
+    color: var(--cote);
+    border-color: var(--cote);
+  }
+  .visionneuse-commandes button:focus-visible {
+    outline: 2px solid var(--cote);
+    outline-offset: 2px;
+  }
+  .visionneuse-commandes svg {
+    width: 16px;
+    height: 16px;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .visionneuse figure,
+    .visionneuse::backdrop {
+      transition: none;
+    }
+    .visionneuse img.arrive {
+      animation: none;
+    }
+  }
+</style>
+
+<script>
+  type Vue = { src: string; alt: string; legende: string };
+
+  let vues: Vue[] = [];
+  let rang = 0;
+
+  const boite = () => document.querySelector<HTMLDialogElement>('[data-visionneuse]');
+
+  function montrer(k: number) {
+    const d = boite();
+    if (!d || !vues.length) return;
+    rang = (k + vues.length) % vues.length;
+    const v = vues[rang]!;
+    const img = d.querySelector('img');
+    const legende = d.querySelector<HTMLElement>('[data-legende]');
+    const compteur = d.querySelector<HTMLElement>('[data-compteur]');
+    if (img) {
+      img.classList.remove('arrive');
+      img.src = v.src;
+      img.alt = v.alt;
+      // Relance l'animation de développement à chaque photo
+      void img.offsetWidth;
+      img.classList.add('arrive');
+    }
+    if (legende) legende.textContent = v.legende;
+    if (compteur) compteur.textContent = `${rang + 1}/${vues.length}`;
+  }
+
+  function ouvrir(bouton: HTMLElement) {
+    const d = boite();
+    if (!d) return;
+    // Une entrée par photo, dans l'ordre de la planche contact si la page en a une
+    // (un même tirage peut figurer deux fois sur la page : dans le film et en fin de planche)
+    const vus = new Set<string>();
+    vues = [];
+    const contact = document.querySelectorAll<HTMLElement>('[data-planche-contact] [data-photo]');
+    (contact.length ? contact : document.querySelectorAll<HTMLElement>('[data-photo]')).forEach((b) => {
+      const src = b.dataset.src ?? '';
+      if (!src || vus.has(src)) return;
+      vus.add(src);
+      vues.push({ src, alt: b.dataset.alt ?? '', legende: b.dataset.legende ?? '' });
+    });
+    const k = vues.findIndex((v) => v.src === bouton.dataset.src);
+    if (!d.open) d.showModal();
+    montrer(Math.max(0, k));
+  }
+
+  document.addEventListener('click', (ev) => {
+    const cible = ev.target as HTMLElement;
+    const bouton = cible.closest<HTMLElement>('[data-photo]');
+    if (bouton) {
+      ouvrir(bouton);
+      return;
+    }
+    const d = boite();
+    if (!d || !d.open) return;
+    if (cible.closest('[data-precedente]')) montrer(rang - 1);
+    else if (cible.closest('[data-suivante]')) montrer(rang + 1);
+    else if (cible.closest('[data-fermer]') || cible === d) d.close();
+  });
+
+  document.addEventListener('keydown', (ev) => {
+    const d = boite();
+    if (!d || !d.open) return;
+    if (ev.key === 'ArrowLeft') montrer(rang - 1);
+    else if (ev.key === 'ArrowRight') montrer(rang + 1);
+  });
+</script>

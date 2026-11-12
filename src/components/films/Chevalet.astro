@@ -1,0 +1,1345 @@
+---
+/**
+ * Film de montage du chevalet d'aquarelle : le chevalet en volumes sur un canvas collant,
+ * et les étapes du projet qui défilent par-dessus. Le défilement est la manivelle du film :
+ * il retourne le plateau, glisse les tubes, pose la planchette, incline le tout.
+ *
+ * Le texte des étapes et les photos viennent du Markdown du projet (`etapes`, `photos`) ;
+ * ce composant ne porte que la mise en scène, calée sur six étapes dans cet ordre :
+ * poche, tubes, planchette, finition, inclinaison, feuille.
+ * Repli (moins d'animations, ou pas de script) : les étapes se lisent à la suite, sans canvas.
+ */
+import type { CollectionEntry } from 'astro:content';
+import Tampon from '../Tampon.astro';
+import Tirage, { type Photo } from '../Tirage.astro';
+import { CATEGORIES } from '../../lib/nomenclature';
+
+interface Props {
+  projet: CollectionEntry<'projets'>;
+  planche: string;
+}
+const { projet, planche } = Astro.props;
+const d = projet.data;
+const parId = new Map(d.photos.map((p) => [p.id, p] as const));
+const etapes = d.etapes.map((e) => ({
+  ...e,
+  tirages: e.photos.map((id) => parId.get(id)).filter((p): p is Photo => p !== undefined)
+}));
+const nb = etapes.length + 1;
+const mots = (t: string) => t.split(' ');
+const vue0 = "Vue d'ensemble, à plat";
+---
+
+<section class="film" data-film="chevalet" style={`--chapitres:${nb}`} aria-label={`${d.titre} : le montage en ${etapes.length} étapes`}>
+  <div class="film-colle">
+    <canvas class="film-canvas" aria-hidden="true"></canvas>
+    <div class="film-cotes" aria-hidden="true">
+      <span data-cote="longueur" data-valeur="400">400</span>
+      <span data-cote="profondeur" data-valeur="300">300</span>
+      <span data-cote="epaisseur" data-valeur="18">18</span>
+      <span data-cote="base" data-valeur="100">100</span>
+      <span data-cote="montee" data-valeur="20">20</span>
+      <span data-cote="pente">20 %</span>
+    </div>
+    <div class="film-etiquettes" aria-hidden="true">
+      <span data-etiquette="poche" data-chapitres="1">poche évidée</span>
+      <span data-etiquette="tube" data-chapitres="2">tube d'aluminium brossé</span>
+      <span data-etiquette="planchette" data-chapitres="3">planchette en pin</span>
+      <span data-etiquette="charniere" data-chapitres="3">charnière</span>
+      <span data-etiquette="aimant" data-chapitres="3">aimant</span>
+      <span data-etiquette="dessus" data-chapitres="4" data-couche>Rubio protecteur · couche 1/2</span>
+      <span data-etiquette="pied" data-chapitres="5">planchette en pin</span>
+      <span data-etiquette="feuille" data-chapitres="6">feuille 26 × 36 cm</span>
+    </div>
+    <div class="film-pied">
+      <p class="film-figure cote" data-figure aria-hidden="true">Fig. 1 — {vue0}</p>
+      <button class="son" type="button" data-son aria-pressed="false">
+        <svg viewBox="0 0 16 16" aria-hidden="true">
+          <path d="M2 6h3l4-3v10l-4-3H2z" fill="currentColor"></path>
+          <path class="son-ondes" d="M11 5.5a3 3 0 0 1 0 5M12.5 3.5a5.5 5.5 0 0 1 0 9" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"></path>
+          <path class="son-barre" d="M11 5l3 6" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"></path>
+        </svg>
+        <span class="si-coupe">Son coupé</span>
+        <span class="si-actif">Son actif</span>
+      </button>
+      <ol class="film-regle" aria-hidden="true">
+        {Array.from({ length: nb }, (_, k) => <li data-pas={k}>{k + 1}</li>)}
+      </ol>
+    </div>
+  </div>
+
+  <div class="film-chapitres">
+    <div class="chapitre" data-chapitre="0" data-vue={vue0}>
+      <header class="chapitre-texte premier">
+        <p class="cote">
+          <span>Planche {planche}</span>
+          <span>{CATEGORIES[d.categorie].label}</span>
+          {d.lieu && <span>{d.lieu}</span>}
+          <span>{d.periode}</span>
+        </p>
+        <h1>
+          {mots(d.titre).map((m, k) => (
+            <Fragment>
+              <span class="mot" style={`--i:${k}`}><span>{m}</span></span>{' '}
+            </Fragment>
+          ))}
+        </h1>
+        <p class="accroche fondu">{d.accroche}</p>
+        <div class="fondu" style="--i:1"><Tampon statut={d.statut} /></div>
+        <p class="indice cote fondu" style="--i:3">
+          <svg viewBox="0 0 12 12" aria-hidden="true"><path d="M2 4l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.3"></path></svg>
+          Faire défiler pour le monter
+        </p>
+      </header>
+    </div>
+    {etapes.map((e, k) => (
+      <div class="chapitre" data-chapitre={k + 1} data-vue={e.vue}>
+        <div class="chapitre-texte">
+          <p class="cote">
+            <span>Étape {k + 1}/{etapes.length}</span>
+            <span>{e.vue}</span>
+          </p>
+          <h2>
+            {mots(e.titre).map((m, i) => (
+              <Fragment>
+                <span class="mot" style={`--i:${i}`}><span>{m}</span></span>{' '}
+              </Fragment>
+            ))}
+          </h2>
+          <p class="fondu">{e.texte}</p>
+          {e.tirages.length > 0 && (
+            <div class="tirages fondu" data-nb={e.tirages.length} style="--i:1">
+              {e.tirages.map((p, i) => (
+                <div style={`--i:${i}`}>
+                  <Tirage photo={p} />
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    ))}
+  </div>
+</section>
+
+<script is:inline data-astro-rerun>
+  // Posé avant le premier affichage : le texte attend son entrée sans clignoter.
+  (function () {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    var f = document.querySelector('[data-film]:not([data-pret])');
+    if (!f) return;
+    f.setAttribute('data-pret', '');
+    // Garde-fou : si le film ne démarre pas, le texte ne reste pas caché
+    setTimeout(function () {
+      if (!f.hasAttribute('data-lance')) f.removeAttribute('data-pret');
+    }, 5000);
+  })();
+</script>
+
+<style>
+  .film {
+    position: relative;
+    height: calc(var(--chapitres) * 100vh);
+    margin: 0 calc(-1 * var(--marge));
+  }
+  .film-colle {
+    position: sticky;
+    top: calc(var(--cadre) + var(--bande));
+    height: calc(100dvh - 2 * (var(--cadre) + var(--bande)));
+    overflow: hidden;
+  }
+  .film-canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+
+  /* Cotes : le nombre interrompt la ligne, comme sur un plan */
+  .film-cotes span {
+    position: absolute;
+    left: 0;
+    top: 0;
+    font-family: var(--f-cote);
+    font-size: 0.86rem;
+    line-height: 1;
+    color: var(--cote);
+    background: var(--papier);
+    padding: 0.12rem 0.32rem;
+    white-space: nowrap;
+    opacity: 0;
+    translate: -50% -50%;
+    will-change: transform, opacity;
+  }
+  .film-cotes span[data-cote='pente'] {
+    color: var(--crayon);
+    font-size: 1.05rem;
+    background: none;
+  }
+
+  /* Étiquettes : un nom et son trait d'attache, accrochés à un point du volume */
+  .film-etiquettes span {
+    position: absolute;
+    left: 0;
+    top: 0;
+    font-family: var(--f-cote);
+    font-size: 0.88rem;
+    line-height: 1;
+    color: var(--cote);
+    white-space: nowrap;
+    padding: 0.16rem 0.38rem 0.16rem 0.95rem;
+    background: color-mix(in oklab, var(--papier) 80%, transparent);
+    border-radius: 2px;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+    will-change: transform;
+  }
+  .film-etiquettes span::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    width: 0.55rem;
+    height: 1px;
+    background: var(--cote);
+  }
+  .film-etiquettes span.gauche {
+    translate: -100% 0;
+    padding: 0.16rem 0.95rem 0.16rem 0.38rem;
+  }
+  .film-etiquettes span.gauche::before {
+    left: auto;
+    right: 0;
+  }
+  .film-etiquettes span.visible {
+    opacity: 1;
+  }
+
+  /* Pied du film : nom de la vue, son, règle des étapes */
+  .film-pied {
+    position: absolute;
+    left: var(--marge);
+    right: var(--marge);
+    bottom: 0.9rem;
+    display: flex;
+    align-items: flex-end;
+    gap: 1rem;
+  }
+  .film-figure {
+    margin: 0 auto 0 0;
+  }
+  .film-regle {
+    position: relative;
+    display: flex;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    font-family: var(--f-cote);
+    font-size: var(--t-0);
+    line-height: 1;
+    color: var(--encre-2);
+  }
+  .film-regle li {
+    position: relative;
+    margin: 0;
+    width: 2rem;
+    padding-top: 0.6rem;
+    text-align: center;
+    border-top: var(--ep-fin) solid var(--trait-2);
+    transition: color 0.3s ease;
+  }
+  .film-regle li::before {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 0;
+    width: 1px;
+    height: 0.38rem;
+    background: var(--trait-2);
+  }
+  .film-regle li.actif {
+    color: var(--cote);
+  }
+  /* Curseur au crayon : il suit le défilement, étape par étape */
+  .film-regle::after {
+    content: '';
+    position: absolute;
+    top: -0.35rem;
+    left: calc(1rem + var(--p, 0) * (100% - 2rem));
+    width: 1.5px;
+    height: 0.85rem;
+    background: var(--crayon);
+  }
+  .son {
+    appearance: none;
+    background: color-mix(in oklab, var(--papier) 85%, transparent);
+    color: var(--encre-2);
+    border: var(--ep-fin) solid var(--trait-3);
+    border-radius: 999px;
+    font-family: var(--f-cote);
+    font-size: var(--t-0);
+    letter-spacing: 0.03em;
+    padding: 0.35rem 0.75rem 0.35rem 0.6rem;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    line-height: 1;
+  }
+  .son:hover {
+    color: var(--encre);
+    border-color: var(--trait-2);
+  }
+  .son svg {
+    width: 14px;
+    height: 14px;
+  }
+  .son .si-actif,
+  .son .son-ondes {
+    display: none;
+  }
+  .son[aria-pressed='true'] .si-actif,
+  .son[aria-pressed='true'] .son-ondes {
+    display: inline;
+  }
+  .son[aria-pressed='true'] .si-coupe,
+  .son[aria-pressed='true'] .son-barre {
+    display: none;
+  }
+  .son[aria-pressed='true'] {
+    color: var(--cote);
+    border-color: var(--cote);
+  }
+
+  /* Chapitres : ils défilent par-dessus le canvas */
+  .film-chapitres {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+  .chapitre {
+    height: 100vh;
+    display: grid;
+    align-content: center;
+    padding: 0 var(--marge);
+  }
+  .chapitre-texte {
+    pointer-events: auto;
+    max-width: 29rem;
+    padding: 1.25rem 1.4rem 1.4rem;
+    margin-left: -1.4rem;
+    background: color-mix(in oklab, var(--papier) 80%, transparent);
+    backdrop-filter: blur(3px);
+    -webkit-backdrop-filter: blur(3px);
+    border-radius: 2px;
+  }
+  .chapitre-texte.premier {
+    max-width: 35rem;
+  }
+  .chapitre-texte .cote {
+    display: flex;
+    gap: 0.4rem 1.25rem;
+    flex-wrap: wrap;
+    margin: 0 0 0.9rem;
+  }
+  .chapitre-texte h1 {
+    font-size: clamp(2.4rem, 5.4vw, 4.1rem);
+    font-weight: 760;
+    font-stretch: 92%;
+    line-height: 0.98;
+    letter-spacing: -0.02em;
+    margin: 0;
+  }
+  .chapitre-texte h2 {
+    font-size: clamp(1.7rem, 3.3vw, 2.4rem);
+    line-height: 1.04;
+    margin: 0 0 0.8rem;
+  }
+  .chapitre-texte p {
+    margin: 0;
+    max-width: 40ch;
+    text-wrap: pretty;
+  }
+  .chapitre-texte .accroche {
+    font-size: var(--t-2);
+    color: var(--encre-2);
+    margin-top: 1.1rem;
+    max-width: 36ch;
+  }
+  .chapitre-texte :global(.tampon) {
+    margin-top: 1.4rem;
+  }
+  .chapitre-texte .indice {
+    margin: 2rem 0 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+  .chapitre-texte .indice svg {
+    width: 12px;
+    height: 12px;
+    animation: descendre 2.4s ease-in-out infinite;
+  }
+  @keyframes descendre {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(3px);
+    }
+  }
+  .tirages {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+    margin-top: 1.2rem;
+  }
+  .tirages[data-nb='1'] {
+    grid-template-columns: minmax(0, 19rem);
+  }
+
+  /* --- Entrées en scène ---------------------------------------------------- */
+  /* Les titres montent mot à mot derrière un cache ; le reste suit en fondu. */
+  .mot {
+    display: inline-block;
+    overflow: hidden;
+    vertical-align: top;
+    padding-bottom: 0.16em;
+    margin-bottom: -0.16em;
+  }
+  .mot > span {
+    display: inline-block;
+    transition: transform 0.85s cubic-bezier(0.2, 0.8, 0.2, 1);
+    transition-delay: calc(90ms + var(--i, 0) * 60ms);
+  }
+  .fondu {
+    transition:
+      opacity 0.7s ease,
+      transform 0.85s cubic-bezier(0.2, 0.8, 0.2, 1);
+    transition-delay: calc(300ms + var(--i, 0) * 110ms);
+  }
+  .film[data-pret] .chapitre-texte {
+    transition: opacity 0.45s ease;
+  }
+  .film[data-pret] .chapitre:not(.actif) .chapitre-texte {
+    opacity: 0;
+  }
+  .film[data-pret] .chapitre:not(.actif) .mot > span {
+    transform: translateY(115%);
+    transition-duration: 0.25s;
+    transition-delay: 0s;
+  }
+  .film[data-pret] .chapitre:not(.actif) .fondu {
+    opacity: 0;
+    transform: translateY(16px);
+    transition-duration: 0.25s;
+    transition-delay: 0s;
+  }
+  /* Le tampon s'abat sur la feuille */
+  .film[data-pret] .chapitre.actif :global(.tampon) {
+    animation: tamponner 0.55s cubic-bezier(0.3, 1.5, 0.5, 1) 0.95s both;
+  }
+  @keyframes tamponner {
+    from {
+      opacity: 0;
+      scale: 2.4;
+    }
+    55% {
+      opacity: 1;
+    }
+    to {
+      opacity: 1;
+      scale: 1;
+    }
+  }
+
+  /* Écran large mais peu haut : le titre et ses marges se resserrent */
+  @media (min-width: 900px) and (max-height: 780px) {
+    .chapitre-texte h1 {
+      font-size: clamp(2.2rem, 4.3vw, 3.3rem);
+    }
+    .chapitre-texte .accroche {
+      margin-top: 0.8rem;
+    }
+    .chapitre-texte :global(.tampon) {
+      margin-top: 1rem;
+    }
+    .chapitre-texte .indice {
+      margin-top: 1.2rem;
+    }
+    .film-pied {
+      bottom: 0.6rem;
+    }
+  }
+
+  @media (max-width: 899px) {
+    .chapitre {
+      align-content: end;
+      padding-bottom: 1.4rem;
+    }
+    .chapitre-texte {
+      max-width: none;
+      margin-left: 0;
+      padding: 1rem 1.1rem 1.15rem;
+      background: color-mix(in oklab, var(--papier) 88%, transparent);
+    }
+    .chapitre-texte h1 {
+      font-size: clamp(2rem, 9.6vw, 2.6rem);
+    }
+    .chapitre-texte h2 {
+      font-size: clamp(1.45rem, 6.4vw, 1.8rem);
+      margin-bottom: 0.55rem;
+    }
+    .chapitre-texte .accroche {
+      font-size: var(--t-1);
+      margin-top: 0.8rem;
+    }
+    .chapitre-texte :global(.tampon) {
+      margin-top: 1rem;
+    }
+    .chapitre-texte .indice {
+      margin-top: 1rem;
+    }
+    .tirages,
+    .tirages[data-nb='1'] {
+      grid-template-columns: repeat(2, minmax(0, 8.6rem));
+      gap: 0.8rem;
+      margin-top: 0.85rem;
+    }
+    .film-pied {
+      bottom: auto;
+      top: 0.7rem;
+      align-items: center;
+    }
+    .film-figure {
+      display: none;
+    }
+    .son {
+      margin-right: auto;
+    }
+    .son span {
+      display: none !important;
+    }
+    .film-regle li {
+      width: 1.55rem;
+    }
+    .film-regle::after {
+      left: calc(0.775rem + var(--p, 0) * (100% - 1.55rem));
+    }
+  }
+
+  /* Repli : moins d'animations → pas de canvas, les étapes à la suite */
+  @media (prefers-reduced-motion: reduce) {
+    .film {
+      height: auto;
+      margin: 0 0 clamp(2rem, 5vw, 3.5rem);
+    }
+    .film-colle {
+      display: none;
+    }
+    .film-chapitres {
+      position: static;
+      pointer-events: auto;
+      display: grid;
+      gap: 2.5rem;
+    }
+    .chapitre {
+      height: auto;
+      display: block;
+      padding: 0;
+    }
+    .chapitre-texte {
+      background: none;
+      padding: 0;
+      margin: 0;
+      backdrop-filter: none;
+      max-width: 44rem;
+    }
+    .chapitre-texte .indice {
+      display: none;
+    }
+    .mot > span,
+    .fondu {
+      transition: none;
+    }
+  }
+</style>
+
+<script>
+  import { poser, type Face, type Matiere, type Montage, type Pose } from '../../lib/chevalet';
+  import { baseCamera, projeter, fbm, lerp, borne, type Camera, type Base, type Ecran } from '../../lib/projection';
+  import { activerSon, couperSon, pas } from '../../lib/son';
+  import type { V3 } from '../../lib/marcheur';
+
+  const reduit = window.matchMedia('(prefers-reduced-motion: reduce)');
+  const peutSurvoler = window.matchMedia('(hover: hover)');
+  const lisse = (t: number) => {
+    const u = borne(t, 0, 1);
+    return u * u * (3 - 2 * u);
+  };
+
+  /** Piste d'animation : des clés (chapitre, valeur), lissées de l'une à l'autre. */
+  type Cle = [number, number];
+  function piste(cles: Cle[], c: number): number {
+    const premiere = cles[0]!;
+    if (c <= premiere[0]) return premiere[1];
+    for (let k = 1; k < cles.length; k++) {
+      const a = cles[k - 1]!;
+      const b = cles[k]!;
+      if (c <= b[0]) return lerp(a[1], b[1], lisse((c - a[0]) / (b[0] - a[0])));
+    }
+    return cles[cles.length - 1]![1];
+  }
+
+  /*
+   * Le scénario. L'abscisse est le chapitre affiché (0 = titre, 1 à 6 = étapes) ;
+   * entre deux nombres entiers, on est en train de passer d'une étape à la suivante.
+   */
+  const PISTES = {
+    // Le plateau se retourne pour montrer la poche, puis revient pour la finition
+    retourne: [[0.2, 0], [0.9, 1], [3.46, 1], [3.95, 0]] as Cle[],
+    tubes: [[1.2, 1], [1.95, 0]] as Cle[],
+    planchette: [[2.25, 1], [2.8, 0]] as Cle[],
+    // Dépliée pour se montrer, repliée sur ses aimants, puis dépliée pour de bon
+    ouverture: [[2.8, 0], [3.0, 1], [3.2, 1], [3.43, 0], [4.35, 0], [4.95, 1]] as Cle[],
+    feuille: [[5.4, 0], [5.9, 1]] as Cle[],
+    // Caméra : trois quarts, plongée dans la poche, de face et rasante pour les tubes, gros plan
+    // sur les charnières, dessus pour le vernis, élévation pour la pente, vue du peintre.
+    // Elle reste du côté où le plateau se soulève : on voit son dessous arriver pendant qu'il se retourne.
+    lacet: [[0, 0.55], [1, 0.85], [2, 0.12], [3, 0.32], [4, 0.75], [5, Math.PI / 2], [6, 0.3]] as Cle[],
+    tangage: [[0, 0.52], [1, 0.8], [2, 0.42], [3, 0.52], [4, 0.95], [5, 0.07], [6, 0.62]] as Cle[],
+    distance: [[0, 980], [1, 900], [2, 860], [3, 800], [4, 940], [5, 820], [6, 840]] as Cle[],
+    cibleY: [[0, 10], [2, 10], [3, 26], [4, 10], [5, 34], [6, 20]] as Cle[],
+    cibleZ: [[0, 0], [2, 0], [3, -40], [4, 0], [6, 0]] as Cle[]
+  };
+
+  type RVB = [number, number, number];
+  function rvb(hex: string, defaut: RVB): RVB {
+    const m = /^#([0-9a-f]{6})$/i.exec(hex.trim());
+    if (!m) return defaut;
+    const n = parseInt(m[1]!, 16);
+    return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+  }
+  const css = (c: RVB, a = 1) => (a >= 1 ? `rgb(${c[0]},${c[1]},${c[2]})` : `rgba(${c[0]},${c[1]},${c[2]},${a.toFixed(3)})`);
+  const melange = (a: RVB, b: RVB, t: number): RVB => [
+    Math.round(lerp(a[0], b[0], t)),
+    Math.round(lerp(a[1], b[1], t)),
+    Math.round(lerp(a[2], b[2], t))
+  ];
+
+  /*
+   * Les matières restent dans les bleus du plan, chacune à sa place dans l'échelle des valeurs :
+   * le pin plus clair que le hêtre, l'aluminium et les aimants à la couleur des cotes.
+   * (part de la couleur visée : thème sombre, thème clair)
+   */
+  const MATIERES: Record<Matiere, { vers: 'trait' | 'cote' | 'clair'; sombre: number; clair: number }> = {
+    hetre: { vers: 'trait', sombre: 0.2, clair: 0.14 },
+    pin: { vers: 'trait', sombre: 0.36, clair: 0.06 },
+    alu: { vers: 'cote', sombre: 0.52, clair: 0.3 },
+    acier: { vers: 'trait', sombre: 0.66, clair: 0.42 },
+    aimant: { vers: 'cote', sombre: 0.95, clair: 0.8 },
+    papier: { vers: 'clair', sombre: 0.94, clair: 1 }
+  };
+  // Lumière fixe, de devant, en haut à gauche
+  const LUMIERE: V3 = (() => {
+    const v: V3 = [-0.42, 0.74, 0.52];
+    const l = Math.hypot(...v);
+    return [v[0] / l, v[1] / l, v[2] / l];
+  })();
+
+  const X = 200;
+  const Z = 150;
+  const COTES_3D: { cle: string; a: V3; b: V3; decal: V3 }[] = [
+    { cle: 'longueur', a: [-X, 0, Z], b: [X, 0, Z], decal: [0, 0, 50] },
+    { cle: 'profondeur', a: [X, 0, -Z], b: [X, 0, Z], decal: [50, 0, 0] },
+    { cle: 'epaisseur', a: [-X, 0, Z], b: [-X, 18, Z], decal: [-26, 0, 26] }
+  ];
+  // Triangle de pente, dans le jour entre la table et le plateau : 20 de montée pour 100 de base
+  const PENTE: [V3, V3, V3] = [
+    [X + 46, 0, Z],
+    [X + 46, 0, Z - 100],
+    [X + 46, 20, Z - 100]
+  ];
+
+  class Film {
+    section: HTMLElement;
+    colle: HTMLElement;
+    canvas: HTMLCanvasElement;
+    ctx: CanvasRenderingContext2D;
+    chapitres: HTMLElement[];
+    etiquettes: HTMLElement[];
+    cotes = new Map<string, HTMLElement>();
+    regle: HTMLElement[];
+    figure: HTMLElement | null;
+    couche: HTMLElement | null;
+    boutonSon: HTMLButtonElement | null;
+    nb: number;
+
+    couleurs = {
+      papier: [14, 42, 71] as RVB,
+      ombre: [7, 26, 46] as RVB,
+      trait: [220, 233, 245] as RVB,
+      cote: [143, 216, 255] as RVB,
+      crayon: [255, 106, 61] as RVB,
+      clair: [234, 242, 250] as RVB
+    };
+    themeClair = false;
+    teintes = new Map<string, string>();
+
+    ecran: Ecran = { w: 1, h: 1, cx: 0, cy: 0 };
+    dpr = 1;
+    facteurDistance = 1;
+    hautSection = 0;
+    hautChapitre = 1;
+    hautColle = 1;
+
+    /** Chapitre visé par le défilement, et sa version lissée (celle qu'on dessine) */
+    c = 0;
+    cl = 0;
+    chapitre = -1;
+    souris = { x: 0, y: 0, lx: 0, ly: 0 };
+    precedent: number | null = null;
+    dt = 16;
+    debut: number | null = null;
+    actif = false;
+    detruit = false;
+    rafId = 0;
+
+    posePrec: Pose | null = null;
+    impulsion = -1e9;
+    tVernis = 0;
+    tLavis = 0;
+    couchePrec = '';
+    pPrec = '';
+    finition = false;
+    aCotes: Record<string, number> = { longueur: 0, profondeur: 0, epaisseur: 0, pente: 0 };
+    sonActif = false;
+
+    observateur: IntersectionObserver;
+    observateurTheme: MutationObserver;
+
+    constructor(section: HTMLElement) {
+      this.section = section;
+      this.colle = section.querySelector('.film-colle') as HTMLElement;
+      this.canvas = section.querySelector('canvas') as HTMLCanvasElement;
+      this.ctx = this.canvas.getContext('2d', { alpha: true }) as CanvasRenderingContext2D;
+      this.chapitres = Array.from(section.querySelectorAll<HTMLElement>('[data-chapitre]'));
+      this.etiquettes = Array.from(section.querySelectorAll<HTMLElement>('[data-etiquette]'));
+      section.querySelectorAll<HTMLElement>('[data-cote]').forEach((e) => this.cotes.set(e.dataset.cote ?? '', e));
+      this.regle = Array.from(section.querySelectorAll<HTMLElement>('[data-pas]'));
+      this.figure = section.querySelector('[data-figure]');
+      this.couche = section.querySelector('[data-couche]');
+      this.boutonSon = section.querySelector<HTMLButtonElement>('[data-son]');
+      this.nb = this.chapitres.length;
+
+      this.lireCouleurs();
+      this.redimensionner();
+      this.mesurer();
+      this.lireDefilement();
+      this.cl = this.c;
+
+      window.addEventListener('resize', this.surRedimension, { passive: true });
+      window.addEventListener('scroll', this.surDefilement, { passive: true });
+      if (peutSurvoler.matches) window.addEventListener('pointermove', this.surPointeur, { passive: true });
+      document.addEventListener('visibilitychange', this.surVisibilite);
+      this.boutonSon?.addEventListener('click', this.basculerSon);
+
+      this.observateur = new IntersectionObserver((entrees) => {
+        const visible = entrees.some((e) => e.isIntersecting);
+        if (visible && !this.actif) {
+          this.actif = true;
+          this.precedent = null;
+          this.rafId = requestAnimationFrame(this.boucle);
+        } else if (!visible) {
+          this.actif = false;
+        }
+      });
+      this.observateur.observe(section);
+
+      this.observateurTheme = new MutationObserver(() => this.lireCouleurs());
+      this.observateurTheme.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+
+      section.setAttribute('data-pret', '');
+      section.setAttribute('data-lance', '');
+    }
+
+    lireCouleurs() {
+      const s = getComputedStyle(document.documentElement);
+      const lire = (n: string, defaut: RVB) => rvb(s.getPropertyValue(n), defaut);
+      const c = this.couleurs;
+      this.themeClair = document.documentElement.dataset.theme === 'calque';
+      this.couleurs = {
+        papier: lire('--papier', c.papier),
+        ombre: lire('--papier-3', c.ombre),
+        trait: lire('--trait', c.trait),
+        cote: lire('--cote', c.cote),
+        crayon: lire('--crayon', c.crayon),
+        clair: this.themeClair ? [255, 255, 255] : lire('--encre', c.clair)
+      };
+      this.teintes.clear();
+    }
+
+    redimensionner() {
+      const r = this.colle.getBoundingClientRect();
+      const w = Math.max(1, Math.round(r.width));
+      const h = Math.max(1, Math.round(r.height));
+      this.dpr = Math.min(window.devicePixelRatio || 1, 2);
+      this.canvas.width = Math.round(w * this.dpr);
+      this.canvas.height = Math.round(h * this.dpr);
+      this.ctx.setTransform(this.dpr, 0, 0, this.dpr, 0, 0);
+      const large = w >= 900;
+      this.ecran = { w, h, cx: large ? w * 0.715 : w * 0.5, cy: large ? h * 0.5 : h * 0.27 };
+      // Écran étroit : la caméra recule pour que le plateau et ses cotes tiennent en largeur
+      this.facteurDistance = large ? borne(1.75 * (h / w), 1, 1.5) : borne(1.12 * (h / w), 1, 2.3);
+    }
+
+    mesurer() {
+      const r = this.section.getBoundingClientRect();
+      this.hautSection = r.top + window.scrollY;
+      this.hautColle = this.colle.getBoundingClientRect().height;
+      this.hautChapitre = Math.max(1, this.chapitres[0]?.getBoundingClientRect().height ?? r.height / this.nb);
+    }
+
+    lireDefilement() {
+      // Le chapitre k est au centre de l'écran quand c vaut k
+      const c = (window.scrollY - this.hautSection + this.hautColle / 2) / this.hautChapitre - 0.5;
+      this.c = borne(c, 0, this.nb - 1);
+    }
+
+    surRedimension = () => {
+      this.redimensionner();
+      this.mesurer();
+      this.lireDefilement();
+      if (!this.actif) this.dessiner(performance.now());
+    };
+    surDefilement = () => this.lireDefilement();
+    surPointeur = (e: PointerEvent) => {
+      this.souris.x = (e.clientX / window.innerWidth - 0.5) * 2;
+      this.souris.y = (e.clientY / window.innerHeight - 0.5) * 2;
+    };
+    surVisibilite = () => {
+      if (document.hidden) this.precedent = null;
+    };
+
+    basculerSon = async () => {
+      if (!this.boutonSon) return;
+      if (this.sonActif) {
+        this.sonActif = false;
+        await couperSon();
+      } else {
+        this.sonActif = await activerSon();
+      }
+      this.boutonSon.setAttribute('aria-pressed', this.sonActif ? 'true' : 'false');
+    };
+
+    boucle = (t: number) => {
+      if (this.detruit || !this.actif) return;
+      if (this.debut === null) this.debut = t;
+      if (this.precedent !== null) {
+        this.dt = Math.min(t - this.precedent, 50);
+        const k = 1 - Math.pow(0.0015, this.dt / 1000);
+        this.cl = lerp(this.cl, this.c, k);
+        if (Math.abs(this.cl - this.c) < 0.0004) this.cl = this.c;
+        this.souris.lx = lerp(this.souris.lx, this.souris.x, 1 - Math.pow(0.01, this.dt / 1000));
+        this.souris.ly = lerp(this.souris.ly, this.souris.y, 1 - Math.pow(0.01, this.dt / 1000));
+      }
+      this.precedent = t;
+      this.dessiner(t);
+      this.rafId = requestAnimationFrame(this.boucle);
+    };
+
+    camera(c: number, t: number): Camera {
+      const s = t / 1000;
+      // Pendant un retournement, le plateau se dresse : la caméra le suit et recule un peu
+      const dresse = Math.sin(Math.PI * piste(PISTES.retourne, c));
+      return {
+        lacet: piste(PISTES.lacet, c) + 0.025 * fbm(s * 0.07, 1) + 0.04 * this.souris.lx,
+        tangage: borne(piste(PISTES.tangage, c) + 0.015 * fbm(s * 0.05, 2) - 0.025 * this.souris.ly, 0.03, 1.5),
+        distance: piste(PISTES.distance, c) * this.facteurDistance * (1 + 0.14 * dresse),
+        cible: [0, piste(PISTES.cibleY, c) + 105 * dresse + 2 * fbm(s * 0.04, 3), piste(PISTES.cibleZ, c)],
+        champ: 0.6
+      };
+    }
+
+    teinte(m: Matiere, lum: number): string {
+      const cran = Math.round(lum * 24);
+      const cle = `${m}:${cran}`;
+      let couleur = this.teintes.get(cle);
+      if (!couleur) {
+        const q = MATIERES[m];
+        const l = cran / 24;
+        const part = q.vers === 'clair' ? (this.themeClair ? q.clair : q.sombre) * (0.78 + 0.22 * l) : this.themeClair ? q.clair * (1.75 - 1.05 * l) : q.sombre * (0.45 + 0.75 * l);
+        couleur = css(melange(this.couleurs.papier, this.couleurs[q.vers], borne(part, 0, 1)));
+        this.teintes.set(cle, couleur);
+      }
+      return couleur;
+    }
+
+    /** Trace un contour fermé projeté ; faux si un sommet passe derrière la caméra. */
+    contour(pts: V3[], base: Base): boolean {
+      const ctx = this.ctx;
+      ctx.beginPath();
+      for (let k = 0; k < pts.length; k++) {
+        const q = projeter(pts[k]!, base, this.ecran);
+        if (!q) return false;
+        if (k === 0) ctx.moveTo(q.x, q.y);
+        else ctx.lineTo(q.x, q.y);
+      }
+      ctx.closePath();
+      return true;
+    }
+
+    segment(a: V3, b: V3, base: Base, part = 1) {
+      const pa = projeter(a, base, this.ecran);
+      const pb = projeter(b, base, this.ecran);
+      if (!pa || !pb) return;
+      const ctx = this.ctx;
+      ctx.beginPath();
+      ctx.moveTo(pa.x, pa.y);
+      ctx.lineTo(lerp(pa.x, pb.x, part), lerp(pa.y, pb.y, part));
+      ctx.stroke();
+    }
+
+    sol(base: Base, plein: number) {
+      const ctx = this.ctx;
+      ctx.strokeStyle = css(this.couleurs.trait);
+      ctx.lineWidth = 0.6;
+      ctx.globalAlpha = 0.13 * (0.35 + 0.65 * plein);
+      ctx.setLineDash([]);
+      for (let z = -400; z <= 400; z += 50) this.segment([-550, 0, z], [550, 0, z], base);
+      for (let x = -550; x <= 550; x += 50) this.segment([x, 0, -400], [x, 0, 400], base);
+    }
+
+    ombre(m: Montage, base: Base, plein: number) {
+      const ctx = this.ctx;
+      const auSol = m.emprise.map((p) => [p[0], 0, p[2]] as V3);
+      if (!this.contour(auSol, base)) return;
+      ctx.globalAlpha = (this.themeClair ? 0.1 : 0.5) * plein;
+      ctx.fillStyle = css(this.themeClair ? this.couleurs.trait : this.couleurs.ombre);
+      ctx.fill();
+    }
+
+    /** Les pièces, de la plus lointaine à la plus proche ; dans chacune, les faces tournées vers nous. */
+    volumes(m: Montage, base: Base, trace: number, plein: number) {
+      const ctx = this.ctx;
+      const cam = base.pos;
+      const dist = (p: V3) => (p[0] - cam[0]) ** 2 + (p[1] - cam[1]) ** 2 + (p[2] - cam[2]) ** 2;
+      const pieces = new Map<string, Face[]>();
+      for (const f of m.faces) {
+        const liste = pieces.get(f.piece);
+        if (liste) liste.push(f);
+        else pieces.set(f.piece, [f]);
+      }
+      // Le plateau sépare les pièces : vues de dessus, tubes et planchette sont derrière lui et la
+      // feuille devant ; vues de dessous (plateau retourné), c'est l'inverse.
+      const dessus = m.faces[0]!;
+      const cote = dessus.n[0] * (cam[0] - dessus.c[0]) + dessus.n[1] * (cam[1] - dessus.c[1]) + dessus.n[2] * (cam[2] - dessus.c[2]) > 0 ? 1 : -1;
+      const rang = (piece: string) => (piece === 'plateau' ? 0 : piece === 'feuille' ? cote : -cote);
+      const ordre = [...pieces.entries()]
+        .map(([nom, faces]) => {
+          let cx = 0;
+          let cy = 0;
+          let cz = 0;
+          for (const f of faces) {
+            cx += f.c[0] / faces.length;
+            cy += f.c[1] / faces.length;
+            cz += f.c[2] / faces.length;
+          }
+          return { faces, rang: rang(nom), d: dist([cx, cy, cz]) };
+        })
+        .sort((a, b) => a.rang - b.rang || b.d - a.d);
+
+      const trait = css(this.couleurs.trait);
+      ctx.lineJoin = 'round';
+      ctx.lineCap = 'round';
+      for (const piece of ordre) {
+        const faces = piece.faces
+          .filter((f) => f.n[0] * (cam[0] - f.c[0]) + f.n[1] * (cam[1] - f.c[1]) + f.n[2] * (cam[2] - f.c[2]) > 0)
+          .sort((a, b) => dist(b.c) - dist(a.c));
+        for (const f of faces) {
+          const lum = borne(0.22 + 0.78 * Math.max(0, f.n[0] * LUMIERE[0] + f.n[1] * LUMIERE[1] + f.n[2] * LUMIERE[2]), 0, 1);
+          if (!this.contour(f.pts, base)) continue;
+          ctx.setLineDash([]);
+          if (plein > 0) {
+            ctx.globalAlpha = f.alpha * plein;
+            ctx.fillStyle = this.teinte(f.m, lum);
+            ctx.fill();
+            // Filets : joints et fil du bois
+            if (f.filets.length) {
+              ctx.strokeStyle = trait;
+              ctx.lineWidth = 0.6;
+              ctx.globalAlpha = f.alpha * plein * (this.themeClair ? 0.3 : 0.2);
+              for (const filet of f.filets) {
+                for (let k = 1; k < filet.length; k++) this.segment(filet[k - 1]!, filet[k]!, base);
+              }
+            }
+            for (const p of f.pastilles) {
+              if (!this.contour(p.pts, base)) continue;
+              if (p.alpha <= 0.01) continue;
+              ctx.globalAlpha = f.alpha * plein * p.alpha;
+              ctx.fillStyle = this.teinte(p.m, lum);
+              ctx.fill();
+              ctx.strokeStyle = trait;
+              ctx.lineWidth = 0.7;
+              ctx.globalAlpha = f.alpha * plein * p.alpha * 0.7;
+              ctx.stroke();
+            }
+          }
+          // Arêtes : elles se tracent à l'ouverture de la planche, avant que les faces se remplissent
+          ctx.strokeStyle = trait;
+          ctx.lineWidth = 1.15;
+          ctx.globalAlpha = f.alpha * 0.9;
+          if (trace >= 1) {
+            this.contour(f.pts, base);
+            ctx.stroke();
+          } else if (trace > 0) {
+            for (let k = 0; k < f.pts.length; k++) this.segment(f.pts[k]!, f.pts[(k + 1) % f.pts.length]!, base, trace);
+          }
+        }
+      }
+    }
+
+    /** Finition : une bande de lumière passe sur le dessus à chaque couche, et le brillant monte. */
+    vernis(m: Montage, base: Base, force: number) {
+      const DUREE = 1.3;
+      const total = 5 * DUREE + 2.6;
+      this.tVernis = (this.tVernis + this.dt / 1000) % total;
+      const n = Math.min(4, Math.floor(this.tVernis / DUREE));
+      const fini = this.tVernis >= 5 * DUREE;
+      const q = fini ? 1 : lisse(((this.tVernis % DUREE) / DUREE) * 1.25);
+      const brillant = fini ? 5 : n + q;
+      const ctx = this.ctx;
+      const clair = css(this.couleurs.clair);
+      ctx.setLineDash([]);
+      // Reflets qui s'installent, couche après couche
+      for (const [u0, large] of [[0.16, 0.1], [0.34, 0.035]] as [number, number][]) {
+        const bande = [m.surDessus(u0, 0), m.surDessus(u0 + large, 0), m.surDessus(u0 + large + 0.2, 1), m.surDessus(u0 + 0.2, 1)];
+        if (!this.contour(bande, base)) continue;
+        ctx.globalAlpha = force * 0.034 * brillant * (this.themeClair ? 2.2 : 1);
+        ctx.fillStyle = clair;
+        ctx.fill();
+      }
+      if (!fini) {
+        const v1 = borne(q * 1.18, 0, 1);
+        const v0 = borne(q * 1.18 - 0.18, 0, 1);
+        if (v1 > v0) {
+          const bande = [m.surDessus(0, v0), m.surDessus(1, v0), m.surDessus(1, v1), m.surDessus(0, v1)];
+          if (this.contour(bande, base)) {
+            ctx.globalAlpha = force * (this.themeClair ? 0.5 : 0.2);
+            ctx.fillStyle = clair;
+            ctx.fill();
+          }
+          ctx.strokeStyle = css(this.couleurs.cote);
+          ctx.lineWidth = 1.4;
+          ctx.globalAlpha = force * 0.9;
+          this.segment(m.surDessus(0, v1), m.surDessus(1, v1), base);
+        }
+      }
+      const texte = fini ? '2 couches de Rubio · 3 couches de vernis marin' : n < 2 ? `Rubio protecteur · couche ${n + 1}/2` : `vernis marin · couche ${n - 1}/3`;
+      if (this.couche && texte !== this.couchePrec) {
+        this.couche.textContent = texte;
+        this.couchePrec = texte;
+      }
+    }
+
+    /** Aquarelle : un lavis dégradé descend sur la feuille, le front mouillé un peu irrégulier. */
+    lavis(m: Montage, base: Base, w: number) {
+      const ctx = this.ctx;
+      const HAUT = 0.07;
+      const BAS = 0.93;
+      const front = borne(HAUT + (BAS - HAUT) * lisse(w) * 1.02, HAUT, BAS);
+      if (front <= HAUT + 0.005) return;
+      const N = 14;
+      const bord: V3[] = [];
+      // Haut, côté droit, front mouillé (de droite à gauche), côté gauche
+      bord.push(m.surFeuille(0.06, HAUT), m.surFeuille(0.94, HAUT));
+      for (let k = 1; k <= 6; k++) {
+        const v = lerp(HAUT, front, k / 6);
+        bord.push(m.surFeuille(0.94 + 0.008 * fbm(v * 23, 9), v));
+      }
+      for (let k = N; k >= 0; k--) {
+        const u = lerp(0.06, 0.94, k / N);
+        const ondule = front < BAS - 0.01 ? 0.022 * fbm(u * 9 + w * 2.2, 5) : 0.006 * fbm(u * 9, 5);
+        bord.push(m.surFeuille(u, borne(front + ondule, HAUT, 0.95)));
+      }
+      for (let k = 5; k >= 1; k--) {
+        const v = lerp(HAUT, front, k / 6);
+        bord.push(m.surFeuille(0.06 + 0.008 * fbm(v * 19, 4), v));
+      }
+      const haut = projeter(m.surFeuille(0.5, HAUT), base, this.ecran);
+      const bas = projeter(m.surFeuille(0.5, BAS), base, this.ecran);
+      if (!haut || !bas || !this.contour(bord, base)) return;
+      const degrade = ctx.createLinearGradient(haut.x, haut.y, bas.x, bas.y);
+      const c = this.couleurs.cote;
+      const force = this.themeClair ? 0.85 : 1;
+      degrade.addColorStop(0, css(c, 0.82 * force));
+      degrade.addColorStop(0.3, css(c, 0.56 * force));
+      degrade.addColorStop(0.62, css(c, 0.3 * force));
+      degrade.addColorStop(1, css(c, 0.12 * force));
+      ctx.globalAlpha = 1;
+      ctx.fillStyle = degrade;
+      ctx.fill();
+      // Le front encore mouillé : un liseré plus soutenu qui s'efface quand le lavis est fini
+      if (front < BAS - 0.01) {
+        ctx.strokeStyle = css(c);
+        ctx.lineWidth = 1.2;
+        ctx.globalAlpha = 0.5;
+        for (let k = 0; k < N; k++) {
+          const u0 = lerp(0.06, 0.94, k / N);
+          const u1 = lerp(0.06, 0.94, (k + 1) / N);
+          this.segment(
+            m.surFeuille(u0, borne(front + 0.022 * fbm(u0 * 9 + w * 2.2, 5), HAUT, 0.95)),
+            m.surFeuille(u1, borne(front + 0.022 * fbm(u1 * 9 + w * 2.2, 5), HAUT, 0.95)),
+            base
+          );
+        }
+      }
+    }
+
+    fleche(p: { x: number; y: number }, depuis: { x: number; y: number }) {
+      const dx = p.x - depuis.x;
+      const dy = p.y - depuis.y;
+      const l = Math.hypot(dx, dy);
+      if (l < 12) return;
+      const ux = dx / l;
+      const uy = dy / l;
+      const ctx = this.ctx;
+      ctx.beginPath();
+      ctx.moveTo(p.x, p.y);
+      ctx.lineTo(p.x - ux * 8 - uy * 2.6, p.y - uy * 8 + ux * 2.6);
+      ctx.lineTo(p.x - ux * 8 + uy * 2.6, p.y - uy * 8 - ux * 2.6);
+      ctx.closePath();
+      ctx.fill();
+    }
+
+    placer(el: HTMLElement | undefined, q: { x: number; y: number } | null, opacite: number, texte?: string) {
+      if (!el) return;
+      if (!q || opacite <= 0.01) {
+        if (el.style.opacity !== '0') el.style.opacity = '0';
+        return;
+      }
+      el.style.opacity = opacite.toFixed(2);
+      el.style.transform = `translate(${q.x.toFixed(1)}px, ${q.y.toFixed(1)}px)`;
+      if (texte !== undefined && el.textContent !== texte) el.textContent = texte;
+    }
+
+    /** Lignes de cote dans l'espace : elles s'étirent depuis leur milieu pendant que le nombre monte. */
+    coter(base: Base, pose: Pose, plein: number) {
+      const ctx = this.ctx;
+      const pasDeTemps = 1 - Math.pow(0.012, this.dt / 1000);
+      const cibles: Record<string, number> = {
+        longueur: this.chapitre === 0 && plein >= 1 && pose.retourne < 0.03 ? 1 : 0,
+        profondeur: this.chapitre === 0 && plein >= 1 && pose.retourne < 0.03 ? 1 : 0,
+        epaisseur: this.chapitre === 1 && pose.retourne > 0.985 ? 1 : 0,
+        pente: this.chapitre === 5 && pose.ouverture > 0.985 ? 1 : 0
+      };
+      for (const cle of Object.keys(cibles)) this.aCotes[cle] = lerp(this.aCotes[cle] ?? 0, cibles[cle]!, pasDeTemps);
+
+      const couleur = css(this.couleurs.cote);
+      ctx.setLineDash([]);
+      ctx.strokeStyle = couleur;
+      ctx.fillStyle = couleur;
+      for (const cote of COTES_3D) {
+        const k = lisse(this.aCotes[cote.cle] ?? 0);
+        const el = this.cotes.get(cote.cle);
+        if (k <= 0.01) {
+          this.placer(el, null, 0);
+          continue;
+        }
+        const a2: V3 = [cote.a[0] + cote.decal[0], cote.a[1] + cote.decal[1], cote.a[2] + cote.decal[2]];
+        const b2: V3 = [cote.b[0] + cote.decal[0], cote.b[1] + cote.decal[1], cote.b[2] + cote.decal[2]];
+        const milieu: V3 = [(a2[0] + b2[0]) / 2, (a2[1] + b2[1]) / 2, (a2[2] + b2[2]) / 2];
+        const vers = (p: V3): V3 => [lerp(milieu[0], p[0], k), lerp(milieu[1], p[1], k), lerp(milieu[2], p[2], k)];
+        // Lignes d'attache, un peu plus longues que le décalage
+        ctx.lineWidth = 0.7;
+        ctx.globalAlpha = 0.55 * k;
+        for (const p of [cote.a, cote.b]) {
+          this.segment([p[0] + cote.decal[0] * 0.12, p[1] + cote.decal[1] * 0.12, p[2] + cote.decal[2] * 0.12], [p[0] + cote.decal[0] * 1.16, p[1] + cote.decal[1] * 1.16, p[2] + cote.decal[2] * 1.16], base);
+        }
+        ctx.lineWidth = 1;
+        ctx.globalAlpha = 0.95 * k;
+        this.segment(vers(a2), vers(b2), base);
+        const qm = projeter(milieu, base, this.ecran);
+        const qa = projeter(vers(a2), base, this.ecran);
+        const qb = projeter(vers(b2), base, this.ecran);
+        if (qm && qa && qb && k > 0.6) {
+          ctx.globalAlpha = lisse((k - 0.6) / 0.4);
+          this.fleche(qa, qm);
+          this.fleche(qb, qm);
+        }
+        const valeur = Number(el?.dataset.valeur ?? 0);
+        this.placer(el, qm, k, String(Math.round(valeur * k)));
+      }
+
+      // Triangle de pente : base, montée, puis l'hypoténuse au crayon
+      const k = lisse(this.aCotes.pente ?? 0);
+      if (k <= 0.01) {
+        for (const cle of ['base', 'montee', 'pente']) this.placer(this.cotes.get(cle), null, 0);
+        return;
+      }
+      const [A, B, C] = PENTE;
+      ctx.lineWidth = 1;
+      ctx.globalAlpha = 0.95;
+      this.segment(A, B, base, lisse(k / 0.45));
+      if (k > 0.4) this.segment(B, C, base, lisse((k - 0.4) / 0.25));
+      if (k > 0.6) {
+        ctx.strokeStyle = css(this.couleurs.crayon);
+        ctx.lineWidth = 1.6;
+        this.segment(C, A, base, lisse((k - 0.6) / 0.4));
+      }
+      const mi = (p: V3, q: V3): V3 => [(p[0] + q[0]) / 2, (p[1] + q[1]) / 2, (p[2] + q[2]) / 2];
+      const sous = projeter(mi(A, B), base, this.ecran);
+      const cote = projeter(mi(B, C), base, this.ecran);
+      const pointe = projeter(A, base, this.ecran);
+      this.placer(this.cotes.get('base'), sous ? { x: sous.x, y: sous.y + 13 } : null, lisse((k - 0.3) / 0.3), String(Math.round(100 * lisse(k / 0.6))));
+      this.placer(this.cotes.get('montee'), cote ? { x: cote.x + 17, y: cote.y } : null, lisse((k - 0.5) / 0.3), String(Math.round(20 * lisse(k / 0.8))));
+      this.placer(this.cotes.get('pente'), pointe ? { x: pointe.x - 34, y: pointe.y - 6 } : null, lisse((k - 0.75) / 0.25));
+    }
+
+    /** Les aimants : deux anneaux qui s'élargissent quand la planchette se plaque. */
+    aimants(m: Montage, base: Base, t: number) {
+      const u = (t - this.impulsion) / 750;
+      if (u < 0 || u > 1) return;
+      const ctx = this.ctx;
+      ctx.strokeStyle = css(this.couleurs.cote);
+      ctx.setLineDash([]);
+      for (const cle of ['aimant', 'aimant-2']) {
+        const p = m.ancres[cle];
+        const q = p ? projeter(p, base, this.ecran) : null;
+        if (!q) continue;
+        for (const retard of [0, 0.22]) {
+          const v = u - retard;
+          if (v <= 0) continue;
+          ctx.globalAlpha = (1 - v) * 0.9;
+          ctx.lineWidth = 1.4;
+          ctx.beginPath();
+          ctx.arc(q.x, q.y, 5 + 34 * lisse(v), 0, Math.PI * 2);
+          ctx.stroke();
+        }
+      }
+    }
+
+    evenements(pose: Pose, t: number) {
+      const avant = this.posePrec;
+      this.posePrec = pose;
+      if (!avant) return;
+      const son = this.sonActif && document.visibilityState === 'visible';
+      if (avant.tubes > 0.02 && pose.tubes <= 0.02 && son) pas(1, 0.7);
+      if (avant.planchette > 0.02 && pose.planchette <= 0.02) {
+        this.impulsion = t;
+        if (son) pas(3, 1);
+      }
+      if (avant.ouverture > 0.04 && pose.ouverture <= 0.04 && pose.retourne > 0.5) {
+        this.impulsion = t;
+        if (son) pas(0, 1);
+      }
+      if (avant.feuille < 0.97 && pose.feuille >= 0.97 && son) pas(2, 0.3);
+    }
+
+    majChapitre() {
+      const ch = borne(Math.round(this.cl), 0, this.nb - 1);
+      if (ch === this.chapitre) return;
+      this.chapitre = ch;
+      this.chapitres.forEach((e, k) => e.classList.toggle('actif', k === ch));
+      this.regle.forEach((e, k) => e.classList.toggle('actif', k === ch));
+      if (this.figure) this.figure.textContent = `Fig. ${ch + 1} — ${this.chapitres[ch]?.dataset.vue ?? ''}`;
+      for (const e of this.etiquettes) {
+        e.classList.toggle('visible', (e.dataset.chapitres ?? '').split(' ').includes(String(ch)));
+      }
+      if (ch === 4) this.tVernis = 0;
+    }
+
+    majEtiquettes(m: Montage, base: Base) {
+      for (const e of this.etiquettes) {
+        if (!e.classList.contains('visible')) continue;
+        // L'étiquette des couches n'apparaît qu'une fois le plateau reposé à plat
+        if (e === this.couche) e.style.opacity = this.finition ? '' : '0';
+        const a = m.ancres[e.dataset.etiquette ?? ''];
+        const q = a ? projeter(a, base, this.ecran) : null;
+        if (!q) continue;
+        const gauche = q.x > this.ecran.w - 190;
+        e.classList.toggle('gauche', gauche);
+        e.style.transform = `translate(${(q.x + (gauche ? -8 : 8)).toFixed(1)}px, ${(q.y - 10).toFixed(1)}px)`;
+      }
+    }
+
+    dessiner(t: number) {
+      const ctx = this.ctx;
+      const { w, h } = this.ecran;
+      ctx.clearRect(0, 0, w, h);
+      const c = this.cl;
+      const pose: Pose = {
+        retourne: piste(PISTES.retourne, c),
+        tubes: piste(PISTES.tubes, c),
+        planchette: piste(PISTES.planchette, c),
+        ouverture: piste(PISTES.ouverture, c),
+        feuille: piste(PISTES.feuille, c)
+      };
+      const m = poser(pose);
+      const base = baseCamera(this.camera(c, t));
+
+      // Ouverture de la planche : les arêtes se tracent, puis les faces se remplissent
+      const s = this.debut === null ? 0 : (t - this.debut) / 1000;
+      const trace = lisse(s / 1.25);
+      const plein = lisse((s - 0.6) / 0.9);
+
+      this.majChapitre();
+      this.sol(base, plein);
+      this.ombre(m, base, plein);
+      this.volumes(m, base, trace, plein);
+
+      const finition = 1 - borne(Math.abs(c - 4) / 0.42, 0, 1);
+      this.finition = finition > 0 && pose.retourne < 0.02;
+      if (this.finition) this.vernis(m, base, lisse(finition));
+
+      if (pose.feuille >= 0.985) this.tLavis = Math.min(3.4, this.tLavis + this.dt / 1000);
+      else if (pose.feuille < 0.6) this.tLavis = 0;
+      if (this.tLavis > 0) this.lavis(m, base, this.tLavis / 3.2);
+
+      this.coter(base, pose, plein);
+      this.aimants(m, base, t);
+      ctx.globalAlpha = 1;
+      this.majEtiquettes(m, base);
+      this.evenements(pose, t);
+      const p = (c / Math.max(1, this.nb - 1)).toFixed(3);
+      if (p !== this.pPrec) {
+        this.pPrec = p;
+        this.section.style.setProperty('--p', p);
+      }
+    }
+
+    detruire() {
+      this.detruit = true;
+      this.actif = false;
+      cancelAnimationFrame(this.rafId);
+      this.observateur.disconnect();
+      this.observateurTheme.disconnect();
+      window.removeEventListener('resize', this.surRedimension);
+      window.removeEventListener('scroll', this.surDefilement);
+      window.removeEventListener('pointermove', this.surPointeur);
+      document.removeEventListener('visibilitychange', this.surVisibilite);
+      this.boutonSon?.removeEventListener('click', this.basculerSon);
+      if (this.sonActif) couperSon();
+    }
+  }
+
+  let film: Film | null = null;
+
+  function init() {
+    film?.detruire();
+    film = null;
+    if (reduit.matches) return;
+    const section = document.querySelector<HTMLElement>('[data-film="chevalet"]');
+    if (!section) return;
+    film = new Film(section);
+  }
+
+  init();
+  document.addEventListener('astro:page-load', init);
+  document.addEventListener('astro:before-swap', () => {
+    film?.detruire();
+    film = null;
+  });
+</script>

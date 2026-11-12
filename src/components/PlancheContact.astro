@@ -1,0 +1,85 @@
+---
+/**
+ * Planche contact : toutes les photos d'un projet, légendées, en fin de planche.
+ * Chaque tirage apparaît quand il entre à l'écran, puis s'agrandit au clic.
+ */
+import Tirage, { type Photo } from './Tirage.astro';
+
+interface Props {
+  photos: Photo[];
+  titre: string;
+}
+const { photos, titre } = Astro.props;
+---
+
+<section class="planche-contact section" data-planche-contact aria-labelledby="planche-contact">
+  <div class="ligne-titre">
+    <h2 id="planche-contact">{titre}</h2>
+    <span class="cote">{photos.length} tirages</span>
+  </div>
+  <ul>
+    {photos.map((p, k) => (
+      <li style={`--i:${k % 4}`}>
+        <Tirage photo={p} legende tailles="(min-width: 900px) 24rem, (min-width: 560px) 46vw, 92vw" />
+      </li>
+    ))}
+  </ul>
+</section>
+
+<script is:inline data-astro-rerun>
+  // Posé tout de suite, avant le premier affichage : l'état « pas encore vu » ne clignote pas
+  (function () {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches || !('IntersectionObserver' in window)) return;
+    var s = document.querySelector('[data-planche-contact]:not([data-pret])');
+    if (s) s.setAttribute('data-pret', '');
+  })();
+</script>
+
+<script>
+  let observateur: IntersectionObserver | null = null;
+
+  function init() {
+    observateur?.disconnect();
+    const section = document.querySelector<HTMLElement>('[data-planche-contact][data-pret]');
+    if (!section) return;
+    observateur = new IntersectionObserver(
+      (entrees) => {
+        for (const e of entrees) {
+          if (e.isIntersecting) {
+            e.target.classList.add('vu');
+            observateur?.unobserve(e.target);
+          }
+        }
+      },
+      { rootMargin: '0px 0px -12% 0px', threshold: 0.15 }
+    );
+    section.querySelectorAll('li').forEach((li) => observateur?.observe(li));
+  }
+
+  init();
+  document.addEventListener('astro:page-load', init);
+</script>
+
+<style>
+  .planche-contact ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 17rem), 1fr));
+    gap: 2rem 1.5rem;
+  }
+  .planche-contact li {
+    margin: 0;
+    transition: transform 0.9s cubic-bezier(0.2, 0.8, 0.2, 1);
+    transition-delay: calc(var(--i, 0) * 90ms);
+  }
+  .planche-contact[data-pret] li:not(.vu) {
+    transform: translateY(26px);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .planche-contact li {
+      transition: none;
+    }
+  }
+</style>

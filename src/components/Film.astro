@@ -1,0 +1,23 @@
+---
+/**
+ * Aiguillage vers le film d'un projet : une scène en volumes qui remplace l'en-tête de la planche.
+ * Ajouter un film : créer films/<Nom>.astro et l'inscrire dans la table ci-dessous ;
+ * le projet le demande par `film: <nom>` dans son Markdown.
+ * Sans film (ou film inconnu), on rend le contenu passé en enfant : l'en-tête ordinaire.
+ */
+import type { CollectionEntry } from 'astro:content';
+import Chevalet from './films/Chevalet.astro';
+
+interface Props {
+  nom?: string | undefined;
+  projet: CollectionEntry<'projets'>;
+  planche: string;
+}
+const { nom, projet, planche } = Astro.props;
+const films: Record<string, any> = {
+  chevalet: Chevalet
+};
+const Composant = nom ? films[nom] : undefined;
+---
+
+{Composant ? <Composant projet={projet} planche={planche} /> : <slot />}

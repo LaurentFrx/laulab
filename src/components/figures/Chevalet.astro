@@ -1,26 +1,109 @@
 ---
 /**
- * Chevalet de table pour l'aquarelle : photo du chevalet en service.
- * Projet de 2021, antérieur aux dessins du site : la vue est une photo d'époque
- * (public/photos/chevalet-aquarelle/, métadonnées retirées), pas un SVG.
- * En vignette, une version réduite à 640 px.
+ * Chevalet de table pour l'aquarelle : vue de dessus, et coupe en position inclinée.
+ * Échelles : 1/5 pour la vue de dessus, 1/2 pour la coupe.
+ * Seules les cotes écrites en 2021 sont portées (400 × 300, 18, 20 %, feuille 26 × 36) ;
+ * le reste est repris des photos (voir src/lib/chevalet.ts, qui sert au film).
  */
+import Bulle from './Bulle.astro';
+import Cote from './Cote.astro';
+import Marqueur from './Marqueur.astro';
+
 interface Props {
   mode?: 'planche' | 'vignette';
   tracer?: boolean;
   legende?: string;
 }
-const { mode = 'planche', legende } = Astro.props;
-const vignette = mode === 'vignette';
-const description =
-  'Le chevalet en hêtre incliné sur une table, une aquarelle de ciel en cours de peinture, avec la palette, les tubes et les pinceaux autour';
+const { mode = 'planche', tracer = true, legende } = Astro.props;
+
+// Coupe : le plateau pivote sur son arête avant (au point O), pente de 20 %
+const O: [number, number] = [38, 134];
+const a = Math.atan(0.2);
+const c = Math.cos(a);
+const s = Math.sin(a);
+/** Point à `u` le long du dessous du plateau depuis l'avant, et `v` au-dessus (demi-millimètres) */
+const P = (u: number, v: number): [number, number] => [O[0] + u * c - v * s, O[1] - u * s - v * c];
+const f = (p: [number, number]) => `${p[0].toFixed(2)},${p[1].toFixed(2)}`;
+const poly = (...pts: [number, number][]) => pts.map(f).join(' ');
+
+const HAUT = 9; // 18 mm
+const POCHE = 5; // 10 mm
+const AXE = 139; // axe des charnières, à 278 mm de l'avant
+const PIED = -27.8; // pied de la planchette : il touche la table
+
+const plateau = poly(P(0, 0), P(150, 0), P(150, HAUT), P(0, HAUT));
+const tubes = [0, 144].map((u) => ({
+  dehors: poly(P(u, 0), P(u + 6, 0), P(u + 6, POCHE), P(u, POCHE)),
+  dedans: poly(P(u + 1.2, 1.2), P(u + 4.8, 1.2), P(u + 4.8, POCHE - 1.2), P(u + 1.2, POCHE - 1.2))
+}));
+const planchette = poly(P(AXE, 4.5), P(AXE + 4, 4.5), P(AXE + 4, PIED), P(AXE, PIED));
+// Hachures du bois coupé : le dessus du plateau, puis la planchette
+const hachuresPlateau = Array.from({ length: 27 }, (_, k) => 8 + k * 5).map((u) => [P(u, POCHE + 0.5), P(u + 2.4, HAUT - 0.5)] as const);
+const hachuresPlanchette = Array.from({ length: 7 }, (_, k) => 1 - k * 4).map((v) => [P(AXE + 0.5, v), P(AXE + 3.5, v - 2.2)] as const);
+const fond = [P(6, POCHE), P(144, POCHE)] as const;
+const feuille = [P(10, HAUT + 0.9), P(140, HAUT + 0.9)] as const;
+const charniere = P(AXE, 4.5);
+const aimant = poly(P(111.5, POCHE), P(115, POCHE), P(115, POCHE - 1.1), P(111.5, POCHE - 1.1));
+const arc = { de: [O[0] + 62, O[1]] as [number, number], a: [O[0] + 62 * c, O[1] - 62 * s] as [number, number] };
+const cote18 = { haut: P(-7, HAUT), bas: P(-7, 0) };
 ---
 
-<figure class:list={['figure', 'photo', { vignette }]}>
-  {vignette ? (
-    <img src="/photos/chevalet-aquarelle/en-service-640.jpg" alt={description} width="640" height="476" loading="lazy" decoding="async" />
-  ) : (
-    <img src="/photos/chevalet-aquarelle/en-service.jpg" alt={description} width="1600" height="1190" decoding="async" />
-  )}
+<figure class:list={['figure', 'chevalet', { vignette: mode === 'vignette' }]} data-trace={tracer ? '' : undefined}>
+  <svg viewBox="0 0 220 150" role="img" aria-label="Chevalet de table : vue de dessus du plateau de 400 par 300 avec une feuille de 26 par 36 centimètres, et coupe en position inclinée à 20 % montrant le plateau évidé, les deux tubes d'aluminium, la planchette dépliée, une charnière et un aimant">
+    <defs><Marqueur id="f-chevalet" /></defs>
+
+    <!-- Vue de dessus, au 1/5 -->
+    <rect class="fort" x="20" y="12" width="80" height="60"></rect>
+    {Array.from({ length: 9 }, (_, n) => 28 + n * 8).map((x) => (
+      <line class="fin" x1={x} y1="12" x2={x} y2="72"></line>
+    ))}
+    <rect class="cache" x="24" y="16" width="72" height="52"></rect>
+    <text class="texte-cote" x="60" y="43" text-anchor="middle">feuille 26 × 36</text>
+    <text class="texte-legende" x="20" y="80">vue de dessus</text>
+    <Cote x1="100" y1="6" x2="20" y2="6" texte="400" decalage="3" marqueur="f-chevalet" attache="4" />
+    <Cote x1="106" y1="72" x2="106" y2="12" texte="300" decalage="4" marqueur="f-chevalet" attache="4" />
+
+    <!-- Table -->
+    <line class="moyen" x1="12" y1="134" x2="208" y2="134"></line>
+    {Array.from({ length: 33 }, (_, n) => 16 + n * 6).map((x) => (
+      <line class="hachure" x1={x} y1="134.5" x2={x - 4} y2="138.5"></line>
+    ))}
+
+    <!-- Coupe en position inclinée, au 1/2 -->
+    <polygon class="fort" points={plateau}></polygon>
+    <line class="moyen" x1={fond[0][0].toFixed(2)} y1={fond[0][1].toFixed(2)} x2={fond[1][0].toFixed(2)} y2={fond[1][1].toFixed(2)}></line>
+    {hachuresPlateau.map(([p, q]) => (
+      <line class="hachure" x1={p[0].toFixed(2)} y1={p[1].toFixed(2)} x2={q[0].toFixed(2)} y2={q[1].toFixed(2)}></line>
+    ))}
+    {tubes.map((t) => (
+      <>
+        <polygon class="fort" points={t.dehors}></polygon>
+        <polygon class="fin" points={t.dedans}></polygon>
+      </>
+    ))}
+    <polygon class="voile-cote" points={aimant}></polygon>
+    <polygon class="fin" points={aimant}></polygon>
+    <!-- Planchette dépliée : c'est elle qui donne la pente -->
+    <polygon class="crayon" points={planchette}></polygon>
+    {hachuresPlanchette.map(([p, q]) => (
+      <line class="hachure" x1={p[0].toFixed(2)} y1={p[1].toFixed(2)} x2={q[0].toFixed(2)} y2={q[1].toFixed(2)}></line>
+    ))}
+    <circle class="articulation" cx={charniere[0].toFixed(2)} cy={charniere[1].toFixed(2)} r="1.3"></circle>
+    <line class="moyen" x1={feuille[0][0].toFixed(2)} y1={feuille[0][1].toFixed(2)} x2={feuille[1][0].toFixed(2)} y2={feuille[1][1].toFixed(2)}></line>
+    <text class="texte-legende" x="38" y="146">coupe, position inclinée</text>
+
+    <!-- Pente et épaisseur -->
+    <path class="dim" d={`M${f(arc.de).replace(',', ' ')} A62 62 0 0 0 ${f(arc.a).replace(',', ' ')}`}></path>
+    <text class="texte-cote" x="106" y="130">20 %</text>
+    <Cote x1={cote18.haut[0]} y1={cote18.haut[1]} x2={cote18.bas[0]} y2={cote18.bas[1]} texte="18" decalage="5" marqueur="f-chevalet" attache="6" />
+
+    <!-- Repères -->
+    <Bulle n="1" x="118" y="88" ax={P(72, 7.4)[0].toFixed(2)} ay={P(72, 7.4)[1].toFixed(2)} />
+    <Bulle n="2" x="201" y="82" ax={P(147, 2.5)[0].toFixed(2)} ay={P(147, 2.5)[1].toFixed(2)} />
+    <Bulle n="3" x="207" y="118" ax={P(AXE + 4, -14)[0].toFixed(2)} ay={P(AXE + 4, -14)[1].toFixed(2)} />
+    <Bulle n="4" x="164" y="76" ax={charniere[0].toFixed(2)} ay={(charniere[1] - 1.3).toFixed(2)} />
+    <Bulle n="5" x="140" y="82" ax={P(113.2, POCHE)[0].toFixed(2)} ay={P(113.2, POCHE)[1].toFixed(2)} />
+    <Bulle n="6" x="62" y="100" ax={P(42, HAUT + 0.9)[0].toFixed(2)} ay={P(42, HAUT + 0.9)[1].toFixed(2)} />
+  </svg>
   {legende && <figcaption>{legende}</figcaption>}
 </figure>

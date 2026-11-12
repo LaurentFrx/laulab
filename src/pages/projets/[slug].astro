@@ -4,6 +4,9 @@ import Planche from '../../layouts/Planche.astro';
 import Figure from '../../components/Figure.astro';
 import Tampon from '../../components/Tampon.astro';
 import Cartouche from '../../components/Cartouche.astro';
+import Film from '../../components/Film.astro';
+import PlancheContact from '../../components/PlancheContact.astro';
+import Visionneuse from '../../components/Visionneuse.astro';
 import { CATEGORIES, numeroPlanche, trierParRepere } from '../../lib/nomenclature';
 
 export async function getStaticPaths() {
@@ -23,17 +26,20 @@ const dessine = d.collaboration.claude.length ? 'Laurent Feroux et Claude' : 'La
 
 <Planche titre={d.titre} description={d.accroche} actif="projets">
   <article>
-    <header class="planche-tete">
-      <p class="cote">
-        <span>Planche {planche}</span>
-        <span>{CATEGORIES[d.categorie].label}</span>
-        {d.lieu && <span>{d.lieu}</span>}
-        <span>{d.periode}</span>
-      </p>
-      <h1>{d.titre}</h1>
-      <p class="accroche">{d.accroche}</p>
-      <Tampon statut={d.statut} />
-    </header>
+    {/* Un projet qui a son film s'ouvre dessus ; les autres gardent l'en-tête ordinaire */}
+    <Film nom={d.film} projet={projet} planche={planche}>
+      <header class="planche-tete">
+        <p class="cote">
+          <span>Planche {planche}</span>
+          <span>{CATEGORIES[d.categorie].label}</span>
+          {d.lieu && <span>{d.lieu}</span>}
+          <span>{d.periode}</span>
+        </p>
+        <h1>{d.titre}</h1>
+        <p class="accroche">{d.accroche}</p>
+        <Tampon statut={d.statut} />
+      </header>
+    </Film>
 
     <div class="planche-corps">
       <div>
@@ -114,6 +120,13 @@ const dessine = d.collaboration.claude.length ? 'Laurent Feroux et Claude' : 'La
         </section>
       </aside>
     </div>
+
+    {d.photos.length > 0 && (
+      <>
+        <PlancheContact photos={d.photos} titre={`Photos de ${d.periode}`} />
+        <Visionneuse />
+      </>
+    )}
 
     <nav class="voisins" aria-label="Planches voisines">
       {precedent ? (

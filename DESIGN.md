@@ -56,6 +56,18 @@ Exception assumée : les plateaux de découpe et les figures des études restent
 
 Comme l'original, l'atelier est un seul document : les feuilles s'enchaînent sans rechargement et le robot 3D, une fois chargé, reste vivant d'une feuille à l'autre. Un bouton « Plein écran » (là où le navigateur le permet) rend la scène et ses commandes seules à l'écran. Sur téléphone, le bandeau des feuilles défile et se centre sur la feuille ouverte.
 
+## Films de montage (novembre 2026)
+
+Une planche peut s'ouvrir sur un film : l'objet en volumes sur un canvas collant, et les étapes du projet qui défilent par-dessus. Premier film : le chevalet d'aquarelle (planche 20).
+
+- **Le défilement est la manivelle.** Chaque étape a sa pose et son cadrage ; entre deux étapes, les pièces bougent pour de vrai : le plateau se retourne comme une page, les tubes glissent à leur place, la planchette pivote sur ses charnières, et c'est elle qui lève le plateau jusqu'à sa pente.
+- **Des volumes, pas des fils.** Faces pleines, triées de la plus lointaine à la plus proche, éclairées par une lumière fixe. Les matières restent dans les bleus du plan, chacune à sa place dans l'échelle des valeurs ; l'aluminium et les aimants prennent la couleur des cotes. Toujours sans bibliothèque 3D ni texture.
+- **Les cotes se tracent.** Une ligne de cote s'étire depuis son milieu pendant que son nombre monte ; seules les cotes connues sont portées. Le crayon rouge est réservé à ce qui fait la pente.
+- **Ce qui ne dépend pas du défilement vit seul** : les couches de finition passent en bande de lumière, le lavis descend sur la feuille, les aimants claquent en deux anneaux (et d'un « toc » si le son est activé).
+- **Les titres entrent en scène** mot à mot derrière un cache, le tampon s'abat, le reste suit en fondu ; en quittant l'étape, tout s'efface vite.
+- **Les photos sont des tirages** : elles arrivent derrière un volet, en bleu de cyanotype, puis se développent en couleurs ; un clic les agrandit. En fin de planche, la planche contact les reprend toutes, légendées.
+- **Repli** (moins d'animations, pas de script) : pas de canvas, les étapes à la suite avec leurs photos, puis la figure SVG cotée.
+
 ## À ne pas faire
 
 Cartes à ombre portée, dégradés décoratifs, coins arrondis généralisés, étiquettes en capitales au-dessus de chaque titre, flèches « → » collées aux liens. Si un élément n'encode pas une information, il est retiré.

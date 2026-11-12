@@ -25,6 +25,9 @@ Site statique Astro 7 (`output: 'static'`, `trailingSlash: 'always'`). Français
 | `src/components/Scene.astro` | Scène d'accueil : canvas 2D collant, chapitres au défilement, étiquettes projetées, repli SVG |
 | `src/components/figures/` | Dessins SVG ; `Figure.astro` fait l'aiguillage par nom |
 | `src/components/Cartouche.astro` | Bloc d'identification en pied de page |
+| `src/components/Film.astro`, `src/components/films/` | Film de montage d'un projet (`film: <nom>` dans son Markdown) : il remplace l'en-tête de la planche. `Film.astro` fait l'aiguillage par nom ; sans film, la planche garde son en-tête ordinaire |
+| `src/lib/chevalet.ts` | Le chevalet d'aquarelle en volumes : faces planes posées selon l'étape (`poser()`), cinématique de la planchette et de la pente |
+| `src/components/Tirage.astro`, `PlancheContact.astro`, `Visionneuse.astro` | Photos d'un projet : tirage qui se développe, planche contact en fin de planche, agrandissement au clic |
 | `src/layouts/Planche.astro` | Gabarit commun (cadre, en-tête, `<head>`) |
 | `scripts/icones/` | Logo LF source (`logo-lf.png`) et `generer.py` (Pillow) : favicon, icônes Android/iOS dans `public/` ; si le logo change, changer aussi le nom des fichiers (iOS garde ses icônes en cache par adresse) |
 | `scripts/deploy-vps.sh` | Déploiement sur le VPS : suit ce dépôt **et** le dépôt de l'atelier, build, remplacement atomique de `dist/` |
@@ -33,6 +36,14 @@ Site statique Astro 7 (`output: 'static'`, `trailingSlash: 'always'`). Français
 | `src/atelier/` | `atelier.ts` (sommaire, contenu des onglets, adresses des fichiers — côté build seulement), `atelier.css` (jetons `--at-*` pris dans ceux du site), `habillage.ts` (palette, arêtes, lumière, cadrage, plein écran, libération de la 3D), `demarrer.ts` (cycle de vie : chargement en flux, persistance entre feuilles, arrêt en quittant l'atelier) |
 | `src/layouts/Atelier.astro`, `src/pages/projets/jansenosaure/atelier/[...feuille].astro` | Une page par onglet de l'atelier ; la section « Voir » (la 3D) est sur chaque feuille, `transition:persist`, cachée hors de « Voir » |
 | `scripts/precompression.mjs` | Après le build, jumeaux `.br` et `.gz` de chaque fichier texte de `dist/` (Caddy `precompressed`) |
+
+## Films et photos
+
+- Le texte d'un film vient du Markdown du projet : `etapes` (titre, texte, nom de la vue, photos) et `photos` (id, src, alt, légende, dimensions). Le composant du film ne porte que la mise en scène : poses, caméra, cotes, étiquettes. Le film du chevalet est calé sur six étapes dans un ordre précis (poche, tubes, planchette, finition, inclinaison, feuille) ; en changer l'ordre demande de reprendre ses pistes (`PISTES`).
+- Les pistes d'un film sont indexées par le chapitre affiché (0 = titre, 1…n = étapes) : entre deux entiers, on passe d'une étape à la suivante. Ce qui ne dépend pas du défilement (vernis, lavis, aimants) est animé dans le temps.
+- Ordre de dessin : les pièces sont rangées de part et d'autre du plateau (derrière lui ou devant, selon que la caméra voit son dessus ou son dessous), puis par distance ; les petites pièces plaquées sur une face (charnières, aimants) sont ses « pastilles », dessinées juste après elle.
+- Photos : `public/photos/<slug>/NN-nom.jpg` (1600 px au plus, métadonnées retirées) et sa réduction `NN-nom-800.jpg` à côté, que `Tirage.astro` déduit du nom. Recette : `ffmpeg -i source -map_metadata -1 -vf "scale='min(1600,iw)':-2:flags=lanczos" -q:v 4 NN-nom.jpg`, puis la même avec 800 et `-q:v 5`.
+- L'état « pas encore apparu » des titres et des tirages n'est posé que si un script en ligne a marqué la section (`data-pret`) : sans script ou avec moins d'animations, tout est visible d'emblée.
 
 ## Serveur (VPS tazieff-dev)
 

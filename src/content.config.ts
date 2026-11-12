@@ -49,6 +49,33 @@ const projets = defineCollection({
         description: z.string()
       })
       .optional(),
+    /** Film : scène en volumes qui ouvre la planche (src/components/films/<nom>.astro) */
+    film: z.string().optional(),
+    /** Étapes racontées par le film, dans l'ordre ; `photos` renvoie aux `id` ci-dessous */
+    etapes: z
+      .array(
+        z.object({
+          titre: z.string(),
+          texte: z.string(),
+          /** Nom de la vue, affiché en légende : « Dessous, poche évidée » */
+          vue: z.string(),
+          photos: z.array(z.string()).default([])
+        })
+      )
+      .default([]),
+    /** Photos du projet (public/photos/<slug>/) ; chaque `nom.jpg` a sa réduction `nom-800.jpg` */
+    photos: z
+      .array(
+        z.object({
+          id: z.string(),
+          src: z.string().regex(/^\/photos\/.+\.jpg$/),
+          alt: z.string(),
+          legende: z.string().optional(),
+          largeur: z.number().int().positive(),
+          hauteur: z.number().int().positive()
+        })
+      )
+      .default([]),
     /** Révision de la planche (lettre) */
     revision: z.string().default('A')
   })
