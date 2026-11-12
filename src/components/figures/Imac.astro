@@ -1,0 +1,77 @@
+---
+/** Sauvetage d'un iMac : copier, dédoublonner, reclasser. Les trois temps de la méthode, de gauche à droite. */
+import Bulle from './Bulle.astro';
+import Marqueur from './Marqueur.astro';
+
+interface Props {
+  mode?: 'planche' | 'vignette';
+  tracer?: boolean;
+  legende?: string;
+}
+const { mode = 'planche', tracer = true, legende } = Astro.props;
+const dossiers = [
+  { y: 46, nom: 'Pro' },
+  { y: 70, nom: 'Perso' },
+  { y: 94, nom: 'Archives' }
+];
+---
+
+<figure class:list={['figure', 'imac', { vignette: mode === 'vignette' }]} data-trace={tracer ? '' : undefined}>
+  <svg viewBox="0 0 220 150" role="img" aria-label="Un iMac dont le disque dur est défaillant ; tout est copié sur un SSD externe, environ 330 Go ; les doublons sont écartés par empreinte ; les fichiers sont reclassés dans trois dossiers : Pro, Perso, Archives">
+    <defs><Marqueur id="f-imac" /></defs>
+
+    <!-- L'iMac -->
+    <rect class="fort" x="14" y="22" width="52" height="40" rx="2"></rect>
+    <line class="fin" x1="14" y1="54" x2="66" y2="54"></line>
+    <path class="fort" d="M35 62 L33 74 H47 L45 62"></path>
+    <line class="fort" x1="27" y1="74" x2="53" y2="74"></line>
+    <!-- Son disque dur, fêlé -->
+    <circle class="moyen" cx="40" cy="38" r="10"></circle>
+    <circle class="fin" cx="40" cy="38" r="2.4"></circle>
+    <path class="crayon" d="M33 29 l5 6 l-3 3 l6 5 l-2 3 l5 4"></path>
+    <text class="texte-legende" x="14" y="83">disque dur défaillant</text>
+
+    <!-- 1 · Copier -->
+    <line class="moyen" x1="68" y1="42" x2="93" y2="42" marker-end="url(#f-imac)"></line>
+    <text class="texte-cote" x="69" y="38">1 · copier</text>
+    <rect class="fort" x="94" y="30" width="40" height="24" rx="3"></rect>
+    <text class="texte-legende" x="98" y="40">SSD externe</text>
+    <text class="texte-cote" x="98" y="48">≈ 330 Go</text>
+
+    <!-- 2 · Dédoublonner -->
+    <line class="moyen" x1="114" y1="54" x2="114" y2="73" marker-end="url(#f-imac)"></line>
+    <rect class="fin" x="84" y="80" width="12" height="16"></rect>
+    <rect class="fin" x="88" y="77" width="12" height="16"></rect>
+    <rect class="moyen" x="92" y="74" width="12" height="16"></rect>
+    <line class="fin" x1="94.5" y1="79" x2="101.5" y2="79"></line>
+    <line class="fin" x1="94.5" y1="83" x2="101.5" y2="83"></line>
+    <line class="moyen" x1="106" y1="84" x2="121" y2="84" marker-end="url(#f-imac)"></line>
+    <rect class="fort" x="122" y="76" width="12" height="16"></rect>
+    <line class="fin" x1="124.5" y1="81" x2="131.5" y2="81"></line>
+    <line class="fin" x1="124.5" y1="85" x2="131.5" y2="85"></line>
+    <text class="texte-cote" x="84" y="104">2 · dédoublonner</text>
+    <text class="texte-legende" x="84" y="110">par empreinte</text>
+
+    <!-- 3 · Reclasser -->
+    <polyline class="moyen" points="134,84 146,84 146,34 153,34" marker-end="url(#f-imac)"></polyline>
+    <text class="texte-cote" x="154" y="24">3 · reclasser</text>
+    <rect class="fort" x="154" y="28" width="14" height="10" rx="1.5"></rect>
+    <polyline class="moyen" points="160,38 160,102"></polyline>
+    {dossiers.map((d) => (
+      <>
+        <line class="moyen" x1="160" y1={d.y + 8} x2="170" y2={d.y + 8}></line>
+        <path class="fort" d={`M170 ${d.y} h9 l2 3 h27 v13 h-38 Z`}></path>
+        <text class="texte-legende" x="174" y={d.y + 11}>{d.nom}</text>
+      </>
+    ))}
+    <text class="texte-legende" x="154" y="122">scripts Python,</text>
+    <text class="texte-legende" x="154" y="128">plutôt qu'à la main</text>
+
+    <!-- Repères -->
+    <Bulle n="1" x="8" y="12" ax="20" ay="22" />
+    <Bulle n="2" x="140" y="18" ax="130" ay="30" />
+    <Bulle n="3" x="72" y="92" ax="84" ay="90" />
+    <Bulle n="4" x="214" y="34" ax="204" ay="48" />
+  </svg>
+  {legende && <figcaption>{legende}</figcaption>}
+</figure>

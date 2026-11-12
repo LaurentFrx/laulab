@@ -6,6 +6,12 @@ statut: a-l-etude
 periode: depuis août 2026
 debut: 2026-08
 repere: 7
+figure: humanoide
+reperes:
+  - Actionneurs, à choisir en premier
+  - Contrôle temps réel
+  - Modèle embarqué
+  - "Ce que ce choix conditionne : budget, masse, électronique de puissance"
 matieres:
   - Actionneurs (à choisir)
   - Contrôle temps réel

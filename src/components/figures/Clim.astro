@@ -1,0 +1,85 @@
+---
+/** Climatisation du FabLab : l'unité Daikin, l'ESP32 sur son connecteur de service, MQTT, l'application. */
+import Bulle from './Bulle.astro';
+import Marqueur from './Marqueur.astro';
+
+interface Props {
+  mode?: 'planche' | 'vignette';
+  tracer?: boolean;
+  legende?: string;
+}
+const { mode = 'planche', tracer = true, legende } = Astro.props;
+---
+
+<figure class:list={['figure', 'clim', { vignette: mode === 'vignette' }]} data-trace={tracer ? '' : undefined}>
+  <svg viewBox="0 0 220 150" role="img" aria-label="Une unité intérieure Daikin au mur ; son adaptateur d'origine relié à un cloud inaccessible ; un ESP32 branché sur le connecteur de service, qui publie en MQTT vers un serveur Mosquitto ; une application web pour les adhérents">
+    <defs><Marqueur id="f-clim" /></defs>
+
+    <!-- Mur -->
+    <line class="fort" x1="10" y1="8" x2="10" y2="142"></line>
+    {Array.from({ length: 22 }, (_, n) => 10 + n * 6).map((y) => (
+      <line class="hachure" x1="9.5" y1={y} x2="5.5" y2={y + 4}></line>
+    ))}
+
+    <!-- Unité intérieure -->
+    <path class="fort" d="M10 26 H78 a6 6 0 0 1 6 6 V52 a6 6 0 0 1 -6 6 H10 Z"></path>
+    <line class="moyen" x1="10" y1="50" x2="84" y2="50"></line>
+    <line class="fin" x1="18" y1="54" x2="76" y2="54"></line>
+    {[20, 32, 44, 56, 68].map((x) => (
+      <line class="fin" x1={x} y1="42" x2={x + 8} y2="42"></line>
+    ))}
+    <path class="cache" d="M30 62 q-4 8 -10 12"></path>
+    <path class="cache" d="M46 62 q0 9 -2 14"></path>
+    <path class="cache" d="M62 62 q4 8 10 12"></path>
+    <text class="texte-legende" x="16" y="36">Daikin Perfera</text>
+
+    <!-- Adaptateur d'origine, et le cloud du fabricant : inaccessible -->
+    <rect class="moyen" x="62" y="12" width="16" height="9"></rect>
+    <line class="fin" x1="70" y1="21" x2="70" y2="26"></line>
+    <line class="cache" x1="78" y1="16" x2="94" y2="16"></line>
+    <path class="cache" d="M98 23 a5.5 5.5 0 0 1 -1 -10.5 a6 6 0 0 1 11 -2.5 a7 7 0 0 1 12 3 a5 5 0 0 1 -1 10 Z"></path>
+    <path class="crayon" d="M102 9 l12 12 M114 9 l-12 12"></path>
+    <text class="texte-legende" x="126" y="14">cloud du fabricant</text>
+    <text class="texte-legende" x="126" y="20">lié à un autre compte</text>
+
+    <!-- ESP32 sur le connecteur de service -->
+    <line class="moyen" x1="84" y1="45" x2="96" y2="45"></line>
+    <circle class="articulation fixe" cx="84" cy="45" r="1.4"></circle>
+    <rect class="fort" x="96" y="37" width="24" height="16"></rect>
+    <text class="texte-legende" x="99" y="44">ESP32</text>
+    <text class="texte-legende" x="99" y="50">Faikout</text>
+    <text class="texte-legende" x="80" y="64">connecteur de service</text>
+
+    <!-- Ondes : MQTT -->
+    <path class="cache" d="M124 40 a6 6 0 0 1 0 10"></path>
+    <path class="cache" d="M128 36 a11 11 0 0 1 0 18"></path>
+    <path class="cache" d="M132 32 a16 16 0 0 1 0 26"></path>
+    <text class="texte-cote" x="139" y="42">MQTT</text>
+
+    <!-- Mosquitto, sur le VPS -->
+    <rect class="moyen" x="160" y="34" width="46" height="22"></rect>
+    <text class="texte-legende" x="164" y="43">Mosquitto</text>
+    <text class="texte-legende" x="164" y="50">sur le VPS</text>
+    <line class="moyen" x1="183" y1="56" x2="183" y2="77" marker-end="url(#f-clim)"></line>
+
+    <!-- Application web des adhérents -->
+    <rect class="fort" x="138" y="78" width="70" height="56" rx="2"></rect>
+    <line class="fin" x1="138" y1="89" x2="208" y2="89"></line>
+    <text class="texte-legende" x="142" y="86">application web · adhérents</text>
+    <line class="fort" x1="150" y1="104" x2="157" y2="104"></line>
+    <line class="fort" x1="160" y1="104" x2="167" y2="104"></line>
+    <text class="texte-legende" x="171" y="108" style="font-size:9px">°C</text>
+    <rect class="moyen" x="144" y="116" width="27" height="12" rx="6"></rect>
+    <text class="texte-legende" x="148" y="124">consigne</text>
+    <rect class="moyen" x="176" y="116" width="27" height="12" rx="6"></rect>
+    <text class="texte-legende" x="183" y="124">mode</text>
+
+    <!-- Repères -->
+    <Bulle n="1" x="30" y="94" ax="42" ay="58" />
+    <Bulle n="2" x="46" y="10" ax="62" ay="16" />
+    <Bulle n="3" x="132" y="70" ax="119" ay="53" />
+    <Bulle n="4" x="213" y="26" ax="204" ay="34" />
+    <Bulle n="5" x="124" y="110" ax="138" ay="106" />
+  </svg>
+  {legende && <figcaption>{legende}</figcaption>}
+</figure>

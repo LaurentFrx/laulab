@@ -1,0 +1,80 @@
+---
+/**
+ * Salle de réunion de BiscaLab : vue de dessus à l'échelle (toile de 2,20 m, objectif à 5,30 m),
+ * et la matrice HDMI qui choisit la source. Le projecteur est au crayon : il reste à choisir.
+ */
+import Bulle from './Bulle.astro';
+import Cote from './Cote.astro';
+import Marqueur from './Marqueur.astro';
+
+interface Props {
+  mode?: 'planche' | 'vignette';
+  tracer?: boolean;
+  legende?: string;
+}
+const { mode = 'planche', tracer = true, legende } = Astro.props;
+// Les huit entrées de la matrice
+const entrees = Array.from({ length: 8 }, (_, n) => 106.5 + n * 3.3);
+---
+
+<figure class:list={['figure', 'salle', { vignette: mode === 'vignette' }]} data-trace={tracer ? '' : undefined}>
+  <svg viewBox="0 0 220 150" role="img" aria-label="Vue de dessus de la salle : une toile de 2,20 m de large, un vidéoprojecteur dont l'objectif est à 5,30 m, posé sur le coffre du rideau métallique au-dessus de la vitrine ; dessous, une matrice HDMI à huit entrées et une sortie, commandée en RS-232, par le réseau ou par infrarouge">
+    <defs><Marqueur id="f-salle" /></defs>
+
+    <!-- Toile -->
+    <line class="fort" x1="24" y1="22" x2="24" y2="74"></line>
+    <line class="fin" x1="21.5" y1="22" x2="21.5" y2="74"></line>
+
+    <!-- Faisceau et axe -->
+    <line class="cache" x1="149" y1="48" x2="24" y2="22"></line>
+    <line class="cache" x1="149" y1="48" x2="24" y2="74"></line>
+    <line class="axe" x1="24" y1="48" x2="149" y2="48"></line>
+
+    <!-- Coffre du rideau métallique, le long de la vitrine -->
+    <rect class="moyen" x="151" y="14" width="15" height="68"></rect>
+    <line class="fin" x1="169" y1="14" x2="169" y2="82"></line>
+    <line class="fin" x1="171" y1="14" x2="171" y2="82"></line>
+    <text class="texte-legende" x="174" y="20">vitrine</text>
+
+    <!-- Projecteur : à choisir -->
+    <rect class="crayon" x="152" y="42.5" width="12" height="11" rx="1"></rect>
+    <rect class="crayon" x="149" y="45.5" width="3" height="5"></rect>
+
+    <!-- Cotes -->
+    <Cote x1="14" y1="74" x2="14" y2="22" texte="2,20 m" marqueur="f-salle" attache="0" />
+    <line class="fin" x1="12" y1="22" x2="24" y2="22"></line>
+    <line class="fin" x1="12" y1="74" x2="24" y2="74"></line>
+    <Cote x1="24" y1="86" x2="149" y2="86" texte="5,30 m" marqueur="f-salle" />
+    <line class="fin" x1="24" y1="74" x2="24" y2="88"></line>
+    <line class="fin" x1="149" y1="51" x2="149" y2="88"></line>
+    <text class="texte-cote" x="62" y="44">ratio 5,30 / 2,20 ≈ 2,4</text>
+
+    <!-- Matrice HDMI -->
+    <rect class="fort" x="72" y="104" width="50" height="28"></rect>
+    <text class="texte-legende" x="77" y="116">TESmart</text>
+    <text class="texte-legende" x="77" y="123">matrice HDMI 8×1</text>
+    {entrees.map((y) => (
+      <line class="moyen" x1="60" y1={y} x2="72" y2={y}></line>
+    ))}
+    <text class="texte-legende" x="22" y="117">8 entrées</text>
+    <text class="texte-legende" x="22" y="123">(ordinateurs)</text>
+    <polyline class="moyen" points="122,118 158,118 158,55" marker-end="url(#f-salle)"></polyline>
+    <text class="texte-legende" x="128" y="115">1 sortie</text>
+
+    <!-- Commande -->
+    <line class="fin" x1="80" y1="132" x2="80" y2="137"></line>
+    <line class="fin" x1="97" y1="132" x2="97" y2="137"></line>
+    <line class="fin" x1="114" y1="132" x2="114" y2="137"></line>
+    <text class="texte-legende" x="72" y="142">RS-232</text>
+    <text class="texte-legende" x="91" y="142">réseau</text>
+    <text class="texte-legende" x="108" y="142">IR déporté</text>
+
+    <!-- Repères -->
+    <Bulle n="1" x="38" y="12" ax="25" ay="26" />
+    <Bulle n="2" x="136" y="30" ax="152" ay="44" />
+    <Bulle n="3" x="186" y="60" ax="166" ay="66" />
+    <Bulle n="4" x="48" y="96" ax="72" ay="106" />
+    <Bulle n="5" x="150" y="140" ax="129" ay="140.5" />
+  </svg>
+  {legende && <figcaption>{legende}</figcaption>}
+</figure>

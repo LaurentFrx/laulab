@@ -1,0 +1,76 @@
+---
+/** Tazieff EPS : l'application sur un téléphone, ses trois rubriques, et ce qui la fait tourner. */
+import Bulle from './Bulle.astro';
+import Marqueur from './Marqueur.astro';
+
+interface Props {
+  mode?: 'planche' | 'vignette';
+  tracer?: boolean;
+  legende?: string;
+}
+const { mode = 'planche', tracer = true, legende } = Astro.props;
+const rubriques = [
+  { y: 44, nom: 'Exercices' },
+  { y: 70, nom: 'Méthodes' },
+  { y: 96, nom: 'Épreuve du bac' }
+];
+---
+
+<figure class:list={['figure', 'tazieff', { vignette: mode === 'vignette' }]} data-trace={tracer ? '' : undefined}>
+  <svg viewBox="0 0 220 150" role="img" aria-label="Un téléphone affichant trois rubriques : exercices, méthodes, épreuve du bac ; l'application Next.js hébergée sur Vercel, sa base Supabase, et une application Android à venir">
+    <defs><Marqueur id="f-tazieff" /></defs>
+
+    <!-- Téléphone -->
+    <rect class="fort" x="22" y="12" width="56" height="126" rx="7"></rect>
+    <rect class="fin" x="26" y="20" width="48" height="106"></rect>
+    <line class="moyen" x1="44" y1="16" x2="56" y2="16"></line>
+    <circle class="fin" cx="50" cy="132" r="2.2"></circle>
+    <!-- Haltère, en tête d'écran -->
+    <line class="fort" x1="37" y1="31" x2="63" y2="31"></line>
+    <rect class="moyen" x="34" y="26" width="3" height="10"></rect>
+    <rect class="moyen" x="30.5" y="27.5" width="3" height="7"></rect>
+    <rect class="moyen" x="63" y="26" width="3" height="10"></rect>
+    <rect class="moyen" x="66.5" y="27.5" width="3" height="7"></rect>
+    <!-- Trois rubriques -->
+    {rubriques.map((r) => (
+      <>
+        <rect class="moyen" x="30" y={r.y} width="40" height="20"></rect>
+        <line class="fin" x1="34" y1={r.y + 13} x2="60" y2={r.y + 13}></line>
+        <line class="fin" x1="34" y1={r.y + 16.5} x2="52" y2={r.y + 16.5}></line>
+        <text class="texte-legende" x="33" y={r.y + 8}>{r.nom}</text>
+      </>
+    ))}
+
+    <!-- Vers le site -->
+    <line class="moyen" x1="78" y1="54" x2="111" y2="54" marker-end="url(#f-tazieff)"></line>
+    <text class="texte-cote" x="82" y="50">muscu-eps.fr</text>
+
+    <!-- L'application, sur Vercel -->
+    <rect class="fort" x="112" y="40" width="50" height="28"></rect>
+    <text class="texte-legende" x="116" y="51">Next.js</text>
+    <text class="texte-legende" x="116" y="60">hébergé sur Vercel</text>
+
+    <!-- La base de données -->
+    <line class="moyen" x1="137" y1="68" x2="137" y2="91" marker-end="url(#f-tazieff)"></line>
+    <path class="fort" d="M116 98 a21 5 0 0 1 42 0 v22 a21 5 0 0 1 -42 0 Z"></path>
+    <path class="moyen" d="M116 98 a21 5 0 0 0 42 0"></path>
+    <path class="fin" d="M116 106 a21 5 0 0 0 42 0"></path>
+    <text class="texte-legende" x="121" y="116">Supabase</text>
+    <text class="texte-legende" x="121" y="122">PostgreSQL</text>
+
+    <!-- Application Android, à venir -->
+    <rect class="cache" x="176" y="40" width="36" height="28" rx="3"></rect>
+    <text class="texte-legende" x="180" y="51">Android</text>
+    <text class="texte-legende" x="180" y="60">TWA · à venir</text>
+    <line class="cache" x1="162" y1="54" x2="176" y2="54"></line>
+
+    <!-- Repères -->
+    <Bulle n="1" x="9" y="54" ax="30" ay="54" />
+    <Bulle n="2" x="9" y="80" ax="30" ay="80" />
+    <Bulle n="3" x="9" y="106" ax="30" ay="106" />
+    <Bulle n="4" x="150" y="26" ax="142" ay="40" />
+    <Bulle n="5" x="176" y="112" ax="158" ay="108" />
+    <Bulle n="6" x="204" y="86" ax="196" ay="68" />
+  </svg>
+  {legende && <figcaption>{legende}</figcaption>}
+</figure>

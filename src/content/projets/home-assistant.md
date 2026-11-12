@@ -7,6 +7,14 @@ periode: → mai 2026
 debut: 2026-01
 repere: 18
 lieu: Maison
+figure: hass
+reperes:
+  - Home Assistant, qui n'est plus utilisé
+  - "Intégrations matériel : Shelly, onduleur, batteries"
+  - Pilotage du cumulus
+  - Automatisations YAML
+  - Relais de notifications push
+  - Domo, qui remplace le tout en juin 2026
 matieres:
   - Home Assistant
   - Automatisations YAML

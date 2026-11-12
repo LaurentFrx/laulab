@@ -6,6 +6,12 @@ statut: termine
 periode: "2026"
 debut: 2026-07
 repere: 17
+figure: imac
+reperes:
+  - iMac, disque dur défaillant
+  - Copie de tout ce qui pouvait l'être sur un SSD externe, environ 330 Go
+  - Dédoublonnage par empreinte
+  - Reclassement en Pro / Perso / Archives, par scripts Python
 matieres:
   - iMac, disque dur défaillant
   - SSD externe

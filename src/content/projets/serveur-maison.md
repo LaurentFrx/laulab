@@ -7,6 +7,13 @@ periode: depuis 2026
 debut: 2026-06
 repere: 15
 lieu: Maison
+figure: serveur
+reperes:
+  - Raspberry Pi 4
+  - Nextcloud, Plex, MariaDB et Redis dans Docker, gérés avec Portainer
+  - SSD externe Samsung T7, pour les médias
+  - Tailscale, vers mes appareils où que je sois
+  - "Migration depuis iCloud : environ 660 Go en WebDAV, cinq fichiers à la fois"
 matieres:
   - Raspberry Pi 4
   - Nextcloud, Plex, MariaDB, Redis

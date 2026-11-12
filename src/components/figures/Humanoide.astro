@@ -1,0 +1,74 @@
+---
+/** Robot humanoïde, à l'étude : rien de construit, donc une silhouette en pointillés ; ce qui est à choisir est au crayon. */
+import Bulle from './Bulle.astro';
+import Marqueur from './Marqueur.astro';
+
+interface Props {
+  mode?: 'planche' | 'vignette';
+  tracer?: boolean;
+  legende?: string;
+}
+const { mode = 'planche', tracer = true, legende } = Astro.props;
+// Articulations : là où iront les actionneurs
+const actionneurs: [number, number][] = [
+  [42, 46], [78, 46], [36, 66], [84, 66], [52, 86], [68, 86], [50, 108], [70, 108], [50, 128], [70, 128]
+];
+// « Qui conditionne tout le reste »
+const consequences = ['budget', 'masse', 'électronique de puissance', 'ce que le robot pourra faire'];
+---
+
+<figure class:list={['figure', 'humanoide', { vignette: mode === 'vignette' }]} data-trace={tracer ? '' : undefined}>
+  <svg viewBox="0 0 220 150" role="img" aria-label="Silhouette en pointillés d'un robot humanoïde : les actionneurs, à choisir, sont marqués à chaque articulation ; dans le torse, le modèle embarqué et le contrôle temps réel ; à droite, ce que le choix des actionneurs conditionne">
+    <defs><Marqueur id="f-humanoide" /></defs>
+
+    <!-- Sol -->
+    <line class="moyen" x1="14" y1="136" x2="106" y2="136"></line>
+    {Array.from({ length: 15 }, (_, n) => 18 + n * 6).map((x) => (
+      <line class="hachure" x1={x} y1="136.5" x2={x - 4} y2="140.5"></line>
+    ))}
+
+    <!-- Silhouette : rien n'est construit -->
+    <circle class="cache" cx="60" cy="24" r="9"></circle>
+    <line class="cache" x1="60" y1="33" x2="60" y2="38"></line>
+    <rect class="cache" x="44" y="38" width="32" height="46" rx="3"></rect>
+    <polyline class="cache" points="42,46 36,66 38,88"></polyline>
+    <polyline class="cache" points="78,46 84,66 82,88"></polyline>
+    <polyline class="cache" points="52,86 50,108 50,128"></polyline>
+    <polyline class="cache" points="68,86 70,108 70,128"></polyline>
+    <path class="cache" d="M44 132 H56 V136 H44 Z"></path>
+    <path class="cache" d="M64 132 H76 V136 H64 Z"></path>
+
+    <!-- Dans le torse -->
+    <rect class="moyen" x="48" y="42" width="24" height="14"></rect>
+    <text class="texte-legende" x="50" y="48">modèle</text>
+    <text class="texte-legende" x="50" y="53">embarqué</text>
+    <rect class="moyen" x="48" y="62" width="24" height="16"></rect>
+    <text class="texte-legende" x="50" y="68">contrôle</text>
+    <text class="texte-legende" x="50" y="73">temps réel</text>
+
+    <!-- Actionneurs : à choisir -->
+    {actionneurs.map(([x, y]) => (
+      <circle class="crayon" cx={x} cy={y} r="2.6"></circle>
+    ))}
+
+    <!-- Ce que ce choix conditionne -->
+    <rect class="crayon" x="120" y="16" width="52" height="20"></rect>
+    <text class="texte-legende" x="124" y="25">Actionneurs</text>
+    <text class="texte-legende" x="124" y="31">à choisir en premier</text>
+    <line class="moyen" x1="128" y1="36" x2="128" y2="118"></line>
+    {consequences.map((c, n) => (
+      <>
+        <line class="moyen" x1="128" y1={52 + n * 22} x2="139" y2={52 + n * 22} marker-end="url(#f-humanoide)"></line>
+        <rect class="moyen" x="140" y={45 + n * 22} width="68" height="14"></rect>
+        <text class="texte-legende" x="144" y={54 + n * 22}>{c}</text>
+      </>
+    ))}
+
+    <!-- Repères -->
+    <Bulle n="1" x="100" y="56" ax="86" ay="65" />
+    <Bulle n="2" x="98" y="80" ax="72" ay="72" />
+    <Bulle n="3" x="22" y="38" ax="48" ay="48" />
+    <Bulle n="4" x="116" y="106" ax="128" ay="106" />
+  </svg>
+  {legende && <figcaption>{legende}</figcaption>}
+</figure>

@@ -1,0 +1,76 @@
+---
+/** Open Duck Mini : schéma de principe du bipède, et la chaîne qui lui apprend à marcher. */
+import Bulle from './Bulle.astro';
+import Marqueur from './Marqueur.astro';
+
+interface Props {
+  mode?: 'planche' | 'vignette';
+  tracer?: boolean;
+  legende?: string;
+}
+const { mode = 'planche', tracer = true, legende } = Astro.props;
+---
+
+<figure class:list={['figure', 'duck', { vignette: mode === 'vignette' }]} data-trace={tracer ? '' : undefined}>
+  <svg viewBox="0 0 220 150" role="img" aria-label="Schéma de principe d'un petit robot bipède vu de profil, avec sa carte embarquée ; à droite, l'entraînement par renforcement en simulation, puis le runtime du FabLab qui rejoue la politique apprise">
+    <defs><Marqueur id="f-duck" /></defs>
+
+    <!-- Sol -->
+    <line class="moyen" x1="10" y1="132" x2="112" y2="132"></line>
+    {Array.from({ length: 17 }, (_, n) => 14 + n * 6).map((x) => (
+      <line class="hachure" x1={x} y1="132.5" x2={x - 4} y2="136.5"></line>
+    ))}
+
+    <!-- Jambe du fond -->
+    <polyline class="cache" points="62,84 56,102 72,118 70,128"></polyline>
+    <path class="cache" d="M64 128 H92 V132 H64 Z"></path>
+
+    <!-- Corps et tête -->
+    <rect class="fort" x="38" y="58" width="42" height="26" rx="5"></rect>
+    <line class="fort" x1="70" y1="58" x2="74" y2="50"></line>
+    <rect class="fort" x="60" y="30" width="34" height="20" rx="8"></rect>
+    <circle class="moyen" cx="86" cy="40" r="1.8"></circle>
+    <line class="moyen" x1="70" y1="30" x2="66" y2="18"></line>
+    <circle class="fin" cx="66" cy="17" r="1.3"></circle>
+    <line class="moyen" x1="80" y1="30" x2="82" y2="17"></line>
+    <circle class="fin" cx="82" cy="16" r="1.3"></circle>
+
+    <!-- Carte embarquée -->
+    <rect class="moyen" x="46" y="64" width="20" height="13"></rect>
+    <line class="fin" x1="49" y1="68" x2="63" y2="68"></line>
+    <line class="fin" x1="49" y1="72" x2="59" y2="72"></line>
+
+    <!-- Jambe de devant -->
+    <polyline class="fort" points="56,84 46,104 62,120 60,128"></polyline>
+    <path class="fort" d="M52 128 H82 V132 H52 Z"></path>
+    <circle class="articulation" cx="56" cy="84" r="2.2"></circle>
+    <circle class="articulation" cx="46" cy="104" r="2.2"></circle>
+    <circle class="articulation" cx="62" cy="120" r="2.2"></circle>
+    <text class="texte-legende" x="12" y="146">schéma de principe · imprimé en 3D</text>
+
+    <!-- Entraînement en simulation -->
+    <rect class="moyen" x="126" y="16" width="82" height="34"></rect>
+    <text class="texte-legende" x="130" y="24">apprentissage par renforcement</text>
+    <text class="texte-legende" x="130" y="30">en simulation (Playground)</text>
+    <polyline class="fin" points="132,46 132,34"></polyline>
+    <polyline class="fin" points="132,46 202,46"></polyline>
+    <polyline class="moyen" points="134,45 144,44 154,41 164,38 176,36 188,35 200,35"></polyline>
+
+    <!-- La politique apprise passe au runtime -->
+    <line class="moyen" x1="167" y1="50" x2="167" y2="69" marker-end="url(#f-duck)"></line>
+    <text class="texte-cote" x="171" y="62">politique</text>
+    <rect class="fort" x="126" y="70" width="82" height="24"></rect>
+    <text class="texte-legende" x="130" y="80">runtime du FabLab</text>
+    <text class="texte-legende" x="130" y="87">adapté à notre exemplaire</text>
+
+    <!-- … et tourne sur la carte du robot -->
+    <polyline class="moyen" points="126,82 104,82 104,70 67,70" marker-end="url(#f-duck)"></polyline>
+
+    <!-- Repères -->
+    <Bulle n="1" x="20" y="46" ax="40" ay="62" />
+    <Bulle n="2" x="96" y="108" ax="62" ay="77" />
+    <Bulle n="3" x="213" y="60" ax="206" ay="50" />
+    <Bulle n="4" x="213" y="106" ax="204" ay="94" />
+  </svg>
+  {legende && <figcaption>{legende}</figcaption>}
+</figure>

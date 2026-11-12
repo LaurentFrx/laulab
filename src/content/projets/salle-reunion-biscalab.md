@@ -7,6 +7,13 @@ periode: depuis septembre 2026
 debut: 2026-09
 repere: 13
 lieu: BiscaLab
+figure: salle
+reperes:
+  - Toile de 2,20 m de large
+  - "Vidéoprojecteur, à choisir ; objectif à 5,30 m de la toile"
+  - Coffre du rideau métallique, au-dessus de la vitrine
+  - Matrice HDMI TESmart, 8 entrées vers 1 sortie
+  - Commande en RS-232, par le réseau, ou par récepteur infrarouge déporté
 matieres:
   - Matrice HDMI TESmart 8×1
   - Vidéoprojecteur (à choisir)

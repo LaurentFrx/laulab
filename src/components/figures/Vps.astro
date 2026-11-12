@@ -1,0 +1,78 @@
+---
+/** Serveur public et réseau : Internet, Caddy, les services du VPS, et le tunnel vers la maison, qui n'ouvre aucun port. */
+import Bulle from './Bulle.astro';
+import Marqueur from './Marqueur.astro';
+
+interface Props {
+  mode?: 'planche' | 'vignette';
+  tracer?: boolean;
+  legende?: string;
+}
+const { mode = 'planche', tracer = true, legende } = Astro.props;
+const appareils = ['Shelly', 'onduleur', 'batteries', 'climatisation'];
+const nuage = 'M98 23 a5.5 5.5 0 0 1 -1 -10.5 a6 6 0 0 1 11 -2.5 a7 7 0 0 1 12 3 a5 5 0 0 1 -1 10 Z';
+---
+
+<figure class:list={['figure', 'vps', { vignette: mode === 'vignette' }]} data-trace={tracer ? '' : undefined}>
+  <svg viewBox="0 0 220 150" role="img" aria-label="Internet arrive sur un VPS Hetzner par Caddy, qui dessert Domo et ce site ; le broker Mosquitto est sur le même serveur ; un tunnel SSH inversé relie le VPS aux appareils de la maison, où aucun port n'est ouvert ; un tunnel Cloudflare complète l'ensemble">
+    <defs><Marqueur id="f-vps" /></defs>
+
+    <!-- Internet -->
+    <path class="moyen" d={nuage} transform="translate(-86 40)"></path>
+    <text class="texte-legende" x="7" y="42">Internet</text>
+    <line class="moyen" x1="36" y1="56" x2="53" y2="56" marker-end="url(#f-vps)"></line>
+
+    <!-- Le VPS -->
+    <rect class="fort" x="50" y="18" width="74" height="94"></rect>
+    <text class="texte-legende" x="54" y="26">VPS Hetzner</text>
+    <rect class="moyen" x="54" y="32" width="22" height="68"></rect>
+    <text class="texte-legende" x="56" y="42">Caddy</text>
+    <text class="texte-legende" x="56" y="49">portier</text>
+    <text class="texte-legende" x="56" y="54">certificats</text>
+    <rect class="moyen" x="86" y="32" width="34" height="18"></rect>
+    <text class="texte-legende" x="90" y="43">Domo</text>
+    <rect class="moyen" x="86" y="56" width="34" height="18"></rect>
+    <text class="texte-legende" x="90" y="67">ce site</text>
+    <rect class="moyen" x="86" y="80" width="34" height="20"></rect>
+    <text class="texte-legende" x="90" y="89">Mosquitto</text>
+    <text class="texte-legende" x="90" y="95">broker MQTT</text>
+    <line class="moyen" x1="76" y1="41" x2="85" y2="41" marker-end="url(#f-vps)"></line>
+    <line class="moyen" x1="76" y1="65" x2="85" y2="65" marker-end="url(#f-vps)"></line>
+
+    <!-- Le tunnel vers la maison -->
+    <line class="moyen" x1="124" y1="62" x2="168" y2="62"></line>
+    <line class="moyen" x1="124" y1="68" x2="168" y2="68"></line>
+    <line class="fin" x1="129" y1="65" x2="163" y2="65" marker-start="url(#f-vps)" marker-end="url(#f-vps)"></line>
+    <text class="texte-cote" x="128" y="75">tunnel SSH inversé</text>
+    <text class="texte-legende" x="128" y="81">(systemd)</text>
+
+    <!-- La maison -->
+    <path class="fort" d="M164 48 L190 26 L216 48"></path>
+    <rect class="fort" x="168" y="48" width="44" height="64"></rect>
+    {appareils.map((nom, n) => (
+      <>
+        <rect class="moyen" x="172" y={56.5 + n * 10} width="3" height="3"></rect>
+        <text class="texte-legende" x="178" y={59.5 + n * 10}>{nom}</text>
+      </>
+    ))}
+
+    <!-- Tunnel Cloudflare -->
+    <path class="cache" d={nuage} transform="translate(69.6 85.8) scale(0.7)"></path>
+    <line class="cache" x1="154" y1="97" x2="168" y2="97"></line>
+    <text class="texte-legende" x="127" y="108">Cloudflare</text>
+
+    <!-- Aucun port ouvert à la maison -->
+    <polyline class="cache" points="20,64 20,130 190,130 190,114"></polyline>
+    <path class="crayon" d="M186 117 l8 8 M194 117 l-8 8"></path>
+    <text class="texte-legende" x="62" y="127">aucun port ouvert à la maison</text>
+
+    <!-- Repères -->
+    <Bulle n="1" x="40" y="22" ax="50" ay="24" />
+    <Bulle n="2" x="40" y="92" ax="54" ay="90" />
+    <Bulle n="3" x="138" y="26" ax="120" ay="36" />
+    <Bulle n="4" x="146" y="48" ax="146" ay="62" />
+    <Bulle n="5" x="203" y="103" ax="196" ay="92" />
+    <Bulle n="6" x="159" y="114" ax="152" ay="102" />
+  </svg>
+  {legende && <figcaption>{legende}</figcaption>}
+</figure>

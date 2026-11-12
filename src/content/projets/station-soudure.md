@@ -7,6 +7,14 @@ periode: septembre 2026
 debut: 2026-09
 repere: 12
 lieu: BiscaLab
+figure: soudure
+reperes:
+  - Pinecil V2, sous IronOS 2.23
+  - Panne TS-D24
+  - Chargeur Anker Prime 140 W, ports C1 et C2 en 28 V
+  - Batterie Anker Prime 20K
+  - Câble USB-C e-marked (Power Delivery)
+  - "Câble non e-marked : sur batterie, le fer refusait de chauffer"
 matieres:
   - Pinecil V2, IronOS 2.23
   - Panne TS-D24

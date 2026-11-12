@@ -1,0 +1,86 @@
+---
+/** Gravure photo au laser : la tête qui balaie le bois ligne à ligne, la trame, et les réglages retenus. */
+import Bulle from './Bulle.astro';
+import Marqueur from './Marqueur.astro';
+
+interface Props {
+  mode?: 'planche' | 'vignette';
+  tracer?: boolean;
+  legende?: string;
+}
+const { mode = 'planche', tracer = true, legende } = Astro.props;
+
+// La photo tramée : des lignes de balayage faites de tirets, plus serrés là où l'image est sombre.
+// Le motif (un portrait en buste) n'est qu'un exemple ; il est calculé, donc identique à chaque build.
+const hasard = (i: number, j: number) => {
+  const v = Math.sin(i * 12.9898 + j * 78.233) * 43758.5453;
+  return v - Math.floor(v);
+};
+const sombre = (x: number, y: number) =>
+  (x - 62) ** 2 + (y - 58) ** 2 < 12 ** 2 || ((x - 62) / 30) ** 2 + ((y - 112) / 36) ** 2 < 1;
+const pas = 2.4;
+const cellule = 2;
+let trame = '';
+for (let j = 0; j < 20; j++) {
+  const y = 39 + j * pas;
+  let debut: number | null = null;
+  for (let i = 0; i <= 35; i++) {
+    const x = 27 + i * cellule;
+    const plein = i < 35 && hasard(i, j) < (sombre(x + cellule / 2, y) ? 0.9 : 0.1);
+    if (plein && debut === null) debut = x;
+    if (!plein && debut !== null) {
+      trame += `M${debut} ${+y.toFixed(1)}h${+(x - debut - 0.7).toFixed(1)}`;
+      debut = null;
+    }
+  }
+}
+---
+
+<figure class:list={['figure', 'laser', { vignette: mode === 'vignette' }]} data-trace={tracer ? '' : undefined}>
+  <svg viewBox="0 0 220 150" role="img" aria-label="Vue de dessus d'une planche de bois en cours de gravure : la tête du laser balaie la photo ligne à ligne, dans un seul sens ; un détail agrandi montre la trame ; puissance 15 %, vitesse 350 mm/s, 100 lignes par centimètre">
+    <defs><Marqueur id="f-laser" /></defs>
+
+    <!-- Planche de bois, et le cadre de la photo -->
+    <rect class="fort" x="14" y="26" width="96" height="98"></rect>
+    <rect class="fin" x="26" y="36" width="72" height="76"></rect>
+
+    <!-- Ce qui est déjà gravé -->
+    <path class="moyen" d={trame}></path>
+    <!-- Ce qui reste à graver -->
+    <path class="cache" d="M38.3 93 A30 36 0 0 0 32 112"></path>
+    <path class="cache" d="M85.7 93 A30 36 0 0 1 92 112"></path>
+
+    <!-- Portique et tête du laser -->
+    <rect class="moyen" x="10" y="88" width="104" height="4"></rect>
+    <rect class="fort" x="64" y="84" width="12" height="12" rx="1.5"></rect>
+    <circle class="crayon" cx="70" cy="90" r="1.6"></circle>
+
+    <!-- Sens de gravure -->
+    <line class="moyen" x1="40" y1="104" x2="92" y2="104" marker-end="url(#f-laser)"></line>
+    <text class="texte-cote" x="42" y="101">350 mm/s</text>
+    <text class="texte-legende" x="42" y="110">un seul sens · une passe</text>
+
+    <!-- Détail agrandi : la trame -->
+    <circle class="fin" cx="92" cy="50" r="4"></circle>
+    <line class="fin" x1="96" y1="50" x2="138" y2="50"></line>
+    <circle class="fort" cx="168" cy="50" r="30"></circle>
+    <path class="moyen" d="M148 32h9M161 32h3M169 32h12M185 32h3 M142 41h4M150 41h14M168 41h3M176 41h16 M139 50h12M155 50h4M163 50h18M185 50h11 M141 59h6M151 59h3M158 59h14M177 59h5M186 59h8 M146 68h11M162 68h4M171 68h15"></path>
+    <text class="texte-cote" x="168" y="90" text-anchor="middle">100 lignes/cm</text>
+    <text class="texte-legende" x="168" y="96" text-anchor="middle">tramage Jarvis</text>
+
+    <!-- Puissance -->
+    <rect class="voile-cote" x="130" y="112" width="11.4" height="8"></rect>
+    <rect class="moyen" x="130" y="112" width="76" height="8"></rect>
+    <line class="fort" x1="141.4" y1="109" x2="141.4" y2="123"></line>
+    <text class="texte-legende" x="130" y="108">puissance</text>
+    <text class="texte-cote" x="150" y="108">15 %</text>
+
+    <!-- Repères -->
+    <Bulle n="1" x="120" y="74" ax="76" ay="88" />
+    <Bulle n="2" x="8" y="50" ax="30" ay="54" />
+    <Bulle n="3" x="208" y="22" ax="190" ay="30" />
+    <Bulle n="4" x="8" y="108" ax="40" ay="104" />
+    <Bulle n="5" x="212" y="134" ax="200" ay="120" />
+  </svg>
+  {legende && <figcaption>{legende}</figcaption>}
+</figure>

@@ -12,6 +12,17 @@ import Cube from './figures/Cube.astro';
 import Compteur from './figures/Compteur.astro';
 import LogoLF from './figures/LogoLF.astro';
 import Chevalet from './figures/Chevalet.astro';
+import Tazieff from './figures/Tazieff.astro';
+import Clim from './figures/Clim.astro';
+import Duck from './figures/Duck.astro';
+import Humanoide from './figures/Humanoide.astro';
+import Laser from './figures/Laser.astro';
+import Soudure from './figures/Soudure.astro';
+import Salle from './figures/Salle.astro';
+import Serveur from './figures/Serveur.astro';
+import Vps from './figures/Vps.astro';
+import Imac from './figures/Imac.astro';
+import Hass from './figures/Hass.astro';
 import ACompleter from './figures/ACompleter.astro';
 
 interface Props {
@@ -31,7 +42,18 @@ const figures: Record<string, any> = {
   cube: Cube,
   compteur: Compteur,
   logo: LogoLF,
-  chevalet: Chevalet
+  chevalet: Chevalet,
+  tazieff: Tazieff,
+  clim: Clim,
+  duck: Duck,
+  humanoide: Humanoide,
+  laser: Laser,
+  soudure: Soudure,
+  salle: Salle,
+  serveur: Serveur,
+  vps: Vps,
+  imac: Imac,
+  hass: Hass
 };
 const Composant = nom ? figures[nom] : undefined;
 ---

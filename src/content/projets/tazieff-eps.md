@@ -8,6 +8,14 @@ debut: 2026-03
 repere: 2
 vedette: false
 lieu: En ligne
+figure: tazieff
+reperes:
+  - Les exercices, par groupe musculaire et par matériel
+  - "Les méthodes d'entraînement : séries, répétitions, récupération"
+  - "L'épreuve du bac : attendus et grilles d'évaluation"
+  - Application Next.js, hébergée sur Vercel
+  - Base Supabase (PostgreSQL)
+  - Application Android (TWA), à venir
 matieres:
   - Next.js
   - Supabase (PostgreSQL)

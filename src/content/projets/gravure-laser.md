@@ -7,6 +7,13 @@ periode: septembre 2026
 debut: 2026-09
 repere: 11
 lieu: BiscaLab
+figure: laser
+reperes:
+  - Tête du laser CO₂ (xTool P2S)
+  - Photo tramée, tramage Jarvis
+  - "Densité : 100 lignes/cm"
+  - Vitesse 350 mm/s, passage unidirectionnel, une passe
+  - "Puissance : 15 %"
 matieres:
   - xTool P2S (CO₂)
   - Tramage Jarvis

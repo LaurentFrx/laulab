@@ -7,6 +7,13 @@ periode: depuis septembre 2026
 debut: 2026-09
 repere: 4
 lieu: BiscaLab
+figure: clim
+reperes:
+  - Unité intérieure Daikin Perfera
+  - Adaptateur Wi-Fi d'origine, encore lié au compte du précédent occupant
+  - ESP32 sous Faikout, sur le connecteur de service
+  - Serveur Mosquitto du VPS, alimenté en MQTT
+  - "Application web des adhérents : température, consigne, mode"
 matieres:
   - Daikin Perfera (adaptateur BRP069C4x)
   - ESP32 avec Faikout

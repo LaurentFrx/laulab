@@ -7,6 +7,12 @@ periode: depuis janvier 2026
 debut: 2026-01
 repere: 6
 lieu: BiscaLab
+figure: duck
+reperes:
+  - Bipède open source, imprimé en 3D
+  - Carte embarquée, qui rejoue la politique apprise
+  - Apprentissage par renforcement, en simulation (Playground)
+  - Runtime du FabLab, adapté à notre exemplaire
 matieres:
   - Open Duck Mini
   - Python

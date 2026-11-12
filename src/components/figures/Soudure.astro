@@ -1,0 +1,73 @@
+---
+/** Station de soudure nomade : le Pinecil, sa panne, ses deux alimentations USB-C, et le câble qui a posé problème. */
+import Bulle from './Bulle.astro';
+import Marqueur from './Marqueur.astro';
+
+interface Props {
+  mode?: 'planche' | 'vignette';
+  tracer?: boolean;
+  legende?: string;
+}
+const { mode = 'planche', tracer = true, legende } = Astro.props;
+---
+
+<figure class:list={['figure', 'soudure', { vignette: mode === 'vignette' }]} data-trace={tracer ? '' : undefined}>
+  <svg viewBox="0 0 220 150" role="img" aria-label="Un fer à souder Pinecil V2 avec sa panne TS-D24, relié en USB-C à un chargeur Anker Prime 140 W ou à une batterie Anker Prime 20K par un câble e-marked ; un câble non e-marked est barré">
+    <defs><Marqueur id="f-soudure" /></defs>
+
+    <!-- Le fer -->
+    <rect class="fort" x="92" y="24" width="84" height="16" rx="3"></rect>
+    <rect class="moyen" x="120" y="28" width="24" height="8"></rect>
+    <text class="texte-legende" x="121.5" y="33.6">IronOS 2.23</text>
+    <circle class="fin" cx="103" cy="32" r="2"></circle>
+    <circle class="fin" cx="111" cy="32" r="2"></circle>
+    <rect class="moyen" x="176" y="29" width="4" height="6"></rect>
+    <!-- La panne -->
+    <rect class="moyen" x="86" y="27" width="6" height="10"></rect>
+    <path class="fort" d="M86 29 H56 L40 31 V33 L56 35 H86"></path>
+    <path class="cache" d="M36 26 q-3 -4 0 -8"></path>
+    <path class="cache" d="M44 25 q-3 -4 0 -8"></path>
+    <text class="texte-legende" x="96" y="19">Pinecil V2</text>
+    <text class="texte-legende" x="38" y="44">panne TS-D24</text>
+
+    <!-- Le câble USB-C -->
+    <path class="moyen" d="M33 82 V68 a6 6 0 0 1 6 -6 H192 a6 6 0 0 0 6 -6 V38 a6 6 0 0 0 -6 -6 H180"></path>
+    <rect class="fort" x="150" y="58.5" width="12" height="7"></rect>
+    <text class="texte-legende" x="146" y="72">e-marked</text>
+    <text class="texte-cote" x="56" y="58">USB-C Power Delivery</text>
+
+    <!-- Chargeur -->
+    <rect class="fort" x="16" y="86" width="58" height="42" rx="3"></rect>
+    <rect class="moyen" x="30" y="82" width="6" height="4"></rect>
+    <rect class="moyen" x="46" y="82" width="6" height="4"></rect>
+    <text class="texte-legende" x="29.5" y="94">C1</text>
+    <text class="texte-legende" x="45.5" y="94">C2</text>
+    <text class="texte-cote" x="56" y="94">28 V</text>
+    <text class="texte-legende" x="21" y="108">Chargeur</text>
+    <text class="texte-legende" x="21" y="115">Anker Prime 140 W</text>
+
+    <!-- Batterie : l'autre alimentation -->
+    <rect class="fort" x="90" y="86" width="56" height="42" rx="3"></rect>
+    <rect class="moyen" x="115" y="82" width="6" height="4"></rect>
+    <line class="cache" x1="118" y1="82" x2="118" y2="62"></line>
+    <circle class="articulation fixe" cx="118" cy="62" r="1.3"></circle>
+    <text class="texte-legende" x="95" y="108">Batterie</text>
+    <text class="texte-legende" x="95" y="115">Anker Prime 20K</text>
+
+    <!-- Le câble fautif -->
+    <ellipse class="cache" cx="185" cy="104" rx="16" ry="11"></ellipse>
+    <ellipse class="cache" cx="185" cy="104" rx="10" ry="6"></ellipse>
+    <path class="crayon" d="M171 92 l28 24 M199 92 l-28 24"></path>
+    <text class="texte-legende" x="164" y="126">câble non e-marked</text>
+    <text class="texte-legende" x="164" y="132">mis au rebut</text>
+
+    <!-- Repères -->
+    <Bulle n="1" x="190" y="14" ax="170" ay="24" />
+    <Bulle n="2" x="20" y="34" ax="42" ay="32" />
+    <Bulle n="3" x="8" y="74" ax="18" ay="88" />
+    <Bulle n="4" x="136" y="138" ax="128" ay="128" />
+    <Bulle n="5" x="156" y="46" ax="156" ay="58.5" />
+    <Bulle n="6" x="212" y="88" ax="198" ay="96" />
+  </svg>
+  {legende && <figcaption>{legende}</figcaption>}
+</figure>

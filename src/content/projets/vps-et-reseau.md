@@ -7,6 +7,14 @@ periode: depuis 2026
 debut: 2026-05
 repere: 16
 lieu: VPS
+figure: vps
+reperes:
+  - VPS Hetzner
+  - "Caddy : portier et certificats"
+  - Domo, ce site et le broker MQTT
+  - Tunnel SSH inversé, maintenu par systemd
+  - "Appareils de la maison : Shelly, onduleur, batteries, climatisation"
+  - Tunnel Cloudflare, pour certains services
 matieres:
   - VPS Hetzner (tazieff-dev)
   - Caddy

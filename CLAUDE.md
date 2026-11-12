@@ -7,6 +7,8 @@ Site statique Astro 7 (`output: 'static'`, `trailingSlash: 'always'`). Français
 - Astro 7 : compilateur Rust strict (balises bien fermées, pas de `<div>` dans `<p>`), `z` vient de `astro/zod`, `render(entry)` vient de `astro:content`, Markdown traité par Sätteri (pas de plugins remark/rehype installés).
 - Les scripts clients (`<script>` dans les composants) doivent écouter `astro:page-load` : le site utilise `<ClientRouter />` (transitions de pages), un script module ne s'exécute qu'une fois.
 - Les props numériques passées aux composants SVG (`Cote`, `Bulle`) arrivent en chaînes : elles sont converties avec `Number()`.
+- Dans une figure, l'attribut `font-size` d'un `<text>` est sans effet : la règle CSS (`.texte-legende`, `.texte-cote`) l'emporte. Pour une autre taille, passer par `style="font-size:…px"`. Compter environ 1,8 unité par caractère à la taille normale.
+- Chaque planche a son dessin (`figure:` dans le Markdown) ; il ne montre que ce que dit la fiche : ce qui reste à choisir est au crayon (`.crayon`), ce qui n'existe pas encore en pointillés (`.cache`).
 - Pas de dépendance réseau au chargement : polices auto-hébergées, aucun CDN, aucun suivi.
 - Thème : `data-theme="cyanotype"` (défaut) ou `"calque"` sur `<html>`, mémorisé dans `localStorage` (`laulab-theme`). Toutes les couleurs sont des variables dans `src/styles/global.css`.
 - La scène 3D de l'accueil n'utilise aucune bibliothèque : projection maison sur Canvas 2D (`projection.ts`), géométrie en segments (`marcheur.ts`). Les couleurs du canvas sont lues dans les variables CSS, donc le thème s'applique. `prefers-reduced-motion` coupe tout et affiche la figure SVG.
