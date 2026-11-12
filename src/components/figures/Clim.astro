@@ -11,7 +11,7 @@ interface Props {
 const { mode = 'planche', tracer = true, legende } = Astro.props;
 ---
 
-<figure class:list={['figure', 'clim', { vignette: mode === 'vignette' }]} data-trace={tracer ? '' : undefined}>
+<figure class:list={['figure', 'clim', { vignette: mode === 'vignette', anime: mode === 'planche' }]} data-trace={tracer ? '' : undefined}>
   <svg viewBox="0 0 220 150" role="img" aria-label="Une unité intérieure Daikin au mur ; son adaptateur d'origine relié à un cloud inaccessible ; un ESP32 branché sur le connecteur de service, qui publie en MQTT vers un serveur Mosquitto ; une application web pour les adhérents">
     <defs><Marqueur id="f-clim" /></defs>
 
@@ -28,9 +28,9 @@ const { mode = 'planche', tracer = true, legende } = Astro.props;
     {[20, 32, 44, 56, 68].map((x) => (
       <line class="fin" x1={x} y1="42" x2={x + 8} y2="42"></line>
     ))}
-    <path class="cache" d="M30 62 q-4 8 -10 12"></path>
-    <path class="cache" d="M46 62 q0 9 -2 14"></path>
-    <path class="cache" d="M62 62 q4 8 10 12"></path>
+    <path class="marche" d="M30 62 q-4 8 -10 12"></path>
+    <path class="marche" d="M46 62 q0 9 -2 14"></path>
+    <path class="marche" d="M62 62 q4 8 10 12"></path>
     <text class="texte-legende" x="16" y="36">Daikin Perfera</text>
 
     <!-- Adaptateur d'origine, et le cloud du fabricant : inaccessible -->
@@ -51,9 +51,9 @@ const { mode = 'planche', tracer = true, legende } = Astro.props;
     <text class="texte-legende" x="80" y="64">connecteur de service</text>
 
     <!-- Ondes : MQTT -->
-    <path class="cache" d="M124 40 a6 6 0 0 1 0 10"></path>
-    <path class="cache" d="M128 36 a11 11 0 0 1 0 18"></path>
-    <path class="cache" d="M132 32 a16 16 0 0 1 0 26"></path>
+    <g class="onde"><path class="cache" d="M124 40 a6 6 0 0 1 0 10"></path></g>
+    <g class="onde" style="--r:0.25s"><path class="cache" d="M128 36 a11 11 0 0 1 0 18"></path></g>
+    <g class="onde" style="--r:0.5s"><path class="cache" d="M132 32 a16 16 0 0 1 0 26"></path></g>
     <text class="texte-cote" x="139" y="42">MQTT</text>
 
     <!-- Mosquitto, sur le VPS -->
@@ -73,6 +73,15 @@ const { mode = 'planche', tracer = true, legende } = Astro.props;
     <text class="texte-legende" x="148" y="124">consigne</text>
     <rect class="moyen" x="176" y="116" width="27" height="12" rx="6"></rect>
     <text class="texte-legende" x="183" y="124">mode</text>
+
+    {mode === 'planche' && (
+      <g>
+        <path class="flux" pathLength="100" d="M138 45 H160" style="--d:3s;--r:0.6s"></path>
+        <path class="flux" pathLength="100" d="M183 56 V77" style="--d:3s;--r:1.4s"></path>
+        <rect class="tour" x="144" y="116" width="27" height="12" rx="6"></rect>
+        <rect class="tour" x="176" y="116" width="27" height="12" rx="6" style="--r:2.25s"></rect>
+      </g>
+    )}
 
     <!-- Repères -->
     <Bulle n="1" x="30" y="94" ax="42" ay="58" />

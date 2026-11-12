@@ -17,7 +17,7 @@ const actionneurs: [number, number][] = [
 const consequences = ['budget', 'masse', 'électronique de puissance', 'ce que le robot pourra faire'];
 ---
 
-<figure class:list={['figure', 'humanoide', { vignette: mode === 'vignette' }]} data-trace={tracer ? '' : undefined}>
+<figure class:list={['figure', 'humanoide', { vignette: mode === 'vignette', anime: mode === 'planche' }]} data-trace={tracer ? '' : undefined}>
   <svg viewBox="0 0 220 150" role="img" aria-label="Silhouette en pointillés d'un robot humanoïde : les actionneurs, à choisir, sont marqués à chaque articulation ; dans le torse, le modèle embarqué et le contrôle temps réel ; à droite, ce que le choix des actionneurs conditionne">
     <defs><Marqueur id="f-humanoide" /></defs>
 
@@ -47,8 +47,8 @@ const consequences = ['budget', 'masse', 'électronique de puissance', 'ce que l
     <text class="texte-legende" x="50" y="73">temps réel</text>
 
     <!-- Actionneurs : à choisir -->
-    {actionneurs.map(([x, y]) => (
-      <circle class="crayon" cx={x} cy={y} r="2.6"></circle>
+    {actionneurs.map(([x, y], n) => (
+      <circle class="crayon pouls" cx={x} cy={y} r="2.6" style={`--r:${(n * 0.18).toFixed(2)}s`}></circle>
     ))}
 
     <!-- Ce que ce choix conditionne -->
@@ -63,6 +63,12 @@ const consequences = ['budget', 'masse', 'électronique de puissance', 'ce que l
         <text class="texte-legende" x="144" y={54 + n * 22}>{c}</text>
       </>
     ))}
+
+    {mode === 'planche' && (
+      <g>
+        {consequences.map((_, n) => <path class="flux" pathLength="100" d={`M128 36 V${52 + n * 22} H139`} style={`--d:3.6s;--r:${n * 0.5}s`}></path>)}
+      </g>
+    )}
 
     <!-- Repères -->
     <Bulle n="1" x="100" y="56" ax="86" ay="65" />

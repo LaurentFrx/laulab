@@ -9,43 +9,69 @@ interface Props {
   legende?: string;
 }
 const { mode = 'planche', tracer = true, legende } = Astro.props;
+const anime = mode === 'planche';
 ---
 
-<figure class:list={['figure', 'duck', { vignette: mode === 'vignette' }]} data-trace={tracer ? '' : undefined}>
+<figure class:list={['figure', 'duck', { vignette: mode === 'vignette', anime }]} data-trace={tracer ? '' : undefined}>
   <svg viewBox="0 0 220 150" role="img" aria-label="Schéma de principe d'un petit robot bipède vu de profil, avec sa carte embarquée ; à droite, l'entraînement par renforcement en simulation, puis le runtime du FabLab qui rejoue la politique apprise">
     <defs><Marqueur id="f-duck" /></defs>
 
-    <!-- Sol -->
+    <!-- Sol : les hachures défilent quand il marche -->
     <line class="moyen" x1="10" y1="132" x2="112" y2="132"></line>
-    {Array.from({ length: 17 }, (_, n) => 14 + n * 6).map((x) => (
-      <line class="hachure" x1={x} y1="132.5" x2={x - 4} y2="136.5"></line>
-    ))}
+    <g class="defile">
+      {Array.from({ length: 17 }, (_, n) => 14 + n * 6).map((x) => (
+        <line class="hachure" x1={x} y1="132.5" x2={x - 4} y2="136.5"></line>
+      ))}
+    </g>
 
-    <!-- Jambe du fond -->
-    <polyline class="cache" points="62,84 56,102 72,118 70,128"></polyline>
-    <path class="cache" d="M64 128 H92 V132 H64 Z"></path>
+    <!-- Patte du fond. Chaque patte est une chaîne : la cuisse porte le tibia, qui porte le pied -->
+    <g class="patte fond">
+      <g class="cuisse">
+        <line class="cache" x1="62" y1="84" x2="52" y2="104"></line>
+        <g class="tibia">
+          <line class="cache" x1="52" y1="104" x2="68" y2="120"></line>
+          <g class="pied">
+            <line class="cache" x1="68" y1="120" x2="66" y2="128"></line>
+            <path class="cache" d="M58 128 H88 V132 H58 Z"></path>
+          </g>
+        </g>
+      </g>
+    </g>
 
-    <!-- Corps et tête -->
+    <!-- Corps -->
     <rect class="fort" x="38" y="58" width="42" height="26" rx="5"></rect>
-    <line class="fort" x1="70" y1="58" x2="74" y2="50"></line>
-    <rect class="fort" x="60" y="30" width="34" height="20" rx="8"></rect>
-    <circle class="moyen" cx="86" cy="40" r="1.8"></circle>
-    <line class="moyen" x1="70" y1="30" x2="66" y2="18"></line>
-    <circle class="fin" cx="66" cy="17" r="1.3"></circle>
-    <line class="moyen" x1="80" y1="30" x2="82" y2="17"></line>
-    <circle class="fin" cx="82" cy="16" r="1.3"></circle>
+    <!-- Tête -->
+    <g class="tete">
+      <line class="fort" x1="70" y1="58" x2="74" y2="50"></line>
+      <rect class="fort" x="60" y="30" width="34" height="20" rx="8"></rect>
+      <circle class="moyen" cx="86" cy="40" r="1.8"></circle>
+      <line class="moyen" x1="70" y1="30" x2="66" y2="18"></line>
+      <circle class="fin" cx="66" cy="17" r="1.3"></circle>
+      <line class="moyen" x1="80" y1="30" x2="82" y2="17"></line>
+      <circle class="fin" cx="82" cy="16" r="1.3"></circle>
+    </g>
 
     <!-- Carte embarquée -->
     <rect class="moyen" x="46" y="64" width="20" height="13"></rect>
     <line class="fin" x1="49" y1="68" x2="63" y2="68"></line>
     <line class="fin" x1="49" y1="72" x2="59" y2="72"></line>
 
-    <!-- Jambe de devant -->
-    <polyline class="fort" points="56,84 46,104 62,120 60,128"></polyline>
-    <path class="fort" d="M52 128 H82 V132 H52 Z"></path>
-    <circle class="articulation" cx="56" cy="84" r="2.2"></circle>
-    <circle class="articulation" cx="46" cy="104" r="2.2"></circle>
-    <circle class="articulation" cx="62" cy="120" r="2.2"></circle>
+    <!-- Patte de devant -->
+    <g class="patte avant">
+      <g class="cuisse">
+        <line class="fort" x1="56" y1="84" x2="46" y2="104"></line>
+        <g class="tibia">
+          <line class="fort" x1="46" y1="104" x2="62" y2="120"></line>
+          <g class="pied">
+            <line class="fort" x1="62" y1="120" x2="60" y2="128"></line>
+            <path class="fort" d="M52 128 H82 V132 H52 Z"></path>
+            <circle class="articulation" cx="62" cy="120" r="2.2"></circle>
+          </g>
+          <circle class="articulation" cx="46" cy="104" r="2.2"></circle>
+        </g>
+        <circle class="articulation" cx="56" cy="84" r="2.2"></circle>
+      </g>
+    </g>
     <text class="texte-legende" x="12" y="146">schéma de principe · imprimé en 3D</text>
 
     <!-- Entraînement en simulation -->
@@ -65,6 +91,14 @@ const { mode = 'planche', tracer = true, legende } = Astro.props;
 
     <!-- … et tourne sur la carte du robot -->
     <polyline class="moyen" points="126,82 104,82 104,70 67,70" marker-end="url(#f-duck)"></polyline>
+
+    {anime && (
+      <g>
+        <path class="flux" pathLength="100" d="M134 45 L144 44 L154 41 L164 38 L176 36 L188 35 L200 35" style="--d:3.6s"></path>
+        <path class="flux" pathLength="100" d="M167 50 V69" style="--d:3.6s;--r:1.4s"></path>
+        <path class="flux" pathLength="100" d="M126 82 H104 V70 H67" style="--d:3.6s;--r:2.2s"></path>
+      </g>
+    )}
 
     <!-- Repères -->
     <Bulle n="1" x="20" y="46" ax="40" ay="62" />

@@ -17,7 +17,7 @@ const { mode = 'planche', tracer = true, legende } = Astro.props;
 const entrees = Array.from({ length: 8 }, (_, n) => 106.5 + n * 3.3);
 ---
 
-<figure class:list={['figure', 'salle', { vignette: mode === 'vignette' }]} data-trace={tracer ? '' : undefined}>
+<figure class:list={['figure', 'salle', { vignette: mode === 'vignette', anime: mode === 'planche' }]} data-trace={tracer ? '' : undefined}>
   <svg viewBox="0 0 220 150" role="img" aria-label="Vue de dessus de la salle : une toile de 2,20 m de large, un vidéoprojecteur dont l'objectif est à 5,30 m, posé sur le coffre du rideau métallique au-dessus de la vitrine ; dessous, une matrice HDMI à huit entrées et une sortie, commandée en RS-232, par le réseau ou par infrarouge">
     <defs><Marqueur id="f-salle" /></defs>
 
@@ -26,6 +26,7 @@ const entrees = Array.from({ length: 8 }, (_, n) => 106.5 + n * 3.3);
     <line class="fin" x1="21.5" y1="22" x2="21.5" y2="74"></line>
 
     <!-- Faisceau et axe -->
+    <g class="faisceau"><polygon class="voile-cote" points="149,48 24,22 24,74"></polygon></g>
     <line class="cache" x1="149" y1="48" x2="24" y2="22"></line>
     <line class="cache" x1="149" y1="48" x2="24" y2="74"></line>
     <line class="axe" x1="24" y1="48" x2="149" y2="48"></line>
@@ -68,6 +69,13 @@ const entrees = Array.from({ length: 8 }, (_, n) => 106.5 + n * 3.3);
     <text class="texte-legende" x="72" y="142">RS-232</text>
     <text class="texte-legende" x="91" y="142">réseau</text>
     <text class="texte-legende" x="108" y="142">IR déporté</text>
+
+    {mode === 'planche' && (
+      <g>
+        {entrees.map((y, n) => <line class="tour huit" x1="60" y1={y} x2="72" y2={y} style={`--d:6.4s;--r:${(n * 0.8).toFixed(1)}s`}></line>)}
+        <path class="flux" pathLength="100" d="M122 118 H158 V55" style="--d:3.2s"></path>
+      </g>
+    )}
 
     <!-- Repères -->
     <Bulle n="1" x="38" y="12" ax="25" ay="26" />

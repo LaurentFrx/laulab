@@ -59,3 +59,20 @@ const Composant = nom ? figures[nom] : undefined;
 ---
 
 {Composant ? <Composant mode={mode} legende={legende} tracer={tracer} /> : <ACompleter mode={mode} titre={titre} />}
+
+<script>
+  // Hors de l'écran, les dessins animés attendent (voir figures-animees.css)
+  let veille: IntersectionObserver | undefined;
+  const surveiller = () => {
+    veille?.disconnect();
+    if (!('IntersectionObserver' in window)) return;
+    veille = new IntersectionObserver(
+      (vues) => {
+        for (const v of vues) v.target.toggleAttribute('data-hors-vue', !v.isIntersecting);
+      },
+      { rootMargin: '80px' }
+    );
+    document.querySelectorAll('.figure.anime').forEach((f) => veille!.observe(f));
+  };
+  document.addEventListener('astro:page-load', surveiller);
+</script>

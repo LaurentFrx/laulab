@@ -16,7 +16,7 @@ const materiel = [
 ];
 ---
 
-<figure class:list={['figure', 'hass', { vignette: mode === 'vignette' }]} data-trace={tracer ? '' : undefined}>
+<figure class:list={['figure', 'hass', { vignette: mode === 'vignette', anime: mode === 'planche' }]} data-trace={tracer ? '' : undefined}>
   <svg viewBox="0 0 220 150" role="img" aria-label="Une maison : Home Assistant, barré, relié au matériel (Shelly, onduleur, batteries) et au cumulus ; à droite, les automatisations YAML, le relais de notifications push, et Domo qui remplace le tout en juin 2026">
     <defs><Marqueur id="f-hass" /></defs>
 
@@ -44,7 +44,8 @@ const materiel = [
     <text class="texte-legende" x="95" y="108">cumulus</text>
 
     <!-- Il n'est plus utilisé -->
-    <path class="crayon" d="M73 61 l22 22 M95 61 l-22 22"></path>
+    <line class="crayon croix" x1="73" y1="61" x2="95" y2="83"></line>
+    <line class="crayon croix" x1="95" y1="61" x2="73" y2="83" style="--r:0.35s"></line>
 
     <!-- Automatisations YAML -->
     <line class="fin" x1="94.5" y1="68" x2="150" y2="34"></line>
@@ -55,8 +56,8 @@ const materiel = [
     <!-- Relais de notifications push -->
     <line class="fin" x1="95" y1="73" x2="150" y2="73"></line>
     <rect class="moyen" x="150" y="67" width="14" height="12"></rect>
-    <path class="cache" d="M168 69.5 a4 4 0 0 1 0 7"></path>
-    <path class="cache" d="M172 67 a7.5 7.5 0 0 1 0 12"></path>
+    <g class="onde"><path class="cache" d="M168 69.5 a4 4 0 0 1 0 7"></path></g>
+    <g class="onde" style="--r:0.3s"><path class="cache" d="M172 67 a7.5 7.5 0 0 1 0 12"></path></g>
     <rect class="moyen" x="186" y="63" width="11" height="20" rx="2"></rect>
     <text class="texte-legende" x="150" y="90">relais de notifications push</text>
 
@@ -65,6 +66,18 @@ const materiel = [
     <rect class="fort" x="150" y="100" width="56" height="26"></rect>
     <text class="texte-legende" x="154" y="111">Domo</text>
     <text class="texte-legende" x="154" y="119">remplace le tout, juin 2026</text>
+
+    {mode === 'planche' && (
+      <g>
+        <path class="flux passe" pathLength="100" d="M48 57.5 L75.5 66" style="--d:3.4s"></path>
+        <path class="flux passe" pathLength="100" d="M48 83.5 L73 74" style="--d:3.4s;--r:0.5s"></path>
+        <path class="flux passe" pathLength="100" d="M48 109.5 L75.5 79" style="--d:3.4s;--r:1s"></path>
+        <path class="flux passe" pathLength="100" d="M84 83 V94" style="--d:3.4s;--r:1.6s"></path>
+        <path class="flux passe" pathLength="100" d="M150 34 L94.5 68" style="--d:3.4s;--r:2.2s"></path>
+        <path class="flux passe" pathLength="100" d="M95 73 H150" style="--d:3.4s;--r:2.6s"></path>
+        <path class="flux" pathLength="100" d="M122 112 H149" style="--d:2.4s;--r:1.2s"></path>
+      </g>
+    )}
 
     <!-- Repères -->
     <Bulle n="1" x="108" y="90" ax="93" ay="79" />

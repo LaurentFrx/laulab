@@ -20,25 +20,35 @@ const sombre = (x: number, y: number) =>
   (x - 62) ** 2 + (y - 58) ** 2 < 12 ** 2 || ((x - 62) / 30) ** 2 + ((y - 112) / 36) ** 2 < 1;
 const pas = 2.4;
 const cellule = 2;
-let trame = '';
-for (let j = 0; j < 20; j++) {
-  const y = 39 + j * pas;
+// Une ligne de balayage à la hauteur y, en tirets
+const ligneTramee = (j: number, y: number) => {
+  let d = '';
   let debut: number | null = null;
   for (let i = 0; i <= 35; i++) {
     const x = 27 + i * cellule;
     const plein = i < 35 && hasard(i, j) < (sombre(x + cellule / 2, y) ? 0.9 : 0.1);
     if (plein && debut === null) debut = x;
     if (!plein && debut !== null) {
-      trame += `M${debut} ${+y.toFixed(1)}h${+(x - debut - 0.7).toFixed(1)}`;
+      d += `M${debut} ${+y.toFixed(1)}h${+(x - debut - 0.7).toFixed(1)}`;
       debut = null;
     }
   }
-}
+  return d;
+};
+let trame = '';
+for (let j = 0; j < 20; j++) trame += ligneTramee(j, 39 + j * pas);
+// La ligne en cours de gravure, sous la tête
+const enCours = ligneTramee(20, 90);
 ---
 
-<figure class:list={['figure', 'laser', { vignette: mode === 'vignette' }]} data-trace={tracer ? '' : undefined}>
+<figure class:list={['figure', 'laser', { vignette: mode === 'vignette', anime: mode === 'planche' }]} data-trace={tracer ? '' : undefined}>
   <svg viewBox="0 0 220 150" role="img" aria-label="Vue de dessus d'une planche de bois en cours de gravure : la tête du laser balaie la photo ligne à ligne, dans un seul sens ; un détail agrandi montre la trame ; puissance 15 %, vitesse 350 mm/s, 100 lignes par centimètre">
-    <defs><Marqueur id="f-laser" /></defs>
+    <defs>
+      <Marqueur id="f-laser" />
+      {mode === 'planche' && (
+        <clipPath id="f-laser-ligne"><rect class="ligne-revele" x="27" y="88.6" width="70" height="2.8"></rect></clipPath>
+      )}
+    </defs>
 
     <!-- Planche de bois, et le cadre de la photo -->
     <rect class="fort" x="14" y="26" width="96" height="98"></rect>
@@ -52,8 +62,11 @@ for (let j = 0; j < 20; j++) {
 
     <!-- Portique et tête du laser -->
     <rect class="moyen" x="10" y="88" width="104" height="4"></rect>
-    <rect class="fort" x="64" y="84" width="12" height="12" rx="1.5"></rect>
-    <circle class="crayon" cx="70" cy="90" r="1.6"></circle>
+    <path class="moyen" d={enCours} clip-path={mode === 'planche' ? 'url(#f-laser-ligne)' : undefined}></path>
+    <g class="tete">
+      <rect class="fort" x="64" y="84" width="12" height="12" rx="1.5"></rect>
+      <circle class="crayon clignote" cx="70" cy="90" r="1.6"></circle>
+    </g>
 
     <!-- Sens de gravure -->
     <line class="moyen" x1="40" y1="104" x2="92" y2="104" marker-end="url(#f-laser)"></line>

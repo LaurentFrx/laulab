@@ -16,7 +16,7 @@ const rubriques = [
 ];
 ---
 
-<figure class:list={['figure', 'tazieff', { vignette: mode === 'vignette' }]} data-trace={tracer ? '' : undefined}>
+<figure class:list={['figure', 'tazieff', { vignette: mode === 'vignette', anime: mode === 'planche' }]} data-trace={tracer ? '' : undefined}>
   <svg viewBox="0 0 220 150" role="img" aria-label="Un téléphone affichant trois rubriques : exercices, méthodes, épreuve du bac ; l'application Next.js hébergée sur Vercel, sa base Supabase, et une application Android à venir">
     <defs><Marqueur id="f-tazieff" /></defs>
 
@@ -26,11 +26,13 @@ const rubriques = [
     <line class="moyen" x1="44" y1="16" x2="56" y2="16"></line>
     <circle class="fin" cx="50" cy="132" r="2.2"></circle>
     <!-- Haltère, en tête d'écran -->
+    <g class="haltere">
     <line class="fort" x1="37" y1="31" x2="63" y2="31"></line>
     <rect class="moyen" x="34" y="26" width="3" height="10"></rect>
     <rect class="moyen" x="30.5" y="27.5" width="3" height="7"></rect>
     <rect class="moyen" x="63" y="26" width="3" height="10"></rect>
     <rect class="moyen" x="66.5" y="27.5" width="3" height="7"></rect>
+    </g>
     <!-- Trois rubriques -->
     {rubriques.map((r) => (
       <>
@@ -63,6 +65,14 @@ const rubriques = [
     <text class="texte-legende" x="180" y="51">Android</text>
     <text class="texte-legende" x="180" y="60">TWA · à venir</text>
     <line class="cache" x1="162" y1="54" x2="176" y2="54"></line>
+
+    {mode === 'planche' && (
+      <g>
+        <path class="flux" pathLength="100" d="M78 54 H111" style="--d:3.2s"></path>
+        <path class="flux" pathLength="100" d="M137 68 V91" style="--d:3.2s;--r:0.9s"></path>
+        {rubriques.map((r, n) => <rect class="tour" x="30" y={r.y} width="40" height="20" style={`--r:${n * 1.5}s`}></rect>)}
+      </g>
+    )}
 
     <!-- Repères -->
     <Bulle n="1" x="9" y="54" ax="30" ay="54" />

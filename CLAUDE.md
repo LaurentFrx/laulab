@@ -26,6 +26,7 @@ Site statique Astro 7 (`output: 'static'`, `trailingSlash: 'always'`). Français
 | `src/lib/son.ts` | Pas synthétisés en Web Audio, sans fichier ; jamais sans clic |
 | `src/components/Scene.astro` | Scène du Jansenosaure, sur l'accueil sous la table à plans (elle ouvrait l'accueil avant novembre 2026) : canvas 2D collant, chapitres au défilement, étiquettes projetées, repli SVG |
 | `src/components/figures/` | Dessins SVG ; `Figure.astro` fait l'aiguillage par nom |
+| `src/styles/figures-animees.css` | Ce qui bouge dans un dessin une fois tracé : briques communes (`flux`, `tour`, `pouls`, `onde`, `marche`, `clignote`) et mouvements propres à un dessin (marche du bipède, balayage du laser…) |
 | `src/components/Cartouche.astro` | Bloc d'identification en pied de page |
 | `src/components/Film.astro`, `src/components/films/` | Film de montage d'un projet (`film: <nom>` dans son Markdown) : il remplace l'en-tête de la planche. `Film.astro` fait l'aiguillage par nom ; sans film, la planche garde son en-tête ordinaire |
 | `src/lib/chevalet.ts` | Le chevalet d'aquarelle en volumes : faces planes posées selon l'étape (`poser()`), cinématique de la planchette et de la pente |
@@ -51,6 +52,16 @@ Site statique Astro 7 (`output: 'static'`, `trailingSlash: 'always'`). Français
 - Ordre de dessin : les pièces sont rangées de part et d'autre du plateau (derrière lui ou devant, selon que la caméra voit son dessus ou son dessous), puis par distance ; les petites pièces plaquées sur une face (charnières, aimants) sont ses « pastilles », dessinées juste après elle.
 - Photos : `public/photos/<slug>/NN-nom.jpg` (1600 px au plus, métadonnées retirées) et sa réduction `NN-nom-800.jpg` à côté, que `Tirage.astro` déduit du nom. Recette : `ffmpeg -i source -map_metadata -1 -vf "scale='min(1600,iw)':-2:flags=lanczos" -q:v 4 NN-nom.jpg`, puis la même avec 800 et `-q:v 5`.
 - L'état « pas encore apparu » des titres et des tirages n'est posé que si un script en ligne a marqué la section (`data-pret`) : sans script ou avec moins d'animations, tout est visible d'emblée.
+
+## Dessins animés
+
+- Un dessin ne s'anime que sur sa planche : la figure pose la classe `anime` en mode planche, et les éléments qui n'existent que pour l'animation (`flux`, `tour`) ne sont rendus que dans ce mode (`{mode === 'planche' && …}`), pour ne pas alourdir les vignettes de la liasse et de l'accueil.
+- Un élément tracé (`fort`, `moyen`, `fin`, `cache`, `axe`, `dim`) porte déjà l'animation du tracé : pour le faire bouger ensuite, animer le `<g>` qui le contient. Une seconde animation sur l'élément remplacerait la première et le trait resterait invisible. Pour des pointillés qui défilent, la classe `marche` remplace `cache`.
+- `flux` : un `<path pathLength="100">` posé sur un lien, parcouru par un signal ; `--d` règle la durée, `--r` le retard. Variante `train` (cinq points, sans `pathLength` : `--f` vaut moins la longueur du trait, plus un).
+- Les rotations d'articulation (pattes du bipède) prennent leur centre en unités du dessin : `transform-origin: 56px 84px`.
+- Ne pas écrire `animation: 1.6s linear infinite` sans nom : la compilation le réduit à `animation: none`. Écrire les propriétés une à une.
+- Hors de l'écran, tout est en pause (`data-hors-vue`, posé par le script de `Figure.astro`) ; avec « réduire les animations », rien ne bouge et les signaux ne sont pas affichés.
+- Pour vérifier : prendre plusieurs images successives du dessin dans les deux moteurs (une capture fixe ne montre pas qu'une animation tourne) et compter `figure.getAnimations({ subtree: true })`.
 
 ## Liasse et transitions de page
 

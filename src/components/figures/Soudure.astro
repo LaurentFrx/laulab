@@ -11,7 +11,7 @@ interface Props {
 const { mode = 'planche', tracer = true, legende } = Astro.props;
 ---
 
-<figure class:list={['figure', 'soudure', { vignette: mode === 'vignette' }]} data-trace={tracer ? '' : undefined}>
+<figure class:list={['figure', 'soudure', { vignette: mode === 'vignette', anime: mode === 'planche' }]} data-trace={tracer ? '' : undefined}>
   <svg viewBox="0 0 220 150" role="img" aria-label="Un fer à souder Pinecil V2 avec sa panne TS-D24, relié en USB-C à un chargeur Anker Prime 140 W ou à une batterie Anker Prime 20K par un câble e-marked ; un câble non e-marked est barré">
     <defs><Marqueur id="f-soudure" /></defs>
 
@@ -25,8 +25,8 @@ const { mode = 'planche', tracer = true, legende } = Astro.props;
     <!-- La panne -->
     <rect class="moyen" x="86" y="27" width="6" height="10"></rect>
     <path class="fort" d="M86 29 H56 L40 31 V33 L56 35 H86"></path>
-    <path class="cache" d="M36 26 q-3 -4 0 -8"></path>
-    <path class="cache" d="M44 25 q-3 -4 0 -8"></path>
+    <g class="chaleur"><path class="cache" d="M36 26 q-3 -4 0 -8"></path></g>
+    <g class="chaleur" style="--r:0.7s"><path class="cache" d="M44 25 q-3 -4 0 -8"></path></g>
     <text class="texte-legende" x="96" y="19">Pinecil V2</text>
     <text class="texte-legende" x="38" y="44">panne TS-D24</text>
 
@@ -60,6 +60,13 @@ const { mode = 'planche', tracer = true, legende } = Astro.props;
     <path class="crayon" d="M171 92 l28 24 M199 92 l-28 24"></path>
     <text class="texte-legende" x="164" y="126">câble non e-marked</text>
     <text class="texte-legende" x="164" y="132">mis au rebut</text>
+
+    {mode === 'planche' && (
+      <g>
+        <path class="crayon braise" d="M52 29.5 L40 31 V33 L52 34.5"></path>
+        <path class="flux" pathLength="100" d="M33 82 V68 a6 6 0 0 1 6 -6 H192 a6 6 0 0 0 6 -6 V38 a6 6 0 0 0 -6 -6 H180" style="--d:3.4s"></path>
+      </g>
+    )}
 
     <!-- Repères -->
     <Bulle n="1" x="190" y="14" ax="170" ay="24" />

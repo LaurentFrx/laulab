@@ -13,7 +13,7 @@ const appareils = ['Shelly', 'onduleur', 'batteries', 'climatisation'];
 const nuage = 'M98 23 a5.5 5.5 0 0 1 -1 -10.5 a6 6 0 0 1 11 -2.5 a7 7 0 0 1 12 3 a5 5 0 0 1 -1 10 Z';
 ---
 
-<figure class:list={['figure', 'vps', { vignette: mode === 'vignette' }]} data-trace={tracer ? '' : undefined}>
+<figure class:list={['figure', 'vps', { vignette: mode === 'vignette', anime: mode === 'planche' }]} data-trace={tracer ? '' : undefined}>
   <svg viewBox="0 0 220 150" role="img" aria-label="Internet arrive sur un VPS Hetzner par Caddy, qui dessert Domo et ce site ; le broker Mosquitto est sur le même serveur ; un tunnel SSH inversé relie le VPS aux appareils de la maison, où aucun port n'est ouvert ; un tunnel Cloudflare complète l'ensemble">
     <defs><Marqueur id="f-vps" /></defs>
 
@@ -58,13 +58,24 @@ const nuage = 'M98 23 a5.5 5.5 0 0 1 -1 -10.5 a6 6 0 0 1 11 -2.5 a7 7 0 0 1 12 3
 
     <!-- Tunnel Cloudflare -->
     <path class="cache" d={nuage} transform="translate(69.6 85.8) scale(0.7)"></path>
-    <line class="cache" x1="154" y1="97" x2="168" y2="97"></line>
+    <line class="marche" x1="154" y1="97" x2="168" y2="97"></line>
     <text class="texte-legende" x="127" y="108">Cloudflare</text>
 
     <!-- Aucun port ouvert à la maison -->
     <polyline class="cache" points="20,64 20,130 190,130 190,114"></polyline>
-    <path class="crayon" d="M186 117 l8 8 M194 117 l-8 8"></path>
+    <path class="crayon pouls" d="M186 117 l8 8 M194 117 l-8 8"></path>
     <text class="texte-legende" x="62" y="127">aucun port ouvert à la maison</text>
+
+    {mode === 'planche' && (
+      <g>
+        <path class="flux" pathLength="100" d="M36 56 H53" style="--d:3s"></path>
+        <path class="flux" pathLength="100" d="M76 41 H85" style="--d:3s;--r:0.8s"></path>
+        <path class="flux" pathLength="100" d="M76 65 H85" style="--d:3s;--r:1.2s"></path>
+        <path class="flux" pathLength="100" d="M129 63.5 H163" style="--d:2.6s;--r:0.4s"></path>
+        <path class="flux" pathLength="100" d="M163 66.5 H129" style="--d:2.6s;--r:1.7s"></path>
+        <path class="flux alerte" pathLength="100" d="M20 64 V130 H190 V124" style="--d:4.8s;--r:0.6s"></path>
+      </g>
+    )}
 
     <!-- Repères -->
     <Bulle n="1" x="40" y="22" ax="50" ay="24" />

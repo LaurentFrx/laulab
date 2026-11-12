@@ -16,7 +16,7 @@ const dossiers = [
 ];
 ---
 
-<figure class:list={['figure', 'imac', { vignette: mode === 'vignette' }]} data-trace={tracer ? '' : undefined}>
+<figure class:list={['figure', 'imac', { vignette: mode === 'vignette', anime: mode === 'planche' }]} data-trace={tracer ? '' : undefined}>
   <svg viewBox="0 0 220 150" role="img" aria-label="Un iMac dont le disque dur est défaillant ; tout est copié sur un SSD externe, environ 330 Go ; les doublons sont écartés par empreinte ; les fichiers sont reclassés dans trois dossiers : Pro, Perso, Archives">
     <defs><Marqueur id="f-imac" /></defs>
 
@@ -28,7 +28,7 @@ const dossiers = [
     <!-- Son disque dur, fêlé -->
     <circle class="moyen" cx="40" cy="38" r="10"></circle>
     <circle class="fin" cx="40" cy="38" r="2.4"></circle>
-    <path class="crayon" d="M33 29 l5 6 l-3 3 l6 5 l-2 3 l5 4"></path>
+    <path class="crayon felure clignote" d="M33 29 l5 6 l-3 3 l6 5 l-2 3 l5 4"></path>
     <text class="texte-legende" x="14" y="83">disque dur défaillant</text>
 
     <!-- 1 · Copier -->
@@ -40,8 +40,10 @@ const dossiers = [
 
     <!-- 2 · Dédoublonner -->
     <line class="moyen" x1="114" y1="54" x2="114" y2="73" marker-end="url(#f-imac)"></line>
-    <rect class="fin" x="84" y="80" width="12" height="16"></rect>
-    <rect class="fin" x="88" y="77" width="12" height="16"></rect>
+    <g class="doublon">
+      <rect class="fin" x="84" y="80" width="12" height="16"></rect>
+      <rect class="fin" x="88" y="77" width="12" height="16"></rect>
+    </g>
     <rect class="moyen" x="92" y="74" width="12" height="16"></rect>
     <line class="fin" x1="94.5" y1="79" x2="101.5" y2="79"></line>
     <line class="fin" x1="94.5" y1="83" x2="101.5" y2="83"></line>
@@ -66,6 +68,16 @@ const dossiers = [
     ))}
     <text class="texte-legende" x="154" y="122">scripts Python,</text>
     <text class="texte-legende" x="154" y="128">plutôt qu'à la main</text>
+
+    {mode === 'planche' && (
+      <g>
+        <path class="flux" pathLength="100" d="M68 42 H93" style="--d:3.6s"></path>
+        <path class="flux" pathLength="100" d="M114 54 V73" style="--d:3.6s;--r:0.8s"></path>
+        <path class="flux" pathLength="100" d="M106 84 H121" style="--d:3.6s;--r:1.5s"></path>
+        <path class="flux" pathLength="100" d="M134 84 H146 V34 H153" style="--d:3.6s;--r:2.1s"></path>
+        {dossiers.map((d, n) => <path class="tour" d={`M170 ${d.y} h9 l2 3 h27 v13 h-38 Z`} style={`--r:${n * 1.5}s`}></path>)}
+      </g>
+    )}
 
     <!-- Repères -->
     <Bulle n="1" x="8" y="12" ax="20" ay="22" />
