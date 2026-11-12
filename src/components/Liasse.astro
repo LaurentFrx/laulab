@@ -386,14 +386,15 @@ const ouverte = rang >= 0 ? projets[rang] : undefined;
     .liasse {
       --lf: clamp(13.5rem, 62vw, 19rem);
     }
-    /* Feuille étroite : le tampon monte dans le coin du dessin, le titre garde toute la largeur */
+    /* Feuille étroite : le tampon se pose juste au-dessus du cartouche, le titre garde toute la largeur */
     .feuille-cartouche {
+      position: relative;
       grid-template-columns: auto minmax(0, 1fr);
     }
     .feuille-cartouche :global(.tampon) {
       position: absolute;
       right: 0.55rem;
-      top: 0.55rem;
+      bottom: calc(100% + 0.45rem);
       background: var(--papier-2);
     }
     .liasse-commandes {

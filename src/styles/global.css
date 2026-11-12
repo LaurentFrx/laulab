@@ -679,6 +679,24 @@ main.page {
   padding: 0.45rem 0.7rem 0.5rem;
   vertical-align: top;
 }
+/* Cartouche étroit (téléphone) : le tampon tient dans sa case, sur deux lignes s'il le faut.
+   Sans cela « EN CHANTIER » dépassait du cartouche et élargissait la page d'un pixel, ce qui
+   suffit à faire sauter la transition entre deux planches. */
+@media (max-width: 560px) {
+  .cartouche td {
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+  }
+  .cartouche .tampon {
+    max-width: 100%;
+    white-space: normal;
+    text-align: center;
+    font-size: 0.52rem;
+    letter-spacing: 0.05em;
+    line-height: 1.25;
+    padding: 0.3em 0.4em 0.25em;
+  }
+}
 .cartouche td .etiquette {
   display: block;
   font-family: var(--f-cote);
