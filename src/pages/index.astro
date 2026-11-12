@@ -2,6 +2,7 @@
 import { getCollection } from 'astro:content';
 import Planche from '../layouts/Planche.astro';
 import Figure from '../components/Figure.astro';
+import Liasse from '../components/Liasse.astro';
 import Scene from '../components/Scene.astro';
 import Tampon from '../components/Tampon.astro';
 import Cartouche from '../components/Cartouche.astro';
@@ -23,6 +24,8 @@ const nbTermine = projets.filter((p) => p.data.statut === 'termine').length;
   actif="accueil"
 >
   <Scene />
+
+  <Liasse />
 
   <section class="section" aria-labelledby="vedettes">
     <div class="ligne-titre">

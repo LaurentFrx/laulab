@@ -1,0 +1,148 @@
+---
+/**
+ * Barre de navigation du téléphone : toujours en bas de l'écran, dans le cadre du plan.
+ * Sur petit écran l'en-tête ne suit pas le défilement, et le site peut être installé comme une
+ * application (sans bouton « retour » du navigateur) : sans cette barre, rien ne ramenait à
+ * l'accueil ni au jeu de plans.
+ *   Accueil · planche précédente · Jeu de plans (plein écran, JeuDePlans.astro) · planche suivante
+ * Sur grand écran, l'en-tête reste visible et porte le même accès au jeu de plans.
+ */
+import { getCollection } from 'astro:content';
+import { numeroPlanche, trierParRepere } from '../lib/nomenclature';
+
+interface Props {
+  actif?: string | undefined;
+  /** Identifiant du projet affiché, s'il y en a un : la barre propose alors ses voisines */
+  planche?: string | undefined;
+}
+const { actif, planche } = Astro.props;
+const projets = trierParRepere(await getCollection('projets'));
+const k = planche ? projets.findIndex((p) => p.id === planche) : -1;
+const ici = k >= 0 ? projets[k] : undefined;
+const precedente = k > 0 ? projets[k - 1] : undefined;
+const suivante = k >= 0 && k < projets.length - 1 ? projets[k + 1] : undefined;
+---
+
+<nav class:list={['dock', { planche: !!ici }]} aria-label="Navigation rapide" data-dock>
+  <a class="dock-accueil" href="/" aria-current={actif === 'accueil' ? 'page' : undefined}>
+    <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2.5 7.6 8 3l5.5 4.6V13H9.6V9.6H6.4V13H2.5Z" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"></path></svg>
+    <span>Accueil</span>
+  </a>
+  {ici &&
+    (precedente ? (
+      <a class="dock-fleche" href={`/projets/${precedente.id}/`} data-tourne="precedent" aria-label={`Planche précédente : ${precedente.data.titre}`}>
+        <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M10 3L5 8l5 5" fill="none" stroke="currentColor" stroke-width="1.4"></path></svg>
+      </a>
+    ) : (
+      <span class="dock-fleche" aria-hidden="true"></span>
+    ))}
+  <a class="dock-jeu" href="/projets/" data-jeu-de-plans>
+    <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2.5 6.5h8v6.5h-8zM4.5 6.5v-2h8V11h-2M6.5 4.5v-2h7V9h-1" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linejoin="round"></path></svg>
+    <span>Jeu de plans</span>
+    <small>{ici ? `${numeroPlanche(ici)} / ${projets.length}` : `${projets.length} planches`}</small>
+  </a>
+  {ici &&
+    (suivante ? (
+      <a class="dock-fleche" href={`/projets/${suivante.id}/`} data-tourne="suivant" aria-label={`Planche suivante : ${suivante.data.titre}`}>
+        <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6 3l5 5-5 5" fill="none" stroke="currentColor" stroke-width="1.4"></path></svg>
+      </a>
+    ) : (
+      <span class="dock-fleche" aria-hidden="true"></span>
+    ))}
+</nav>
+
+<style>
+  .dock {
+    display: none;
+  }
+  @media (max-width: 640px) {
+    .dock {
+      position: fixed;
+      left: var(--cadre);
+      right: var(--cadre);
+      bottom: calc(var(--cadre) + env(safe-area-inset-bottom, 0px));
+      z-index: 45;
+      height: 3.4rem;
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr);
+      background: color-mix(in oklab, var(--papier-2) 94%, transparent);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border: var(--ep-moyen) solid var(--trait-2);
+      font-family: var(--f-cote);
+      font-size: 0.8rem;
+      letter-spacing: 0.02em;
+      line-height: 1;
+    }
+    .dock.planche {
+      grid-template-columns: auto 2.9rem minmax(0, 1fr) 2.9rem;
+    }
+    .dock a,
+    .dock span.dock-fleche {
+      display: grid;
+      place-items: center;
+      align-content: center;
+      gap: 0.3rem;
+      color: var(--encre);
+      text-decoration: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .dock a + a,
+    .dock a + span,
+    .dock span + a {
+      border-left: var(--ep-fin) solid var(--trait-3);
+    }
+    .dock a:active {
+      background: var(--cote-voile);
+      color: var(--cote);
+    }
+    .dock svg {
+      width: 18px;
+      height: 18px;
+    }
+    .dock-accueil {
+      padding: 0 1rem;
+    }
+    .dock-accueil[aria-current] {
+      color: var(--cote);
+    }
+    .dock-jeu {
+      grid-template-columns: auto auto;
+      grid-template-rows: auto auto;
+      column-gap: 0.55rem;
+      justify-content: center;
+    }
+    .dock-jeu svg {
+      grid-row: 1 / 3;
+      width: 22px;
+      height: 22px;
+      color: var(--cote);
+    }
+    .dock-jeu span {
+      font-size: 0.9rem;
+      align-self: end;
+    }
+    .dock-jeu small {
+      font-size: 0.68rem;
+      color: var(--encre-2);
+      align-self: start;
+      justify-self: start;
+    }
+  }
+</style>
+
+<script>
+  import { tourner, type Sens } from '../lib/tourne';
+
+  // Planche précédente ou suivante : la page tourne dans le sens de la numérotation.
+  // En phase de capture : le sens doit être posé avant que le routeur d'Astro ne lance la navigation.
+  document.addEventListener(
+    'click',
+    (ev) => {
+      if (ev.metaKey || ev.ctrlKey || ev.shiftKey || ev.altKey) return;
+      const lien = (ev.target as HTMLElement).closest<HTMLElement>('a[data-tourne]');
+      if (lien) tourner(lien.dataset.tourne as Sens);
+    },
+    true
+  );
+</script>

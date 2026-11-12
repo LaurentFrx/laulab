@@ -137,7 +137,7 @@ import Jansen from './figures/Jansen.astro';
   .son {
     position: absolute;
     right: var(--marge);
-    bottom: 0.8rem;
+    bottom: calc(0.8rem + var(--dock, 0px));
     appearance: none;
     background: color-mix(in oklab, var(--papier) 85%, transparent);
     color: var(--encre-2);
@@ -276,7 +276,7 @@ import Jansen from './figures/Jansen.astro';
     .chapitre:first-child {
       align-content: end;
       padding-top: 0;
-      padding-bottom: 3.6rem;
+      padding-bottom: calc(3.6rem + var(--dock, 0px));
     }
     .chapitre-texte {
       max-width: none;

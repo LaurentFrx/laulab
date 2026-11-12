@@ -85,6 +85,32 @@
     --bande: 16px;
   }
 }
+/* Téléphone : la barre de navigation (Dock.astro) occupe le bas de l'écran ; ce qui est collé
+   en bas (cartes des films, pied de page) remonte d'autant. */
+@media (max-width: 640px) {
+  :root {
+    --dock: calc(3.4rem + var(--cadre) + env(safe-area-inset-bottom, 0px));
+  }
+  main.page {
+    padding-bottom: calc(var(--dock) + 1rem);
+  }
+}
+/* Accès au jeu de plans dans l'en-tête : sur grand écran seulement (le téléphone a sa barre) */
+.nav .lien-jeu {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+.nav .lien-jeu svg {
+  width: 17px;
+  height: 17px;
+  color: var(--cote);
+}
+@media (max-width: 640px) {
+  .nav .lien-jeu {
+    display: none;
+  }
+}
 
 /* --- Base ----------------------------------------------------------------- */
 *,

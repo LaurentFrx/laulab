@@ -25,7 +25,7 @@ const planche = numeroPlanche(projet);
 const dessine = d.collaboration.claude.length ? 'Laurent Feroux et Claude' : 'Laurent Feroux';
 ---
 
-<Planche titre={d.titre} description={d.accroche} actif="projets">
+<Planche titre={d.titre} description={d.accroche} actif="projets" planche={projet.id}>
   <article>
     {/* Un projet qui a son film s'ouvre dessus ; les autres gardent l'en-tête ordinaire */}
     <Film nom={d.film} projet={projet} planche={planche}>

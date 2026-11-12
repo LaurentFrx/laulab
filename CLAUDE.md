@@ -28,6 +28,9 @@ Site statique Astro 7 (`output: 'static'`, `trailingSlash: 'always'`). Français
 | `src/components/Film.astro`, `src/components/films/` | Film de montage d'un projet (`film: <nom>` dans son Markdown) : il remplace l'en-tête de la planche. `Film.astro` fait l'aiguillage par nom ; sans film, la planche garde son en-tête ordinaire |
 | `src/lib/chevalet.ts` | Le chevalet d'aquarelle en volumes : faces planes posées selon l'étape (`poser()`), cinématique de la planchette et de la pente |
 | `src/components/Liasse.astro` | Jeu de plans en volume (CSS 3D) : navigation entre planches, en bas de chaque planche et en tête de la nomenclature. La pose des feuilles est calculée en CSS depuis `--k` (rang) et `--pos` (position) ; le script n'écrit que `--pos`. Pose `data-tourne` sur `<html>` pour la transition « tourner la planche » (fin de `global.css`) |
+| `src/components/Dock.astro` | Barre de navigation du téléphone (≤ 640 px), fixe en bas : Accueil, planche précédente, Jeu de plans, planche suivante. Rendue par le gabarit `Planche.astro` sur toutes les pages ; sa hauteur est dans `--dock` (ce qui est collé en bas remonte d'autant) |
+| `src/components/JeuDePlans.astro` | Jeu de plans en plein écran (`<dialog>`), ouvert par tout élément `[data-jeu-de-plans]` (barre, en-tête). Il emprunte la liasse de la page et la remet à sa place en fermant |
+| `src/lib/tourne.ts` | `tourner(sens)` : pose `data-tourne` pour la transition « tourner la planche », le repose après l'échange de page, l'oublie ensuite |
 | `src/components/Tirage.astro`, `PlancheContact.astro`, `Visionneuse.astro` | Photos d'un projet : tirage qui se développe, planche contact en fin de planche, agrandissement au clic |
 | `src/layouts/Planche.astro` | Gabarit commun (cadre, en-tête, `<head>`) |
 | `scripts/icones/` | Logo LF source (`logo-lf.png`) et `generer.py` (Pillow) : favicon, icônes Android/iOS dans `public/` ; si le logo change, changer aussi le nom des fichiers (iOS garde ses icônes en cache par adresse) |
@@ -48,7 +51,13 @@ Site statique Astro 7 (`output: 'static'`, `trailingSlash: 'always'`). Français
 
 ## Liasse et transitions de page
 
-- En volume, un conteneur `transform-style: preserve-3d` est un plan à z = 0 : il passe devant ses enfants en retrait et leur prend leurs clics. D'où `pointer-events: none` sur la liste et `auto` sur les feuilles. Ne pas l'enlever.
+- **Safari** n'applique pas la `perspective` d'un grand-parent à travers un conteneur `preserve-3d` intermédiaire : toute la liasse s'affichait à plat, feuilles en désordre (publié ainsi le 12/11/2026, vu par Laurent). La perspective est donc sur le parent direct des feuilles, sans `preserve-3d`, et l'ordre d'empilement vient de `z-index` (CSS au départ, script ensuite). Ne pas revenir à un espace 3D partagé.
+- **Toujours essayer dans le moteur de Safari avant de publier** : Laurent consulte le site sur appareils Apple. WebKit est installé avec le Playwright de `~/.npm/_npx/e41f203b7505f1fb/node_modules/playwright` (`webkit.launch()`, profils `devices['iPhone 15']`, `devices['iPad (gen 7)']`) ; celui de `~/tazieff-eps` n'a que Chromium.
+- `pointer-events: none` sur la liste et `auto` sur les feuilles : ailleurs que sur une feuille, le geste va à la scène.
+- **Une seule liasse par page** : elle pèse environ 76 Ko de HTML (les dessins SVG des vingt feuilles). Le plein écran l'emprunte au lieu d'en porter une seconde. Une page sans liasse garde un lien ordinaire vers la nomenclature.
+- Un écouteur de clic qui doit passer avant le routeur d'Astro (ouvrir le plein écran au lieu de suivre le lien, poser le sens de la page qui tourne) s'inscrit **en phase de capture** : le routeur écoute `document` en premier et appelle `preventDefault`.
+- Le site est installable (`manifest.json`, `display: standalone`) et Laurent l'utilise ainsi sur iPhone : pas de bouton « retour ». Sous 640 px l'en-tête ne colle pas ; la barre du bas est donc le seul retour vers l'accueil.
+- Le WebKit de Playwright sous Linux ne dessine pas la propriété `perspective` (rendu logiciel) : il sert à vérifier les parcours, les erreurs et la mise en page dans Safari, pas l'effet 3D.
 - Un composant initialisé sur `astro:page-load` l'est deux fois au premier chargement (au chargement du module, puis à l'évènement) : l'instance arrêtée doit détacher ses écouteurs (`AbortController`), sinon elle répond encore aux clics avec un état périmé.
 - `data-tourne` (suivant, precedent, ouvrir) : l'échange de page d'Astro remet les attributs de `<html>` à neuf, sauf ceux en `data-astro-*` ; la liasse le repose donc sur `astro:after-swap` et l'enlève quand la transition est finie.
 - Pour vérifier une interaction, la filmer avec Playwright (celui de `~/tazieff-eps/node_modules`, Chromium déjà installé) et tracer les évènements : une capture d'écran fixe ne montre ni un clic perdu ni une page qui ne tourne pas.

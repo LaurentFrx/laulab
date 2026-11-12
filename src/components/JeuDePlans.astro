@@ -1,0 +1,187 @@
+---
+/**
+ * Jeu de plans en plein écran : la liasse de la page (Liasse.astro), agrandie, ouverte depuis
+ * n'importe où par un élément `[data-jeu-de-plans]` (barre du téléphone, en-tête).
+ * Une page n'a qu'une liasse : à l'ouverture, on l'emprunte à sa place dans la page, et on l'y
+ * remet à la fermeture. Sur une page sans liasse, l'élément reste un lien vers la nomenclature.
+ */
+---
+
+<dialog class="jeu" data-jeu aria-label="Jeu de plans">
+  <div class="jeu-barre">
+    <a class="jeu-lien" href="/">
+      <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2.5 7.6 8 3l5.5 4.6V13H9.6V9.6H6.4V13H2.5Z" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"></path></svg>
+      Accueil
+    </a>
+    <a class="jeu-lien" href="/projets/">Nomenclature</a>
+    <button type="button" data-jeu-fermer aria-label="Fermer le jeu de plans">
+      <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 3.5l9 9M12.5 3.5l-9 9" fill="none" stroke="currentColor" stroke-width="1.4"></path></svg>
+    </button>
+  </div>
+  <div class="jeu-place" data-jeu-place></div>
+  <p class="jeu-aide cote">Glisser pour feuilleter · toucher la feuille de face pour l'ouvrir</p>
+</dialog>
+
+<style>
+  .jeu {
+    border: 0;
+    padding: 0;
+    margin: 0;
+    width: 100vw;
+    height: 100dvh;
+    max-width: none;
+    max-height: none;
+    color: var(--encre);
+    background-color: var(--papier);
+    background-image:
+      linear-gradient(var(--grille-2) 1px, transparent 1px), linear-gradient(90deg, var(--grille-2) 1px, transparent 1px);
+    background-size: 96px 96px;
+    overflow: hidden auto;
+  }
+  .jeu[open] {
+    display: grid;
+    /* minmax(0, …) : la rangée de feuilles à plat (repli) défile dans sa case au lieu d'élargir le dialogue */
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr) auto;
+    padding: calc(var(--cadre) + 0.6rem) var(--marge) calc(var(--cadre) + 1rem + env(safe-area-inset-bottom, 0px));
+    opacity: 1;
+    transform: none;
+    transition:
+      opacity 0.3s ease,
+      transform 0.45s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+  @starting-style {
+    .jeu[open] {
+      opacity: 0;
+      transform: translateY(18px);
+    }
+  }
+  .jeu::backdrop {
+    background: var(--papier);
+  }
+  .jeu-barre {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    font-family: var(--f-cote);
+    font-size: 0.9rem;
+  }
+  .jeu-lien {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    color: var(--encre);
+    text-decoration: none;
+    padding: 0.5rem 0;
+  }
+  .jeu-lien:hover,
+  .jeu-lien:focus-visible {
+    color: var(--cote);
+  }
+  .jeu-lien svg {
+    width: 17px;
+    height: 17px;
+  }
+  .jeu-barre button {
+    appearance: none;
+    margin-left: auto;
+    width: 2.6rem;
+    height: 2.6rem;
+    display: grid;
+    place-items: center;
+    border-radius: 999px;
+    border: var(--ep-fin) solid var(--trait-3);
+    background: none;
+    color: var(--encre-2);
+    cursor: pointer;
+  }
+  .jeu-barre button:hover,
+  .jeu-barre button:focus-visible {
+    color: var(--cote);
+    border-color: var(--cote);
+  }
+  .jeu-barre button svg {
+    width: 16px;
+    height: 16px;
+  }
+  .jeu-place {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    align-content: center;
+    min-height: 0;
+    min-width: 0;
+  }
+  /* La liasse empruntée : plus grande, sans la marge d'une section */
+  .jeu-place :global(.liasse) {
+    margin-top: 0;
+    --lf: clamp(17rem, 40vw, 32rem);
+  }
+  .jeu-aide {
+    margin: 0;
+    text-align: center;
+  }
+  @media (max-width: 899px) {
+    .jeu-place :global(.liasse) {
+      --lf: min(78vw, 24rem);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .jeu[open] {
+      transition: none;
+    }
+  }
+</style>
+
+<script>
+  /** La liasse empruntée à la page, et le repère laissé à sa place */
+  let emprunt: { section: HTMLElement; repere: Comment } | null = null;
+
+  const boite = () => document.querySelector<HTMLDialogElement>('[data-jeu]');
+
+  function rendre() {
+    if (!emprunt) return;
+    const { section, repere } = emprunt;
+    emprunt = null;
+    repere.replaceWith(section);
+    // De retour dans la page : en repli (rangée à plat), elle se recale sur la feuille ouverte
+    if (!section.hasAttribute('data-pret')) section.dispatchEvent(new CustomEvent('liasse:rejouer'));
+  }
+
+  function ouvrir(): boolean {
+    const d = boite();
+    const section = document.querySelector<HTMLElement>('[data-liasse]');
+    const place = d?.querySelector<HTMLElement>('[data-jeu-place]');
+    if (!d || !section || !place || typeof d.showModal !== 'function') return false;
+    if (d.open) return true;
+    const repere = document.createComment('liasse');
+    section.replaceWith(repere);
+    place.append(section);
+    emprunt = { section, repere };
+    d.addEventListener('close', rendre, { once: true });
+    d.showModal();
+    // La liasse rejoue son entrée (les feuilles glissent jusqu'à leur place) et prend le clavier
+    section.dispatchEvent(new CustomEvent('liasse:rejouer'));
+    return true;
+  }
+
+  // En phase de capture : avant le routeur d'Astro, qui sinon suivrait le lien vers la nomenclature
+  document.addEventListener(
+    'click',
+    (ev) => {
+      if (ev.metaKey || ev.ctrlKey || ev.shiftKey || ev.altKey) return;
+      const cible = ev.target as HTMLElement;
+      // Sans liasse sur la page (ou sans <dialog>), le lien mène simplement à la nomenclature
+      if (cible.closest('[data-jeu-de-plans]') && ouvrir()) {
+        ev.preventDefault();
+        return;
+      }
+      const d = boite();
+      if (d?.open && (cible.closest('[data-jeu-fermer]') || cible === d)) d.close();
+    },
+    true
+  );
+  // La page change : la liasse empruntée part avec l'ancienne page
+  document.addEventListener('astro:before-swap', () => {
+    emprunt = null;
+  });
+</script>

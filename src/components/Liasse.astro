@@ -7,7 +7,8 @@
  * et la page tourne (voir « Tourner la planche » dans global.css).
  *
  * La pose de chaque feuille est calculée en CSS à partir de son rang (--k) et de la position
- * de la liasse (--pos) : le script n'écrit que --pos. Repli (pas de script, ou moins
+ * de la liasse (--pos) : le script écrit --pos, et l'ordre d'empilement (z-index) quand la
+ * feuille de face change. Repli (pas de script, ou moins
  * d'animations) : une rangée de feuilles à plat, qui défile sur le côté.
  */
 import { getCollection } from 'astro:content';
@@ -28,7 +29,7 @@ const depart = Math.max(0, rang);
 const ouverte = rang >= 0 ? projets[rang] : undefined;
 ---
 
-<section class:list={['liasse', { section: !enTete }]} data-liasse data-depart={depart} data-ouverte={rang >= 0 ? rang : undefined} style={`--pos:${depart};--n:${projets.length}`} aria-labelledby="liasse-titre">
+<section class:list={['liasse', { section: !enTete }]} data-liasse data-depart={depart} data-ouverte={rang >= 0 ? rang : undefined} style={`--pos:${depart};--depart:${depart};--n:${projets.length}`} aria-labelledby="liasse-titre">
   <div class="ligne-titre">
     <h2 id="liasse-titre">Jeu de plans</h2>
     <span class="cote">
@@ -319,8 +320,6 @@ const ouverte = rang >= 0 ? projets[rang] : undefined;
   /* --- En volume ----------------------------------------------------------- */
   .liasse[data-pret] .liasse-scene {
     height: calc(var(--hf) + 3rem);
-    perspective: 1250px;
-    perspective-origin: 50% 40%;
     overflow: hidden;
     touch-action: pan-y;
     cursor: grab;
@@ -334,9 +333,13 @@ const ouverte = rang >= 0 ? projets[rang] : undefined;
     display: block;
     padding: 0;
     overflow: visible;
-    transform-style: preserve-3d;
-    /* Dans l'espace, ce conteneur est un plan posé devant les feuilles en retrait : il leur
-       prendrait leurs clics. Seules les feuilles reçoivent le pointeur. */
+    /* La perspective est posée sur le parent direct des feuilles, sans espace 3D partagé
+       (pas de preserve-3d) : Safari n'applique pas la perspective d'un grand-parent à travers
+       un conteneur intermédiaire, et aplatissait toute la liasse. L'ordre des feuilles est
+       donc donné par z-index, pas par leur profondeur. */
+    perspective: 1250px;
+    perspective-origin: 50% 40%;
+    /* Seules les feuilles reçoivent le pointeur ; ailleurs, le geste va à la scène */
     pointer-events: none;
   }
   .liasse[data-pret] .feuille a {
@@ -364,6 +367,9 @@ const ouverte = rang >= 0 ? projets[rang] : undefined;
       rotateX(calc(var(--ty, 0) * (1 - var(--adc)) * 1deg));
     opacity: calc(var(--e, 1) * clamp(0, (5.6 - var(--ad)) / 1.6, 1));
     filter: brightness(calc(1 - var(--ombre, 0.3) * var(--adc)));
+    /* Avant le script : la feuille de départ devant, les autres derrière elle par rang.
+       Ensuite le script tient cet ordre à jour (voir ecrire). */
+    z-index: calc(100 - max(var(--k) - var(--depart), var(--depart) - var(--k)));
     will-change: transform, opacity;
   }
   .liasse[data-pret] .feuille.loin {
@@ -404,11 +410,10 @@ const ouverte = rang >= 0 ? projets[rang] : undefined;
 </style>
 
 <script>
+  import { tourner } from '../lib/tourne';
+
   const reduit = window.matchMedia('(prefers-reduced-motion: reduce)');
   const borne = (v: number, a: number, b: number) => Math.min(b, Math.max(a, v));
-
-  /** Sens de la page qui tourne, gardé d'une page à l'autre le temps de la transition */
-  let sens = '';
 
   class Liasse {
     section: HTMLElement;
@@ -470,6 +475,7 @@ const ouverte = rang >= 0 ? projets[rang] : undefined;
       this.scene.addEventListener('wheel', this.surMolette, { passive: false, signal });
       this.scene.addEventListener('focusin', this.surFocus, { signal });
       this.section.addEventListener('keydown', this.surTouche, { signal });
+      this.section.addEventListener('liasse:rejouer', this.rejouer, { signal });
       this.precedente?.addEventListener('click', this.reculer, { signal });
       this.suivante?.addEventListener('click', this.avancer, { signal });
 
@@ -502,6 +508,8 @@ const ouverte = rang >= 0 ? projets[rang] : undefined;
         this.feuilles.forEach((f, i) => {
           f.classList.toggle('devant', i === k);
           f.classList.toggle('loin', Math.abs(i - k) > 6);
+          // La feuille de face par-dessus, puis ses voisines, de la plus proche à la plus lointaine
+          f.style.zIndex = String(100 - Math.abs(i - k));
         });
       }
       const cible = Math.round(this.cible);
@@ -547,6 +555,18 @@ const ouverte = rang >= 0 ? projets[rang] : undefined;
         return;
       }
       this.rafId = requestAnimationFrame(this.boucle);
+    };
+
+    /** Rejoue l'entrée en scène : la liasse repart de deux feuilles plus loin (à l'ouverture en plein écran). */
+    rejouer = () => {
+      this.vue = true;
+      this.e = 0;
+      this.v = 0;
+      this.cible = Math.round(this.cible);
+      this.pos = this.cible + (this.cible > this.n / 2 ? 2.2 : -2.2);
+      this.lancer();
+      // Le clavier va à la feuille visée (et non à celle qui était de face avant l'entrée)
+      this.liens[this.cible]?.focus({ preventScroll: true });
     };
 
     aller(k: number) {
@@ -642,8 +662,7 @@ const ouverte = rang >= 0 ? projets[rang] : undefined;
         return;
       }
       // La feuille de face s'ouvre : la page tourne dans le sens du jeu de plans
-      sens = this.ouverte < 0 ? 'ouvrir' : k > this.ouverte ? 'suivant' : 'precedent';
-      document.documentElement.dataset.tourne = sens;
+      tourner(this.ouverte < 0 ? 'ouvrir' : k > this.ouverte ? 'suivant' : 'precedent');
     };
 
     surMolette = (ev: WheelEvent) => {
@@ -682,17 +701,26 @@ const ouverte = rang >= 0 ? projets[rang] : undefined;
   }
 
   let liasse: Liasse | null = null;
+  let aPlat: AbortController | null = null;
 
   function init() {
     liasse?.detruire();
     liasse = null;
+    aPlat?.abort();
+    aPlat = null;
     const section = document.querySelector<HTMLElement>('[data-liasse]');
     if (!section) return;
     if (reduit.matches || !section.hasAttribute('data-pret')) {
-      // À plat : la feuille ouverte est amenée au milieu de la rangée, sans faire défiler la page
-      const rangee = section.querySelector<HTMLElement>('.liasse-feuilles');
-      const feuille = section.querySelectorAll<HTMLElement>('.feuille')[Number(section.dataset.depart ?? 0)];
-      if (rangee && feuille) rangee.scrollLeft = feuille.offsetLeft - (rangee.clientWidth - feuille.offsetWidth) / 2;
+      // À plat : la feuille ouverte est amenée au milieu de la rangée, sans faire défiler la page.
+      // À refaire quand la liasse passe en plein écran : un élément déplacé perd son défilement.
+      const caler = () => {
+        const rangee = section.querySelector<HTMLElement>('.liasse-feuilles');
+        const feuille = section.querySelectorAll<HTMLElement>('.feuille')[Number(section.dataset.depart ?? 0)];
+        if (rangee && feuille) rangee.scrollLeft = feuille.offsetLeft - rangee.offsetLeft - (rangee.clientWidth - feuille.offsetWidth) / 2;
+      };
+      caler();
+      aPlat = new AbortController();
+      section.addEventListener('liasse:rejouer', () => requestAnimationFrame(caler), { signal: aPlat.signal });
       return;
     }
     liasse = new Liasse(section);
@@ -700,21 +728,10 @@ const ouverte = rang >= 0 ? projets[rang] : undefined;
 
   init();
   document.addEventListener('astro:page-load', init);
-  document.addEventListener('astro:before-swap', (ev) => {
+  document.addEventListener('astro:before-swap', () => {
     liasse?.detruire();
     liasse = null;
-    if (!sens) return;
-    // La transition finie, on oublie le sens : la navigation suivante reprend le fondu ordinaire
-    const fin = () => {
-      sens = '';
-      delete document.documentElement.dataset.tourne;
-    };
-    const transition = (ev as Event & { viewTransition?: { finished?: Promise<unknown> } }).viewTransition;
-    if (transition?.finished) transition.finished.then(fin, fin);
-    else window.setTimeout(fin, 1200);
-  });
-  // L'échange de page remet les attributs de <html> à neuf : on y repose le sens avant que la transition ne s'anime
-  document.addEventListener('astro:after-swap', () => {
-    if (sens) document.documentElement.dataset.tourne = sens;
+    aPlat?.abort();
+    aPlat = null;
   });
 </script>

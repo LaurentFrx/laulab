@@ -3,13 +3,17 @@ import '../styles/global.css';
 import { ClientRouter } from 'astro:transitions';
 import Cadre from '../components/Cadre.astro';
 import EnTete from '../components/EnTete.astro';
+import Dock from '../components/Dock.astro';
+import JeuDePlans from '../components/JeuDePlans.astro';
 
 interface Props {
   titre: string;
   description: string;
   actif?: 'accueil' | 'projets' | 'methode' | 'a-propos';
+  /** Identifiant du projet affiché : la barre du téléphone propose ses planches voisines */
+  planche?: string;
 }
-const { titre, description, actif } = Astro.props;
+const { titre, description, actif, planche } = Astro.props;
 const titreComplet = actif === 'accueil' ? titre : `${titre} — L@uL@b`;
 const url = new URL(Astro.url.pathname, Astro.site);
 ---
@@ -63,5 +67,7 @@ const url = new URL(Astro.url.pathname, Astro.site);
     <main class="page" id="contenu">
       <slot />
     </main>
+    <Dock actif={actif} planche={planche} />
+    <JeuDePlans />
   </body>
 </html>

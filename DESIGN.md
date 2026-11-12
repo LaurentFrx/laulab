@@ -74,6 +74,8 @@ Une planche peut s'ouvrir sur un film : l'objet en volumes sur un canvas collant
 - **On feuillette avec la main** : glisser, molette horizontale, flèches du clavier, boutons. La liasse suit le geste, garde son élan, puis se pose sur une feuille avec un ressort à peine dépassé. La feuille de face s'incline un peu vers le pointeur. Une règle graduée, curseur au crayon, dit où l'on est.
 - **Un clic de côté amène la feuille de face ; un clic de face l'ouvre.** La page entière tourne alors comme une feuille de classeur, dans le sens de la numérotation, et la planche suivante arrive dessous. Depuis la nomenclature, la planche se pose sur la table.
 - **En arrivant**, chaque en-tête entre en scène : le titre se lève derrière un cache, l'accroche suit, le tampon s'abat.
+- **Le jeu de plans s'ouvre de partout, en plein écran** : la liasse de la page y est agrandie, avec le retour à l'accueil et à la nomenclature. Sur téléphone, une barre reste en bas de l'écran, dans le cadre du plan : Accueil, planche précédente, Jeu de plans, planche suivante. Sur grand écran, l'accès est dans l'en-tête, qui reste visible. Le site s'installe comme une application, sans bouton « retour » : cette barre est le seul chemin de retour, elle ne doit pas disparaître.
+- **Le jeu de plans est sur toutes les pages** : après la scène de l'accueil, en tête de la nomenclature, en bas des planches et des pages Méthode et À propos.
 - **Pas d'ombre portée** : la profondeur vient de la perspective et des feuilles de côté qui s'assombrissent.
 - **Repli** : sans script ou avec moins d'animations, une rangée de feuilles à plat qui défile sur le côté, et pas de page qui tourne.
 
