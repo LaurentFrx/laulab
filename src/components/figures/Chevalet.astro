@@ -48,7 +48,7 @@ const arc = { de: [O[0] + 62, O[1]] as [number, number], a: [O[0] + 62 * c, O[1]
 const cote18 = { haut: P(-7, HAUT), bas: P(-7, 0) };
 ---
 
-<figure class:list={['figure', 'chevalet', { vignette: mode === 'vignette' }]} data-trace={tracer ? '' : undefined}>
+<figure class:list={['figure', 'chevalet', { vignette: mode === 'vignette', anime: mode === 'planche' }]} data-trace={tracer ? '' : undefined}>
   <svg viewBox="0 0 220 150" role="img" aria-label="Chevalet de table : vue de dessus du plateau de 400 par 300 avec une feuille de 26 par 36 centimètres, et coupe en position inclinée à 20 % montrant le plateau évidé, les deux tubes d'aluminium, la planchette dépliée, une charnière et un aimant">
     <defs><Marqueur id="f-chevalet" /></defs>
 
@@ -70,6 +70,7 @@ const cote18 = { haut: P(-7, HAUT), bas: P(-7, 0) };
     ))}
 
     <!-- Coupe en position inclinée, au 1/2 -->
+    <g class="bascule">
     <polygon class="fort" points={plateau}></polygon>
     <line class="moyen" x1={fond[0][0].toFixed(2)} y1={fond[0][1].toFixed(2)} x2={fond[1][0].toFixed(2)} y2={fond[1][1].toFixed(2)}></line>
     {hachuresPlateau.map(([p, q]) => (
@@ -84,15 +85,19 @@ const cote18 = { haut: P(-7, HAUT), bas: P(-7, 0) };
     <polygon class="voile-cote" points={aimant}></polygon>
     <polygon class="fin" points={aimant}></polygon>
     <!-- Planchette dépliée : c'est elle qui donne la pente -->
+    <g class="bequille" style={`transform-origin:${charniere[0].toFixed(2)}px ${charniere[1].toFixed(2)}px`}>
     <polygon class="crayon" points={planchette}></polygon>
     {hachuresPlanchette.map(([p, q]) => (
       <line class="hachure" x1={p[0].toFixed(2)} y1={p[1].toFixed(2)} x2={q[0].toFixed(2)} y2={q[1].toFixed(2)}></line>
     ))}
+    </g>
     <circle class="articulation" cx={charniere[0].toFixed(2)} cy={charniere[1].toFixed(2)} r="1.3"></circle>
     <line class="moyen" x1={feuille[0][0].toFixed(2)} y1={feuille[0][1].toFixed(2)} x2={feuille[1][0].toFixed(2)} y2={feuille[1][1].toFixed(2)}></line>
+    </g>
     <text class="texte-legende" x="38" y="146">coupe, position inclinée</text>
 
-    <!-- Pente et épaisseur -->
+    <!-- Pente, épaisseur et repères : ils s'effacent pendant que le plateau bouge -->
+    <g class="notes">
     <path class="dim" d={`M${f(arc.de).replace(',', ' ')} A62 62 0 0 0 ${f(arc.a).replace(',', ' ')}`}></path>
     <text class="texte-cote" x="106" y="130">20 %</text>
     <Cote x1={cote18.haut[0]} y1={cote18.haut[1]} x2={cote18.bas[0]} y2={cote18.bas[1]} texte="18" decalage="5" marqueur="f-chevalet" attache="6" />
@@ -104,6 +109,7 @@ const cote18 = { haut: P(-7, HAUT), bas: P(-7, 0) };
     <Bulle n="4" x="164" y="76" ax={charniere[0].toFixed(2)} ay={(charniere[1] - 1.3).toFixed(2)} />
     <Bulle n="5" x="140" y="82" ax={P(113.2, POCHE)[0].toFixed(2)} ay={P(113.2, POCHE)[1].toFixed(2)} />
     <Bulle n="6" x="62" y="100" ax={P(42, HAUT + 0.9)[0].toFixed(2)} ay={P(42, HAUT + 0.9)[1].toFixed(2)} />
+    </g>
   </svg>
   {legende && <figcaption>{legende}</figcaption>}
 </figure>

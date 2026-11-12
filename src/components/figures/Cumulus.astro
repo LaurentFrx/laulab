@@ -13,7 +13,7 @@ const { mode = 'planche', tracer = true, legende } = Astro.props;
 const niveaux = [44, 62, 80, 98, 116];
 ---
 
-<figure class:list={['figure', 'cumulus', { vignette: mode === 'vignette' }]} data-trace={tracer ? '' : undefined}>
+<figure class:list={['figure', 'cumulus', { vignette: mode === 'vignette', anime: mode === 'planche' }]} data-trace={tracer ? '' : undefined}>
   <svg viewBox="0 0 220 150" role="img" aria-label="Schéma : ballon d'eau chaude avec sonde en bas, contacteur Shelly, compteur d'énergie, production solaire et serveur Domo">
     <defs><Marqueur id="f-cumulus" /></defs>
 
@@ -33,7 +33,7 @@ const niveaux = [44, 62, 80, 98, 116];
     <line class="moyen" x1="100" y1="129" x2="74" y2="129"></line>
     <line class="moyen" x1="100" y1="131.5" x2="74" y2="131.5"></line>
     <path class="moyen" d="M74 129 a1.25 1.25 0 0 0 0 2.5"></path>
-    <circle class="crayon" cx="76" cy="130.25" r="1.1"></circle>
+    <circle class="crayon pouls" cx="76" cy="130.25" r="1.1"></circle>
     <!-- Entrée eau froide, sortie eau chaude -->
     <line class="moyen" x1="20" y1="126" x2="40" y2="126"></line>
     <line class="dim" x1="22" y1="126" x2="34" y2="126" marker-end="url(#f-cumulus)"></line>
@@ -74,9 +74,22 @@ const niveaux = [44, 62, 80, 98, 116];
     <rect class="moyen" x="176" y="52" width="36" height="22" rx="2"></rect>
     <text class="texte-legende" x="180" y="60">Domo</text>
     <text class="texte-legende" x="180" y="66">VPS · Caddy</text>
-    <polyline class="cache" points="176,63 170,63 170,32 162,32"></polyline>
-    <polyline class="cache" points="176,68 168,68 168,78 162,78"></polyline>
+    <polyline class="marche" points="176,63 170,63 170,32 162,32"></polyline>
+    <polyline class="marche" points="176,68 168,68 168,78 162,78"></polyline>
     <text class="texte-legende" x="166" y="48" font-size="3.4">tunnel SSH</text>
+
+    {mode === 'planche' && (
+      <g>
+        <polyline class="crayon braise si-anime" points="52,124 56,120 60,128 64,120 68,128 72,120 76,128 80,120 84,128 88,124"></polyline>
+        <g class="chaleur si-anime"><path class="fin" d="M58 114 q-3 -4 0 -8"></path></g>
+        <g class="chaleur si-anime" style="--r:0.6s"><path class="fin" d="M70 114 q-3 -4 0 -8"></path></g>
+        <g class="chaleur si-anime" style="--r:1.2s"><path class="fin" d="M82 114 q-3 -4 0 -8"></path></g>
+        <path class="flux" pathLength="100" d="M144 104 V90" style="--d:3.4s"></path>
+        <path class="flux" pathLength="100" d="M126 78 H112 V124 H90" style="--d:3.4s;--r:0.7s"></path>
+        <path class="flux" pathLength="100" d="M144 66 V42" style="--d:3.4s;--r:1.5s"></path>
+        <path class="flux" pathLength="100" d="M162 32 H214" style="--d:3.4s;--r:2.1s"></path>
+      </g>
+    )}
 
     <!-- Repères -->
     <Bulle n="1" x="24" y="40" ax="40" ay="50" />

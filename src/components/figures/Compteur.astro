@@ -12,7 +12,7 @@ interface Props {
 const { mode = 'planche', tracer = true, legende } = Astro.props;
 ---
 
-<figure class:list={['figure', 'compteur', { vignette: mode === 'vignette' }]} data-trace={tracer ? '' : undefined}>
+<figure class:list={['figure', 'compteur', { vignette: mode === 'vignette', anime: mode === 'planche' }]} data-trace={tracer ? '' : undefined}>
   <svg viewBox="0 0 220 150" role="img" aria-label="Coupe d'un passage : caméra fixée en hauteur, champ de vision vers le sol, ligne virtuelle de comptage, boîtier Raspberry Pi 5 avec module Hailo-8">
     <defs><Marqueur id="f-compteur" /></defs>
 
@@ -43,12 +43,12 @@ const { mode = 'planche', tracer = true, legende } = Astro.props;
 
     <!-- Trajectoires -->
     <path class="moyen" d="M30 100 C 70 96, 90 104, 128 100" marker-end="url(#f-compteur)"></path>
-    <text class="texte-legende" x="30" y="96">+1</text>
+    <g class="top entre"><text class="texte-legende" x="30" y="96">+1</text></g>
     <path class="moyen" d="M190 112 C 160 110, 140 116, 96 112" marker-end="url(#f-compteur)"></path>
-    <text class="texte-legende" x="184" y="108">−1</text>
+    <g class="top sort"><text class="texte-legende" x="184" y="108">−1</text></g>
     <!-- Silhouettes schématiques (ellipse = tête vue d'en haut) -->
-    <ellipse class="fin" cx="60" cy="100" rx="4" ry="2.5"></ellipse>
-    <ellipse class="fin" cx="160" cy="112" rx="4" ry="2.5"></ellipse>
+    <g class="passant entre"><ellipse class="fin" cx="60" cy="100" rx="4" ry="2.5"></ellipse></g>
+    <g class="passant sort"><ellipse class="fin" cx="160" cy="112" rx="4" ry="2.5"></ellipse></g>
 
     <!-- Boîtier Raspberry Pi 5 + Hailo -->
     <rect class="fort" x="150" y="40" width="44" height="26"></rect>
@@ -62,6 +62,12 @@ const { mode = 'planche', tracer = true, legende } = Astro.props;
     <text class="texte-legende" x="126" y="25" font-size="3.4">CSI / USB</text>
 
     <Cote x1="52" y1="140" x2="168" y2="140" texte="zone couverte" decalage="4" marqueur="f-compteur" />
+
+    {mode === 'planche' && (
+      <g>
+        <path class="flux" pathLength="100" d="M120 27 H150 V40" style="--d:2.8s"></path>
+      </g>
+    )}
 
     <!-- Repères -->
     <Bulle n="1" x="80" y="30" ax="100" ay="27" />

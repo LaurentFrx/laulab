@@ -12,7 +12,9 @@
 
 /* Ce qui n'existe que pour l'animation */
 .figure .flux,
-.figure .tour {
+.figure .tour,
+.figure .goutte,
+.figure .si-anime {
   display: none;
 }
 
@@ -80,6 +82,22 @@
   .figure.anime .onde {
     animation: fig-onde 1.8s ease-out infinite;
     animation-delay: calc(1.8s + var(--r, 0s));
+  }
+
+  /* Ce qui ne se montre que si ça bouge (une résistance qui rougit, de la chaleur qui monte) */
+  .figure.anime .si-anime {
+    display: inline;
+  }
+
+  /* Chaleur qui monte, décalée par --r */
+  .figure.anime .chaleur {
+    animation: fig-chaleur 1.8s ease-out infinite;
+    animation-delay: calc(1.8s + var(--r, 0s));
+  }
+
+  /* Lueur qui respire */
+  .figure.anime .respire {
+    animation: fig-respire 4s ease-in-out 1.8s infinite;
   }
 
   /* Scintillement */
@@ -174,17 +192,80 @@
   }
 
   /* --- Station de soudure : la panne chauffe ------------------------------ */
-  .figure.anime.soudure .chaleur {
-    animation: soudure-chaleur 1.8s ease-out infinite;
-    animation-delay: calc(1.8s + var(--r, 0s));
-  }
   .figure.anime.soudure .braise {
     animation: fig-onde 2.4s ease-in-out 1.8s infinite;
   }
 
+  /* --- Cumulus (Domo) : la résistance rougit ------------------------------ */
+  .figure.anime.cumulus .braise {
+    animation: fig-onde 2.6s ease-in-out 1.8s infinite;
+  }
+
+  /* --- Compteur de personnes : deux passants, deux comptages -------------- */
+  .figure.anime.compteur .passant.entre {
+    animation: compteur-entre 4.4s linear 1.8s infinite;
+  }
+  .figure.anime.compteur .passant.sort {
+    animation: compteur-sort 4.4s linear 1.8s infinite;
+  }
+  .figure.anime.compteur .top {
+    transform-box: fill-box;
+    transform-origin: center;
+  }
+  .figure.anime.compteur .top.entre {
+    animation: compteur-top-entre 4.4s ease-out 1.8s infinite;
+  }
+  .figure.anime.compteur .top.sort {
+    animation: compteur-top-sort 4.4s ease-out 1.8s infinite;
+  }
+
+  /* --- Station météo : l'anémomètre tourne, la girouette hésite, il pleut -- */
+  .figure.meteo .bras {
+    transform-origin: 66px 14px;
+  }
+  .figure.anime.meteo .bras {
+    animation: meteo-bras 0.7s cubic-bezier(0.37, 0, 0.63, 1) 1.8s infinite alternate;
+  }
+  .figure.anime.meteo .coupelle.gauche {
+    animation: meteo-coupelle-g 0.7s cubic-bezier(0.37, 0, 0.63, 1) 1.8s infinite alternate;
+  }
+  .figure.anime.meteo .coupelle.droite {
+    animation: meteo-coupelle-d 0.7s cubic-bezier(0.37, 0, 0.63, 1) 1.8s infinite alternate;
+  }
+  .figure.meteo .girouette {
+    transform-origin: 66px 30px;
+  }
+  .figure.anime.meteo .girouette {
+    animation: meteo-girouette 3.2s ease-in-out 1.8s infinite alternate;
+  }
+  .figure.anime .goutte {
+    display: inline;
+    stroke: var(--cote);
+    stroke-width: 1;
+    stroke-linecap: round;
+    vector-effect: non-scaling-stroke;
+    opacity: 0;
+    animation: meteo-goutte 1.3s linear infinite;
+    animation-delay: calc(1.8s + var(--r, 0s));
+  }
+
+  /* --- Chevalet : la béquille se replie, le plateau se couche, puis se relève */
+  .figure.chevalet .bascule {
+    transform-origin: 38px 134px;
+  }
+  .figure.anime.chevalet .bascule {
+    animation: chevalet-bascule 11s ease-in-out 1.8s infinite;
+  }
+  .figure.anime.chevalet .bequille {
+    animation: chevalet-bequille 11s ease-in-out 1.8s infinite;
+  }
+  .figure.anime.chevalet .notes {
+    animation: chevalet-notes 11s linear 1.8s infinite;
+  }
+
   /* --- Salle de réunion : le faisceau respire ----------------------------- */
   .figure.anime.salle .faisceau {
-    animation: salle-faisceau 4s ease-in-out 1.8s infinite;
+    animation: fig-respire 4s ease-in-out 1.8s infinite;
   }
 
   /* --- Sauvetage d'un iMac : le disque faiblit, les doublons disparaissent - */
@@ -400,7 +481,7 @@
     transform: scaleX(0.96);
   }
 }
-@keyframes soudure-chaleur {
+@keyframes fig-chaleur {
   0% {
     transform: translateY(2px);
     opacity: 0;
@@ -413,7 +494,7 @@
     opacity: 0;
   }
 }
-@keyframes salle-faisceau {
+@keyframes fig-respire {
   0%,
   100% {
     opacity: 0.35;
@@ -438,5 +519,150 @@
 @keyframes hass-croix {
   to {
     stroke-dashoffset: 0;
+  }
+}
+
+/* Compteur : le passant traverse, le « +1 » saute quand il franchit la ligne */
+@keyframes compteur-entre {
+  0% {
+    transform: translateX(-30px);
+    opacity: 0;
+  }
+  6% {
+    opacity: 1;
+  }
+  60% {
+    transform: translateX(68px);
+    opacity: 1;
+  }
+  68%,
+  100% {
+    transform: translateX(68px);
+    opacity: 0;
+  }
+}
+@keyframes compteur-sort {
+  0%,
+  40% {
+    transform: translateX(30px);
+    opacity: 0;
+  }
+  46% {
+    opacity: 1;
+  }
+  92% {
+    transform: translateX(-64px);
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(-64px);
+    opacity: 0;
+  }
+}
+@keyframes compteur-top-entre {
+  0%,
+  47%,
+  64%,
+  100% {
+    transform: scale(1);
+  }
+  52% {
+    transform: scale(2);
+  }
+}
+@keyframes compteur-top-sort {
+  0%,
+  82%,
+  99%,
+  100% {
+    transform: scale(1);
+  }
+  87% {
+    transform: scale(2);
+  }
+}
+
+/* Météo : vu de face, un bras qui tourne se raccourcit puis s'inverse */
+@keyframes meteo-bras {
+  from {
+    transform: scaleX(1);
+  }
+  to {
+    transform: scaleX(-1);
+  }
+}
+@keyframes meteo-coupelle-g {
+  to {
+    transform: translateX(28px);
+  }
+}
+@keyframes meteo-coupelle-d {
+  to {
+    transform: translateX(-28px);
+  }
+}
+@keyframes meteo-girouette {
+  from {
+    transform: scaleX(1);
+  }
+  to {
+    transform: scaleX(0.7);
+  }
+}
+@keyframes meteo-goutte {
+  0% {
+    transform: translateY(-7px);
+    opacity: 0;
+  }
+  25% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(8px);
+    opacity: 0;
+  }
+}
+
+/* Chevalet : repos, on soulève, la béquille se replie, on couche, puis l'inverse */
+@keyframes chevalet-bascule {
+  0%,
+  50%,
+  100% {
+    transform: rotate(0deg);
+  }
+  57%,
+  65% {
+    transform: rotate(-2.5deg);
+  }
+  73%,
+  80% {
+    transform: rotate(11.31deg);
+  }
+  87%,
+  94% {
+    transform: rotate(-2.5deg);
+  }
+}
+@keyframes chevalet-bequille {
+  0%,
+  57%,
+  94%,
+  100% {
+    transform: rotate(0deg);
+  }
+  65%,
+  87% {
+    transform: rotate(90deg);
+  }
+}
+@keyframes chevalet-notes {
+  0%,
+  49%,
+  100% {
+    opacity: 1;
+  }
+  52%,
+  97% {
+    opacity: 0;
   }
 }

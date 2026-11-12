@@ -11,7 +11,7 @@ interface Props {
 const { mode = 'planche', tracer = true, legende } = Astro.props;
 ---
 
-<figure class:list={['figure', 'solaire', { vignette: mode === 'vignette' }]} data-trace={tracer ? '' : undefined}>
+<figure class:list={['figure', 'solaire', { vignette: mode === 'vignette', anime: mode === 'planche' }]} data-trace={tracer ? '' : undefined}>
   <svg viewBox="0 0 220 150" role="img" aria-label="Plan de toiture : quatre panneaux orientés à 190°, deux panneaux orientés à 280°, et schéma de raccordement avec onduleur, deux batteries Solarbank et compteur">
     <defs><Marqueur id="f-solaire" /></defs>
 
@@ -33,6 +33,9 @@ const { mode = 'planche', tracer = true, legende } = Astro.props;
           <line class="fin" x1={x - 8} y1="7" x2={x + 8} y2="7"></line>
         </>
       ))}
+      {mode === 'planche' && [-36, -18, 0, 18].map((x, n) => (
+        <rect class="tour huit" x={x - 8} y="-14" width="16" height="28" style={`--d:4.8s;--r:${(n * 0.6).toFixed(1)}s`}></rect>
+      ))}
       <line class="axe" x1="-50" y1="0" x2="32" y2="0"></line>
       <line class="dim" x1="-9" y1="14" x2="-9" y2="32" marker-end="url(#f-solaire)"></line>
     </g>
@@ -49,6 +52,9 @@ const { mode = 'planche', tracer = true, legende } = Astro.props;
           <line class="fin" x1={x - 8} y1="0" x2={x + 8} y2="0"></line>
           <line class="fin" x1={x - 8} y1="7" x2={x + 8} y2="7"></line>
         </>
+      ))}
+      {mode === 'planche' && [-9, 9].map((x, n) => (
+        <rect class="tour huit" x={x - 8} y="-14" width="16" height="28" style={`--d:4.8s;--r:${(2.4 + n * 0.6).toFixed(1)}s`}></rect>
       ))}
       <line class="axe" x1="-24" y1="0" x2="24" y2="0"></line>
       <line class="dim" x1="0" y1="14" x2="0" y2="30" marker-end="url(#f-solaire)"></line>
@@ -91,9 +97,21 @@ const { mode = 'planche', tracer = true, legende } = Astro.props;
       <text class="texte-legende" x="158.5" y="13.6" font-size="3.4">kWh</text>
       <line class="moyen" x1="168" y1="12" x2="212" y2="12"></line>
       <text class="texte-legende" x="182" y="9">Linky · réseau</text>
-      <path class="fin" d="M148 8 a6 6 0 0 1 0 8"></path>
+      <g class="onde"><path class="fin" d="M148 8 a6 6 0 0 1 0 8"></path></g>
       <text class="texte-legende" x="138" y="22" font-size="3.4">smart meter</text>
       <text class="texte-cote" x="104" y="3">1 200 W max / batterie</text>
+      {mode === 'planche' && (
+        <g>
+          {[6, 24, 42].map((y, n) => (
+            <>
+              <path class="flux" pathLength="100" d={`M26 ${y} H44`} style={`--d:3.6s;--r:${(n * 0.3).toFixed(1)}s`}></path>
+              <path class="flux" pathLength="100" d={`M74 ${y} H100`} style={`--d:3.6s;--r:${(0.8 + n * 0.3).toFixed(1)}s`}></path>
+            </>
+          ))}
+          <path class="flux" pathLength="100" d="M100 12 H156" style="--d:3.6s;--r:1.8s"></path>
+          <path class="flux" pathLength="100" d="M168 12 H212" style="--d:3.6s;--r:2.5s"></path>
+        </g>
+      )}
     </g>
 
     <!-- Repères -->

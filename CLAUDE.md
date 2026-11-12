@@ -60,6 +60,9 @@ Site statique Astro 7 (`output: 'static'`, `trailingSlash: 'always'`). Français
 - `flux` : un `<path pathLength="100">` posé sur un lien, parcouru par un signal ; `--d` règle la durée, `--r` le retard. Variante `train` (cinq points, sans `pathLength` : `--f` vaut moins la longueur du trait, plus un).
 - Les rotations d'articulation (pattes du bipède) prennent leur centre en unités du dessin : `transform-origin: 56px 84px`.
 - Ne pas écrire `animation: 1.6s linear infinite` sans nom : la compilation le réduit à `animation: none`. Écrire les propriétés une à une.
+- `si-anime` : pour ce qui ne doit se voir que si ça bouge (résistance qui rougit, chaleur qui monte) ; sans animation, l'élément n'est pas affiché.
+- Quand une pièce bouge sous ses repères (plateau du chevalet), les repères et les cotes sont dans un groupe qui s'efface le temps du mouvement.
+- Le Jansenosaure et le logo ont leur propre animation (script du composant) : ils ne passent pas par cette feuille.
 - Hors de l'écran, tout est en pause (`data-hors-vue`, posé par le script de `Figure.astro`) ; avec « réduire les animations », rien ne bouge et les signaux ne sont pas affichés.
 - Pour vérifier : prendre plusieurs images successives du dessin dans les deux moteurs (une capture fixe ne montre pas qu'une animation tourne) et compter `figure.getAnimations({ subtree: true })`.
 

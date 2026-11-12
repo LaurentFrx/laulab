@@ -13,7 +13,7 @@ const { mode = 'planche', tracer = true, legende } = Astro.props;
 const segments = [0, 1, 2, 3, 4, 5];
 ---
 
-<figure class:list={['figure', 'led', { vignette: mode === 'vignette' }]} data-trace={tracer ? '' : undefined}>
+<figure class:list={['figure', 'led', { vignette: mode === 'vignette', anime: mode === 'planche' }]} data-trace={tracer ? '' : undefined}>
   <svg viewBox="0 0 220 150" role="img" aria-label="Coupe d'un profilé aluminium avec diffuseur et ruban COB, plan de six segments sur 3,2 m, et chaîne de commande : alimentation, contrôleur QuinLED sous WLED, flux audio Plexamp puis LedFx">
     <defs><Marqueur id="f-led" /></defs>
 
@@ -43,6 +43,9 @@ const segments = [0, 1, 2, 3, 4, 5];
       ))}
       {segments.slice(0, -1).map((k) => (
         <line class="cache" x1={k * 22 + 19} y1="3" x2={k * 22 + 22} y2="3"></line>
+      ))}
+      {mode === 'planche' && segments.map((k) => (
+        <rect class="tour" x={k * 22} y="0" width="19" height="6" style={`--d:1.8s;--r:${(k * 0.3).toFixed(1)}s`}></rect>
       ))}
       <Cote x1="0" y1="12" x2="129" y2="12" texte="3,2 m · 6 segments" decalage="4" marqueur="f-led" attache="4" />
       <line class="fin" x1="-2" y1="-6" x2="-2" y2="10"></line>
@@ -74,9 +77,17 @@ const segments = [0, 1, 2, 3, 4, 5];
       <text class="texte-legende" x="59" y="43">LedFx</text>
       <text class="texte-legende" x="59" y="49">analyse audio</text>
       <line class="moyen" x1="38" y1="45" x2="56" y2="45"></line>
-      <polyline class="cache" points="94,45 110,45 110,18 75,18"></polyline>
+      <polyline class="marche" points="94,45 110,45 110,18 75,18"></polyline>
       <text class="texte-legende" x="112" y="34" font-size="3.4">DDP</text>
       <text class="texte-legende" x="112" y="39" font-size="3.4">réseau</text>
+      {mode === 'planche' && (
+        <g>
+          <path class="flux" pathLength="100" d="M-20 9 H0" style="--d:3.2s"></path>
+          <path class="flux" pathLength="100" d="M38 9 H56" style="--d:3.2s;--r:0.5s"></path>
+          <path class="flux" pathLength="100" d="M94 9 H104 V-38 H107" style="--d:3.2s;--r:1s"></path>
+          <path class="flux" pathLength="100" d="M38 45 H56" style="--d:3.2s;--r:1.8s"></path>
+        </g>
+      )}
     </g>
 
     <!-- Repères -->

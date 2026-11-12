@@ -12,7 +12,7 @@ interface Props {
 const { mode = 'planche', tracer = true, legende } = Astro.props;
 ---
 
-<figure class:list={['figure', 'meteo', { vignette: mode === 'vignette' }]} data-trace={tracer ? '' : undefined}>
+<figure class:list={['figure', 'meteo', { vignette: mode === 'vignette', anime: mode === 'planche' }]} data-trace={tracer ? '' : undefined}>
   <svg viewBox="0 0 220 150" role="img" aria-label="Élévation d'un mât météo : anémomètre et girouette en tête, pluviomètre, abri de température et UV, boîtier ESP32 avec antenne LoRaWAN ; liaison radio vers une passerelle puis Node-RED">
     <defs><Marqueur id="f-meteo" /></defs>
 
@@ -29,15 +29,17 @@ const { mode = 'planche', tracer = true, legende } = Astro.props;
 
     <!-- Anémomètre -->
     <line class="moyen" x1="66" y1="24" x2="66" y2="14"></line>
-    <line class="moyen" x1="52" y1="14" x2="80" y2="14"></line>
-    <circle class="moyen" cx="52" cy="14" r="3"></circle>
-    <circle class="moyen" cx="80" cy="14" r="3"></circle>
+    <g class="bras"><line class="moyen" x1="52" y1="14" x2="80" y2="14"></line></g>
+    <g class="coupelle gauche"><circle class="moyen" cx="52" cy="14" r="3"></circle></g>
+    <g class="coupelle droite"><circle class="moyen" cx="80" cy="14" r="3"></circle></g>
     <circle class="moyen" cx="66" cy="14" r="1.6"></circle>
     <!-- Girouette -->
     <line class="moyen" x1="66" y1="24" x2="66" y2="30"></line>
-    <line class="moyen" x1="48" y1="30" x2="86" y2="30"></line>
-    <path class="fort" d="M86 30 L80 27 L80 33 Z"></path>
-    <path class="moyen" d="M48 30 L54 26 L54 34 Z"></path>
+    <g class="girouette">
+      <line class="moyen" x1="48" y1="30" x2="86" y2="30"></line>
+      <path class="fort" d="M86 30 L80 27 L80 33 Z"></path>
+      <path class="moyen" d="M48 30 L54 26 L54 34 Z"></path>
+    </g>
 
     <!-- Pluviomètre -->
     <line class="moyen" x1="68" y1="52" x2="92" y2="52"></line>
@@ -62,9 +64,9 @@ const { mode = 'planche', tracer = true, legende } = Astro.props;
     <line class="moyen" x1="98" y1="104" x2="110" y2="104"></line>
     <text class="texte-legende" x="100" y="110" font-size="3.4">alim.</text>
     <!-- Ondes -->
-    <path class="cache" d="M110 72 a10 10 0 0 1 0 20"></path>
-    <path class="cache" d="M116 66 a16 16 0 0 1 0 32"></path>
-    <path class="cache" d="M122 60 a22 22 0 0 1 0 44"></path>
+    <g class="onde"><path class="cache" d="M110 72 a10 10 0 0 1 0 20"></path></g>
+    <g class="onde" style="--r:0.25s"><path class="cache" d="M116 66 a16 16 0 0 1 0 32"></path></g>
+    <g class="onde" style="--r:0.5s"><path class="cache" d="M122 60 a22 22 0 0 1 0 44"></path></g>
     <text class="texte-cote" x="112" y="56">LoRaWAN</text>
 
     <!-- Passerelle -->
@@ -81,6 +83,16 @@ const { mode = 'planche', tracer = true, legende } = Astro.props;
     <line class="fin" x1="154" y1="131" x2="192" y2="131"></line>
 
     <Cote x1="108" y1="24" x2="108" y2="138" texte="hauteur à définir" decalage="-4" marqueur="f-meteo" attache="4" />
+
+    {mode === 'planche' && (
+      <g>
+        <line class="goutte" x1="90" y1="34" x2="90" y2="37"></line>
+        <line class="goutte" x1="93.5" y1="33" x2="93.5" y2="36" style="--r:0.45s"></line>
+        <line class="goutte" x1="97" y1="34" x2="97" y2="37" style="--r:0.9s"></line>
+        <path class="flux" pathLength="100" d="M173 92 V106" style="--d:3s;--r:0.8s"></path>
+        <path class="flux" pathLength="100" d="M154 130 L160 124 L166 127 L172 118 L178 122 L186 116 L192 120" style="--d:3s;--r:1.4s"></path>
+      </g>
+    )}
 
     <!-- Repères -->
     <Bulle n="1" x="30" y="12" ax="50" ay="14" />

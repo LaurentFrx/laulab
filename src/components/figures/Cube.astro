@@ -49,7 +49,7 @@ const axeHaut = iso(0, 0, 72);
 const axeBas = iso(0, 0, -30);
 ---
 
-<figure class:list={['figure', 'cube', { vignette: mode === 'vignette' }]} data-trace={tracer ? '' : undefined}>
+<figure class:list={['figure', 'cube', { vignette: mode === 'vignette', anime: mode === 'planche' }]} data-trace={tracer ? '' : undefined}>
   <svg viewBox="0 0 220 150" role="img" aria-label="Vue éclatée : cube de résine, anneau de LED, carte ESP32-C3, batterie et chargeur, socle en contreplaqué">
     <defs><Marqueur id="f-cube" /></defs>
 
@@ -84,12 +84,18 @@ const axeBas = iso(0, 0, -30);
     <!-- Anneau de LED -->
     <ellipse class="fort" cx={anneau[0]} cy={anneau[1]} rx="13" ry="6.5"></ellipse>
     <ellipse class="moyen" cx={anneau[0]} cy={anneau[1]} rx="9" ry="4.5"></ellipse>
-    {Array.from({ length: 12 }, (_, n) => (n / 12) * Math.PI * 2).map((t) => (
-      <circle class="crayon" cx={anneau[0] + Math.cos(t) * 11} cy={anneau[1] + Math.sin(t) * 5.5} r="0.7"></circle>
+    {Array.from({ length: 12 }, (_, n) => (n / 12) * Math.PI * 2).map((t, n) => (
+      <circle class="crayon onde" cx={anneau[0] + Math.cos(t) * 11} cy={anneau[1] + Math.sin(t) * 5.5} r="0.7" style={`--r:${(n * 0.15).toFixed(2)}s`}></circle>
     ))}
 
     <!-- Cube de résine -->
-    <polygon class="voile-cote" points={C.dessus}></polygon>
+    <polygon class="voile-cote respire" points={C.dessus}></polygon>
+    {mode === 'planche' && (
+      <g class="respire">
+        <polygon class="voile-cote" points={C.droite}></polygon>
+        <polygon class="voile-cote" points={C.gauche}></polygon>
+      </g>
+    )}
     <polygon class="fort" points={C.dessus}></polygon>
     <polygon class="fort" points={C.droite}></polygon>
     <polygon class="fort" points={C.gauche}></polygon>
@@ -98,6 +104,12 @@ const axeBas = iso(0, 0, -30);
     <line class="cache" x1={iso(-16, -16, 32)[0]} y1={iso(-16, -16, 32)[1]} x2={iso(-16, 16, 32)[0]} y2={iso(-16, 16, 32)[1]}></line>
 
     <Cote x1={iso(16, -16, 32)[0]} y1={iso(16, -16, 32)[1]} x2={iso(16, -16, 64)[0]} y2={iso(16, -16, 64)[1]} texte="résine" decalage="-6" marqueur="f-cube" />
+
+    {mode === 'planche' && (
+      <g>
+        <path class="flux" pathLength="100" d="M110 74 V52" style="--d:2.6s"></path>
+      </g>
+    )}
 
     <!-- Repères -->
     <Bulle n="1" x="48" y="22" ax={iso(-16, -16, 60)[0]} ay={iso(-16, -16, 60)[1]} />
