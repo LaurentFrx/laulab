@@ -441,20 +441,6 @@ const vue0 = "Vue d'ensemble, à plat";
   .film[data-pret] .chapitre.actif :global(.tampon) {
     animation: tamponner 0.55s cubic-bezier(0.3, 1.5, 0.5, 1) 0.95s both;
   }
-  @keyframes tamponner {
-    from {
-      opacity: 0;
-      scale: 2.4;
-    }
-    55% {
-      opacity: 1;
-    }
-    to {
-      opacity: 1;
-      scale: 1;
-    }
-  }
-
   /* Écran large mais peu haut : le titre et ses marges se resserrent */
   @media (min-width: 900px) and (max-height: 780px) {
     .chapitre-texte h1 {

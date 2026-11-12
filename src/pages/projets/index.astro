@@ -3,6 +3,7 @@ import { getCollection } from 'astro:content';
 import Planche from '../../layouts/Planche.astro';
 import Tampon from '../../components/Tampon.astro';
 import Cartouche from '../../components/Cartouche.astro';
+import Liasse from '../../components/Liasse.astro';
 import { CATEGORIES, STATUTS, ORDRE_CATEGORIES, parCategorie, numeroPlanche } from '../../lib/nomenclature';
 
 const projets = await getCollection('projets');
@@ -28,6 +29,12 @@ const statutsPresents = (Object.keys(STATUTS) as (keyof typeof STATUTS)[]).filte
     </p>
   </div>
 
+  <Liasse enTete />
+
+  <div class="ligne-titre" style="margin-top:clamp(3rem, 7vw, 6rem)">
+    <h2>Tableau</h2>
+    <span class="cote">filtrable par catégorie et par état</span>
+  </div>
   <ul class="filtres" data-filtres aria-label="Filtres">
     <li><button type="button" data-filtre="categorie" data-valeur="" aria-pressed="true">Tout</button></li>
     {ORDRE_CATEGORIES.map((c) => (

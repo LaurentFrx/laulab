@@ -68,6 +68,15 @@ Une planche peut s'ouvrir sur un film : l'objet en volumes sur un canvas collant
 - **Les photos sont des tirages** : elles arrivent derrière un volet, en bleu de cyanotype, puis se développent en couleurs ; un clic les agrandit. En fin de planche, la planche contact les reprend toutes, légendées.
 - **Repli** (moins d'animations, pas de script) : pas de canvas, les étapes à la suite avec leurs photos, puis la figure SVG cotée.
 
+## Jeu de plans : passer d'une planche à l'autre (novembre 2026)
+
+- **La liasse.** En bas de chaque planche et en tête de la nomenclature, les vingt planches sont des feuilles dans l'espace : celle qu'on regarde est de face, ses voisines pivotent et s'empilent de chaque côté. Chaque feuille porte son dessin (ou son numéro au trait, sur hachures, tant qu'il n'y a pas de dessin) et un cartouche réduit : repère, catégorie, titre, tampon.
+- **On feuillette avec la main** : glisser, molette horizontale, flèches du clavier, boutons. La liasse suit le geste, garde son élan, puis se pose sur une feuille avec un ressort à peine dépassé. La feuille de face s'incline un peu vers le pointeur. Une règle graduée, curseur au crayon, dit où l'on est.
+- **Un clic de côté amène la feuille de face ; un clic de face l'ouvre.** La page entière tourne alors comme une feuille de classeur, dans le sens de la numérotation, et la planche suivante arrive dessous. Depuis la nomenclature, la planche se pose sur la table.
+- **En arrivant**, chaque en-tête entre en scène : le titre se lève derrière un cache, l'accroche suit, le tampon s'abat.
+- **Pas d'ombre portée** : la profondeur vient de la perspective et des feuilles de côté qui s'assombrissent.
+- **Repli** : sans script ou avec moins d'animations, une rangée de feuilles à plat qui défile sur le côté, et pas de page qui tourne.
+
 ## À ne pas faire
 
 Cartes à ombre portée, dégradés décoratifs, coins arrondis généralisés, étiquettes en capitales au-dessus de chaque titre, flèches « → » collées aux liens. Si un élément n'encode pas une information, il est retiré.

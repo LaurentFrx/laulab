@@ -1,0 +1,719 @@
+---
+/**
+ * Liasse : le jeu de plans en volume, pour passer d'une planche à l'autre.
+ * Chaque projet est une feuille (son dessin, son cartouche) ; la feuille ouverte est de face,
+ * ses voisines pivotent et s'empilent de chaque côté. On feuillette en glissant, à la molette
+ * horizontale, aux flèches du clavier ou aux boutons ; un clic sur la feuille de face l'ouvre,
+ * et la page tourne (voir « Tourner la planche » dans global.css).
+ *
+ * La pose de chaque feuille est calculée en CSS à partir de son rang (--k) et de la position
+ * de la liasse (--pos) : le script n'écrit que --pos. Repli (pas de script, ou moins
+ * d'animations) : une rangée de feuilles à plat, qui défile sur le côté.
+ */
+import { getCollection } from 'astro:content';
+import Figure from './Figure.astro';
+import Tampon from './Tampon.astro';
+import { CATEGORIES, numeroPlanche, trierParRepere } from '../lib/nomenclature';
+
+interface Props {
+  /** Identifiant du projet affiché par la page : sa feuille est ouverte, de face */
+  actuel?: string;
+  /** Placée en tête de page, juste sous l'en-tête : sans la marge d'une section */
+  enTete?: boolean;
+}
+const { actuel, enTete = false } = Astro.props;
+const projets = trierParRepere(await getCollection('projets'));
+const rang = projets.findIndex((p) => p.id === actuel);
+const depart = Math.max(0, rang);
+const ouverte = rang >= 0 ? projets[rang] : undefined;
+---
+
+<section class:list={['liasse', { section: !enTete }]} data-liasse data-depart={depart} data-ouverte={rang >= 0 ? rang : undefined} style={`--pos:${depart};--n:${projets.length}`} aria-labelledby="liasse-titre">
+  <div class="ligne-titre">
+    <h2 id="liasse-titre">Jeu de plans</h2>
+    <span class="cote">
+      {ouverte ? `Planche ${numeroPlanche(ouverte)} ouverte · ` : ''}{projets.length} planches
+    </span>
+  </div>
+
+  <div class="liasse-scene">
+    <ol class="liasse-feuilles">
+      {projets.map((p, k) => (
+        <li class="feuille" data-rang={k} style={`--k:${k}`}>
+          <a
+            href={`/projets/${p.id}/`}
+            draggable="false"
+            aria-current={p.id === actuel ? 'page' : undefined}
+            aria-label={`Planche ${numeroPlanche(p)} : ${p.data.titre}${p.id === actuel ? ' (planche ouverte)' : ''}`}
+          >
+            <span class="feuille-dessin" aria-hidden="true">
+              {p.data.figure ? (
+                <Figure nom={p.data.figure} mode="vignette" titre={p.data.titre} tracer={false} />
+              ) : (
+                <span class="feuille-numero">{numeroPlanche(p)}</span>
+              )}
+            </span>
+            <span class="feuille-cartouche">
+              <span class="feuille-repere">{numeroPlanche(p)}</span>
+              <span class="feuille-titre">
+                <span class="cote">{CATEGORIES[p.data.categorie].label}</span>
+                <strong>{p.data.titre}</strong>
+              </span>
+              <Tampon statut={p.data.statut} droit petit />
+            </span>
+            {p.id === actuel && <span class="feuille-ici">Planche ouverte</span>}
+          </a>
+        </li>
+      ))}
+    </ol>
+  </div>
+
+  <div class="liasse-commandes">
+    <button type="button" data-precedente aria-label="Planche précédente">
+      <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M10 3L5 8l5 5" fill="none" stroke="currentColor" stroke-width="1.4"></path></svg>
+    </button>
+    <ol class="liasse-regle" aria-hidden="true">
+      {projets.map((p, k) => <li class:list={{ cinq: k === 0 || (k + 1) % 5 === 0 }}>{k === 0 || (k + 1) % 5 === 0 ? numeroPlanche(p) : ''}</li>)}
+    </ol>
+    <button type="button" data-suivante aria-label="Planche suivante">
+      <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6 3l5 5-5 5" fill="none" stroke="currentColor" stroke-width="1.4"></path></svg>
+    </button>
+  </div>
+</section>
+
+<script is:inline data-astro-rerun>
+  // Posé avant le premier affichage : la liasse apparaît tout de suite en volume, sans passer par la rangée à plat.
+  (function () {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    var l = document.querySelector('[data-liasse]:not([data-pret])');
+    if (l) l.setAttribute('data-pret', '');
+  })();
+</script>
+
+<style>
+  .liasse {
+    --lf: clamp(14.5rem, 33vw, 26rem);
+    --hf: calc(var(--lf) * 0.72);
+  }
+  .liasse-scene {
+    position: relative;
+    margin: 0 calc(-1 * var(--marge));
+  }
+  .liasse-feuilles {
+    list-style: none;
+    margin: 0;
+    padding: 0.5rem var(--marge) 1rem;
+    display: flex;
+    gap: 1.25rem;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: thin;
+  }
+  .feuille {
+    flex: 0 0 var(--lf);
+    height: var(--hf);
+    margin: 0;
+    scroll-snap-align: center;
+  }
+
+  /* Une feuille : le dessin, puis un cartouche réduit */
+  .feuille a {
+    position: relative;
+    display: grid;
+    grid-template-rows: minmax(0, 1fr) auto;
+    height: 100%;
+    background: var(--papier-2);
+    border: var(--ep-moyen) solid var(--trait-2);
+    color: var(--encre);
+    text-decoration: none;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-user-drag: none;
+    -webkit-tap-highlight-color: transparent;
+    transition: border-color 0.2s ease;
+  }
+  .feuille a:focus-visible {
+    outline: 2px solid var(--cote);
+    outline-offset: 3px;
+  }
+  .feuille-dessin {
+    display: grid;
+    place-items: center;
+    min-height: 0;
+    padding: 0.7rem 0.9rem 0.5rem;
+    overflow: hidden;
+    pointer-events: none;
+  }
+  .feuille-dessin :global(.figure) {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+    display: grid;
+    place-items: center;
+  }
+  /* Le dessin tient toujours entier dans sa case, quel que soit son format */
+  .feuille-dessin :global(.figure > svg) {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+  .feuille-dessin :global(.figure > div) {
+    height: 100%;
+    max-height: 100%;
+    aspect-ratio: 1;
+  }
+  /* Pas encore de dessin : le numéro de la planche, au trait, sur des hachures */
+  .feuille-numero {
+    width: 100%;
+    height: 100%;
+    display: grid;
+    place-items: center;
+    font-family: var(--f-titre);
+    font-weight: 760;
+    font-stretch: 92%;
+    font-size: calc(var(--hf) * 0.42);
+    line-height: 1;
+    letter-spacing: -0.02em;
+    color: transparent;
+    -webkit-text-stroke: 1.4px var(--trait-2);
+    background-image: repeating-linear-gradient(-45deg, transparent 0 13px, var(--trait-4) 13px 14px);
+  }
+  .feuille-cartouche {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 0.7rem;
+    padding: 0.45rem 0.7rem 0.5rem;
+    border-top: var(--ep-fin) solid var(--trait-3);
+  }
+  .feuille-repere {
+    font-family: var(--f-cote);
+    font-size: 1.05rem;
+    line-height: 1;
+    color: var(--cote);
+    padding-right: 0.7rem;
+    border-right: var(--ep-fin) solid var(--trait-3);
+    align-self: stretch;
+    display: grid;
+    place-items: center;
+  }
+  .feuille-titre {
+    display: grid;
+    gap: 0.1rem;
+    min-width: 0;
+  }
+  .feuille-titre .cote {
+    font-size: 0.68rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .feuille-titre strong {
+    font-family: var(--f-titre);
+    font-weight: 700;
+    font-size: 0.95rem;
+    line-height: 1.12;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    overflow-wrap: anywhere;
+  }
+  .feuille-ici {
+    position: absolute;
+    left: 0.6rem;
+    top: 0.55rem;
+    font-family: var(--f-cote);
+    font-size: 0.7rem;
+    letter-spacing: 0.03em;
+    line-height: 1;
+    color: var(--crayon);
+    border: 1px solid var(--crayon);
+    padding: 0.22rem 0.4rem;
+    background: var(--papier-2);
+  }
+
+  /* Commandes : deux boutons et la règle des planches */
+  .liasse-commandes {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 0.75rem;
+  }
+  .liasse:not([data-pret]) .liasse-commandes {
+    display: none;
+  }
+  .liasse-commandes button {
+    appearance: none;
+    flex: none;
+    width: 2.5rem;
+    height: 2.5rem;
+    display: grid;
+    place-items: center;
+    border-radius: 999px;
+    border: var(--ep-fin) solid var(--trait-3);
+    background: none;
+    color: var(--encre-2);
+    cursor: pointer;
+  }
+  .liasse-commandes button:hover,
+  .liasse-commandes button:focus-visible {
+    color: var(--cote);
+    border-color: var(--cote);
+  }
+  .liasse-commandes button:disabled {
+    opacity: 0.35;
+    cursor: default;
+  }
+  .liasse-commandes svg {
+    width: 16px;
+    height: 16px;
+  }
+  .liasse-regle {
+    position: relative;
+    display: flex;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    font-family: var(--f-cote);
+    font-size: 0.7rem;
+    line-height: 1;
+    color: var(--encre-2);
+  }
+  .liasse-regle li {
+    position: relative;
+    margin: 0;
+    width: clamp(0.62rem, 2.6vw, 1.15rem);
+    height: 1.35rem;
+    padding-top: 0.62rem;
+    text-align: center;
+    border-top: var(--ep-fin) solid var(--trait-2);
+  }
+  .liasse-regle li::before {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 0;
+    width: 1px;
+    height: 0.25rem;
+    background: var(--trait-2);
+  }
+  .liasse-regle li.cinq::before {
+    height: 0.45rem;
+  }
+  /* Curseur au crayon : la planche de face */
+  .liasse-regle::after {
+    content: '';
+    position: absolute;
+    top: -0.35rem;
+    left: calc((var(--pos) + 0.5) * 100% / var(--n));
+    width: 1.5px;
+    height: 0.9rem;
+    background: var(--crayon);
+  }
+
+  /* --- En volume ----------------------------------------------------------- */
+  .liasse[data-pret] .liasse-scene {
+    height: calc(var(--hf) + 3rem);
+    perspective: 1250px;
+    perspective-origin: 50% 40%;
+    overflow: hidden;
+    touch-action: pan-y;
+    cursor: grab;
+  }
+  .liasse[data-pret] .liasse-scene.saisie {
+    cursor: grabbing;
+  }
+  .liasse[data-pret] .liasse-feuilles {
+    position: absolute;
+    inset: 0;
+    display: block;
+    padding: 0;
+    overflow: visible;
+    transform-style: preserve-3d;
+    /* Dans l'espace, ce conteneur est un plan posé devant les feuilles en retrait : il leur
+       prendrait leurs clics. Seules les feuilles reçoivent le pointeur. */
+    pointer-events: none;
+  }
+  .liasse[data-pret] .feuille a {
+    pointer-events: auto;
+  }
+  .liasse[data-pret] .feuille {
+    /* d : écart à la feuille de face ; dc : sa part entre -1 et 1 (le pivot) ; dr : le reste (la pile) */
+    --d: calc(var(--k) - var(--pos));
+    --dc: clamp(-1, var(--d), 1);
+    --dr: calc(var(--d) - var(--dc));
+    --ad: max(var(--d), -1 * var(--d));
+    --adc: max(var(--dc), -1 * var(--dc));
+    --adr: max(var(--dr), -1 * var(--dr));
+    position: absolute;
+    left: 50%;
+    top: 1.25rem;
+    width: var(--lf);
+    margin-left: calc(var(--lf) / -2);
+    transform: translate3d(
+        calc(var(--dc) * var(--lf) * 0.64 + var(--dr) * var(--lf) * 0.19),
+        calc((1 - var(--e, 1)) * (2.2rem + var(--ad) * 1.5rem)),
+        calc(var(--adc) * -210px + var(--adr) * -48px)
+      )
+      rotateY(calc(var(--dc) * -57deg + var(--tx, 0) * (1 - var(--adc)) * 1deg))
+      rotateX(calc(var(--ty, 0) * (1 - var(--adc)) * 1deg));
+    opacity: calc(var(--e, 1) * clamp(0, (5.6 - var(--ad)) / 1.6, 1));
+    filter: brightness(calc(1 - var(--ombre, 0.3) * var(--adc)));
+    will-change: transform, opacity;
+  }
+  .liasse[data-pret] .feuille.loin {
+    visibility: hidden;
+  }
+  .liasse[data-pret] .feuille.devant a {
+    border-color: var(--trait);
+    cursor: pointer;
+  }
+  .liasse[data-pret] .feuille.devant a[aria-current] {
+    cursor: grab;
+  }
+
+  /* Sur papier clair, les feuilles de côté s'assombrissent moins */
+  :global(:root[data-theme='calque']) .liasse {
+    --ombre: 0.12;
+  }
+
+  @media (max-width: 899px) {
+    .liasse {
+      --lf: clamp(13.5rem, 62vw, 19rem);
+    }
+    /* Feuille étroite : le tampon monte dans le coin du dessin, le titre garde toute la largeur */
+    .feuille-cartouche {
+      grid-template-columns: auto minmax(0, 1fr);
+    }
+    .feuille-cartouche :global(.tampon) {
+      position: absolute;
+      right: 0.55rem;
+      top: 0.55rem;
+      background: var(--papier-2);
+    }
+    .liasse-commandes {
+      gap: 0.6rem;
+    }
+  }
+</style>
+
+<script>
+  const reduit = window.matchMedia('(prefers-reduced-motion: reduce)');
+  const borne = (v: number, a: number, b: number) => Math.min(b, Math.max(a, v));
+
+  /** Sens de la page qui tourne, gardé d'une page à l'autre le temps de la transition */
+  let sens = '';
+
+  class Liasse {
+    section: HTMLElement;
+    scene: HTMLElement;
+    feuilles: HTMLElement[];
+    liens: HTMLAnchorElement[];
+    precedente: HTMLButtonElement | null;
+    suivante: HTMLButtonElement | null;
+    n: number;
+    depart: number;
+    ouverte: number;
+
+    /** Position de la liasse (rang de la feuille de face, en continu), sa cible, sa vitesse */
+    pos: number;
+    cible: number;
+    v = 0;
+    /** Entrée en scène, de 0 à 1 */
+    e = 0;
+    /** Inclinaison de la feuille de face sous le pointeur (degrés), et sa cible */
+    tx = 0;
+    ty = 0;
+    cx = 0;
+    cy = 0;
+    vue = false;
+    devant = -1;
+    rafId = 0;
+    enMarche = false;
+    dernier = 0;
+    detruit = false;
+    saisie: { id: number; x0: number; pos0: number; x: number; t: number; vit: number; bouge: boolean } | null = null;
+    aGlisse = false;
+    minuterie = 0;
+    observateur: IntersectionObserver;
+    abandon = new AbortController();
+
+    constructor(section: HTMLElement) {
+      this.section = section;
+      this.scene = section.querySelector('.liasse-scene') as HTMLElement;
+      this.feuilles = Array.from(section.querySelectorAll<HTMLElement>('.feuille'));
+      this.liens = this.feuilles.map((f) => f.querySelector('a') as HTMLAnchorElement);
+      this.precedente = section.querySelector('[data-precedente]');
+      this.suivante = section.querySelector('[data-suivante]');
+      this.n = this.feuilles.length;
+      this.depart = Number(section.dataset.depart ?? 0);
+      this.ouverte = section.dataset.ouverte === undefined ? -1 : Number(section.dataset.ouverte);
+      // Avant d'être vue, la liasse attend deux feuilles plus tôt : elle glissera jusqu'à sa place
+      this.pos = this.depart + (this.depart > this.n / 2 ? 2.2 : -2.2);
+      this.cible = this.depart;
+      this.ecrire();
+
+      // Tous les écouteurs partent avec la liasse (voir detruire) : une liasse arrêtée ne doit plus rien entendre
+      const signal = this.abandon.signal;
+      this.scene.addEventListener('pointerdown', this.surAppui, { signal });
+      this.scene.addEventListener('pointermove', this.surMouvement, { signal });
+      this.scene.addEventListener('pointerup', this.surRelache, { signal });
+      this.scene.addEventListener('pointercancel', this.surRelache, { signal });
+      this.scene.addEventListener('pointerleave', this.surSortie, { signal });
+      this.scene.addEventListener('click', this.surClic, { signal });
+      this.scene.addEventListener('wheel', this.surMolette, { passive: false, signal });
+      this.scene.addEventListener('focusin', this.surFocus, { signal });
+      this.section.addEventListener('keydown', this.surTouche, { signal });
+      this.precedente?.addEventListener('click', this.reculer, { signal });
+      this.suivante?.addEventListener('click', this.avancer, { signal });
+
+      this.observateur = new IntersectionObserver(
+        (entrees) => {
+          if (entrees.some((x) => x.isIntersecting) && !this.vue) {
+            this.vue = true;
+            this.lancer();
+          }
+        },
+        { threshold: 0.25 }
+      );
+      this.observateur.observe(this.scene);
+    }
+
+    /** Largeur d'un cran : de combien il faut glisser pour passer à la feuille voisine */
+    cran(): number {
+      return Math.max(60, (this.feuilles[0]?.offsetWidth ?? 300) * 0.64);
+    }
+
+    ecrire() {
+      const s = this.section.style;
+      s.setProperty('--pos', this.pos.toFixed(4));
+      s.setProperty('--e', this.e.toFixed(3));
+      s.setProperty('--tx', this.tx.toFixed(2));
+      s.setProperty('--ty', this.ty.toFixed(2));
+      const k = borne(Math.round(this.pos), 0, this.n - 1);
+      if (k !== this.devant) {
+        this.devant = k;
+        this.feuilles.forEach((f, i) => {
+          f.classList.toggle('devant', i === k);
+          f.classList.toggle('loin', Math.abs(i - k) > 6);
+        });
+      }
+      const cible = Math.round(this.cible);
+      if (this.precedente) this.precedente.disabled = cible <= 0;
+      if (this.suivante) this.suivante.disabled = cible >= this.n - 1;
+    }
+
+    lancer() {
+      if (this.enMarche || this.detruit) return;
+      this.enMarche = true;
+      this.dernier = performance.now();
+      this.rafId = requestAnimationFrame(this.boucle);
+    }
+
+    /** Ressort amorti vers la cible : la liasse arrive vite, dépasse à peine, se pose. */
+    boucle = (t: number) => {
+      if (this.detruit) return;
+      const dt = Math.min(0.04, (t - this.dernier) / 1000);
+      this.dernier = t;
+      if (!this.saisie) {
+        const RAIDEUR = 95;
+        const FREIN = 17.5;
+        this.v += ((this.cible - this.pos) * RAIDEUR - this.v * FREIN) * dt;
+        this.pos += this.v * dt;
+      }
+      if (this.vue) this.e = Math.min(1, this.e + dt / 0.85);
+      const suivi = 1 - Math.pow(0.002, dt);
+      this.tx += (this.cx - this.tx) * suivi;
+      this.ty += (this.cy - this.ty) * suivi;
+      const ease = 1 - Math.pow(1 - this.e, 3);
+      const pose = Math.abs(this.cx - this.tx) < 0.02 && Math.abs(this.cy - this.ty) < 0.02;
+      const fini = !this.saisie && pose && Math.abs(this.cible - this.pos) < 0.0008 && Math.abs(this.v) < 0.004 && this.e >= 1;
+      if (fini) {
+        this.pos = this.cible;
+        this.v = 0;
+      }
+      const e = this.e;
+      this.e = ease;
+      this.ecrire();
+      this.e = e;
+      if (fini) {
+        this.enMarche = false;
+        return;
+      }
+      this.rafId = requestAnimationFrame(this.boucle);
+    };
+
+    aller(k: number) {
+      this.cible = borne(k, 0, this.n - 1);
+      this.lancer();
+    }
+    reculer = () => this.aller(Math.round(this.cible) - 1);
+    avancer = () => this.aller(Math.round(this.cible) + 1);
+
+    surAppui = (ev: PointerEvent) => {
+      if (ev.pointerType === 'mouse' && ev.button !== 0) return;
+      this.saisie = { id: ev.pointerId, x0: ev.clientX, pos0: this.pos, x: ev.clientX, t: ev.timeStamp, vit: 0, bouge: false };
+      this.aGlisse = false;
+    };
+
+    surMouvement = (ev: PointerEvent) => {
+      const s = this.saisie;
+      if (!s && ev.pointerType === 'mouse') {
+        // Sous la souris, la feuille de face s'incline un peu vers le pointeur
+        const r = this.scene.getBoundingClientRect();
+        this.cx = borne(((ev.clientX - r.left) / r.width - 0.5) * 2, -1, 1) * 7;
+        this.cy = borne(((ev.clientY - r.top) / r.height - 0.5) * 2, -1, 1) * -5;
+        this.lancer();
+      }
+      if (!s || ev.pointerId !== s.id) return;
+      const dx = ev.clientX - s.x0;
+      if (!s.bouge) {
+        if (Math.abs(dx) < 7) return;
+        // Le geste est un glissement : on le garde, même s'il sort de la scène
+        s.bouge = true;
+        this.aGlisse = true;
+        this.scene.classList.add('saisie');
+        try {
+          this.scene.setPointerCapture(s.id);
+        } catch {
+          /* sans importance */
+        }
+      }
+      const dt = Math.max(1, ev.timeStamp - s.t);
+      s.vit = 0.6 * s.vit + 0.4 * (-(ev.clientX - s.x) / this.cran() / (dt / 1000));
+      s.x = ev.clientX;
+      s.t = ev.timeStamp;
+      let p = s.pos0 - dx / this.cran();
+      // Aux deux bouts, la liasse résiste
+      if (p < 0) p = p * 0.3;
+      if (p > this.n - 1) p = this.n - 1 + (p - (this.n - 1)) * 0.3;
+      this.pos = p;
+      this.cible = p;
+      this.v = 0;
+      this.lancer();
+    };
+
+    surSortie = () => {
+      this.cx = 0;
+      this.cy = 0;
+      this.lancer();
+    };
+
+    surRelache = (ev: PointerEvent) => {
+      const s = this.saisie;
+      if (!s || ev.pointerId !== s.id) return;
+      this.saisie = null;
+      this.scene.classList.remove('saisie');
+      if (!s.bouge) return;
+      // Le clic qui termine un glissement arrive tout de suite, ou pas du tout : passé ce délai,
+      // un clic est de nouveau un vrai clic
+      window.setTimeout(() => (this.aGlisse = false), 80);
+      // L'élan du geste emporte la liasse d'une ou plusieurs feuilles
+      const elan = borne(s.vit * 0.16, -3, 3);
+      this.v = borne(s.vit, -14, 14);
+      this.aller(Math.round(this.pos + elan));
+    };
+
+    surClic = (ev: MouseEvent) => {
+      const feuille = (ev.target as HTMLElement).closest<HTMLElement>('.feuille');
+      if (!feuille) return;
+      const k = Number(feuille.dataset.rang ?? -1);
+      if (this.aGlisse) {
+        // Fin d'un glissement : ce n'est pas un clic
+        ev.preventDefault();
+        this.aGlisse = false;
+        return;
+      }
+      if (ev.metaKey || ev.ctrlKey || ev.shiftKey || ev.altKey) return;
+      if (k !== Math.round(this.pos)) {
+        // Une feuille de côté : elle vient d'abord de face
+        ev.preventDefault();
+        this.aller(k);
+        return;
+      }
+      if (k === this.ouverte) {
+        ev.preventDefault();
+        return;
+      }
+      // La feuille de face s'ouvre : la page tourne dans le sens du jeu de plans
+      sens = this.ouverte < 0 ? 'ouvrir' : k > this.ouverte ? 'suivant' : 'precedent';
+      document.documentElement.dataset.tourne = sens;
+    };
+
+    surMolette = (ev: WheelEvent) => {
+      // Seul le défilement horizontal feuillette : la molette verticale reste à la page
+      if (Math.abs(ev.deltaX) <= Math.abs(ev.deltaY)) return;
+      ev.preventDefault();
+      this.cible = borne(this.cible + ev.deltaX / this.cran() / 1.6, 0, this.n - 1);
+      this.lancer();
+      window.clearTimeout(this.minuterie);
+      this.minuterie = window.setTimeout(() => this.aller(Math.round(this.cible)), 130);
+    };
+
+    surFocus = (ev: FocusEvent) => {
+      if (this.saisie) return;
+      const feuille = (ev.target as HTMLElement).closest<HTMLElement>('.feuille');
+      if (feuille) this.aller(Number(feuille.dataset.rang ?? 0));
+    };
+
+    surTouche = (ev: KeyboardEvent) => {
+      const pas = ev.key === 'ArrowRight' ? 1 : ev.key === 'ArrowLeft' ? -1 : 0;
+      const bout = ev.key === 'Home' ? 0 : ev.key === 'End' ? this.n - 1 : -1;
+      if (!pas && bout < 0) return;
+      ev.preventDefault();
+      const k = bout >= 0 ? bout : borne(Math.round(this.cible) + pas, 0, this.n - 1);
+      this.aller(k);
+      if (this.scene.contains(document.activeElement)) this.liens[k]?.focus({ preventScroll: true });
+    };
+
+    detruire() {
+      this.detruit = true;
+      this.abandon.abort();
+      cancelAnimationFrame(this.rafId);
+      window.clearTimeout(this.minuterie);
+      this.observateur.disconnect();
+    }
+  }
+
+  let liasse: Liasse | null = null;
+
+  function init() {
+    liasse?.detruire();
+    liasse = null;
+    const section = document.querySelector<HTMLElement>('[data-liasse]');
+    if (!section) return;
+    if (reduit.matches || !section.hasAttribute('data-pret')) {
+      // À plat : la feuille ouverte est amenée au milieu de la rangée, sans faire défiler la page
+      const rangee = section.querySelector<HTMLElement>('.liasse-feuilles');
+      const feuille = section.querySelectorAll<HTMLElement>('.feuille')[Number(section.dataset.depart ?? 0)];
+      if (rangee && feuille) rangee.scrollLeft = feuille.offsetLeft - (rangee.clientWidth - feuille.offsetWidth) / 2;
+      return;
+    }
+    liasse = new Liasse(section);
+  }
+
+  init();
+  document.addEventListener('astro:page-load', init);
+  document.addEventListener('astro:before-swap', (ev) => {
+    liasse?.detruire();
+    liasse = null;
+    if (!sens) return;
+    // La transition finie, on oublie le sens : la navigation suivante reprend le fondu ordinaire
+    const fin = () => {
+      sens = '';
+      delete document.documentElement.dataset.tourne;
+    };
+    const transition = (ev as Event & { viewTransition?: { finished?: Promise<unknown> } }).viewTransition;
+    if (transition?.finished) transition.finished.then(fin, fin);
+    else window.setTimeout(fin, 1200);
+  });
+  // L'échange de page remet les attributs de <html> à neuf : on y repose le sens avant que la transition ne s'anime
+  document.addEventListener('astro:after-swap', () => {
+    if (sens) document.documentElement.dataset.tourne = sens;
+  });
+</script>

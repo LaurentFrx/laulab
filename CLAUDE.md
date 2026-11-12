@@ -27,6 +27,7 @@ Site statique Astro 7 (`output: 'static'`, `trailingSlash: 'always'`). Français
 | `src/components/Cartouche.astro` | Bloc d'identification en pied de page |
 | `src/components/Film.astro`, `src/components/films/` | Film de montage d'un projet (`film: <nom>` dans son Markdown) : il remplace l'en-tête de la planche. `Film.astro` fait l'aiguillage par nom ; sans film, la planche garde son en-tête ordinaire |
 | `src/lib/chevalet.ts` | Le chevalet d'aquarelle en volumes : faces planes posées selon l'étape (`poser()`), cinématique de la planchette et de la pente |
+| `src/components/Liasse.astro` | Jeu de plans en volume (CSS 3D) : navigation entre planches, en bas de chaque planche et en tête de la nomenclature. La pose des feuilles est calculée en CSS depuis `--k` (rang) et `--pos` (position) ; le script n'écrit que `--pos`. Pose `data-tourne` sur `<html>` pour la transition « tourner la planche » (fin de `global.css`) |
 | `src/components/Tirage.astro`, `PlancheContact.astro`, `Visionneuse.astro` | Photos d'un projet : tirage qui se développe, planche contact en fin de planche, agrandissement au clic |
 | `src/layouts/Planche.astro` | Gabarit commun (cadre, en-tête, `<head>`) |
 | `scripts/icones/` | Logo LF source (`logo-lf.png`) et `generer.py` (Pillow) : favicon, icônes Android/iOS dans `public/` ; si le logo change, changer aussi le nom des fichiers (iOS garde ses icônes en cache par adresse) |
@@ -44,6 +45,13 @@ Site statique Astro 7 (`output: 'static'`, `trailingSlash: 'always'`). Français
 - Ordre de dessin : les pièces sont rangées de part et d'autre du plateau (derrière lui ou devant, selon que la caméra voit son dessus ou son dessous), puis par distance ; les petites pièces plaquées sur une face (charnières, aimants) sont ses « pastilles », dessinées juste après elle.
 - Photos : `public/photos/<slug>/NN-nom.jpg` (1600 px au plus, métadonnées retirées) et sa réduction `NN-nom-800.jpg` à côté, que `Tirage.astro` déduit du nom. Recette : `ffmpeg -i source -map_metadata -1 -vf "scale='min(1600,iw)':-2:flags=lanczos" -q:v 4 NN-nom.jpg`, puis la même avec 800 et `-q:v 5`.
 - L'état « pas encore apparu » des titres et des tirages n'est posé que si un script en ligne a marqué la section (`data-pret`) : sans script ou avec moins d'animations, tout est visible d'emblée.
+
+## Liasse et transitions de page
+
+- En volume, un conteneur `transform-style: preserve-3d` est un plan à z = 0 : il passe devant ses enfants en retrait et leur prend leurs clics. D'où `pointer-events: none` sur la liste et `auto` sur les feuilles. Ne pas l'enlever.
+- Un composant initialisé sur `astro:page-load` l'est deux fois au premier chargement (au chargement du module, puis à l'évènement) : l'instance arrêtée doit détacher ses écouteurs (`AbortController`), sinon elle répond encore aux clics avec un état périmé.
+- `data-tourne` (suivant, precedent, ouvrir) : l'échange de page d'Astro remet les attributs de `<html>` à neuf, sauf ceux en `data-astro-*` ; la liasse le repose donc sur `astro:after-swap` et l'enlève quand la transition est finie.
+- Pour vérifier une interaction, la filmer avec Playwright (celui de `~/tazieff-eps/node_modules`, Chromium déjà installé) et tracer les évènements : une capture d'écran fixe ne montre ni un clic perdu ni une page qui ne tourne pas.
 
 ## Serveur (VPS tazieff-dev)
 

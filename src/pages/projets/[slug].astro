@@ -5,19 +5,20 @@ import Figure from '../../components/Figure.astro';
 import Tampon from '../../components/Tampon.astro';
 import Cartouche from '../../components/Cartouche.astro';
 import Film from '../../components/Film.astro';
+import Liasse from '../../components/Liasse.astro';
 import PlancheContact from '../../components/PlancheContact.astro';
 import Visionneuse from '../../components/Visionneuse.astro';
 import { CATEGORIES, numeroPlanche, trierParRepere } from '../../lib/nomenclature';
 
 export async function getStaticPaths() {
   const projets = trierParRepere(await getCollection('projets'));
-  return projets.map((projet, k) => ({
+  return projets.map((projet) => ({
     params: { slug: projet.id },
-    props: { projet, precedent: projets[k - 1] ?? null, suivant: projets[k + 1] ?? null }
+    props: { projet }
   }));
 }
 
-const { projet, precedent, suivant } = Astro.props;
+const { projet } = Astro.props;
 const { Content } = await render(projet);
 const d = projet.data;
 const planche = numeroPlanche(projet);
@@ -128,24 +129,7 @@ const dessine = d.collaboration.claude.length ? 'Laurent Feroux et Claude' : 'La
       </>
     )}
 
-    <nav class="voisins" aria-label="Planches voisines">
-      {precedent ? (
-        <a href={`/projets/${precedent.id}/`} rel="prev">
-          <span>← Planche {numeroPlanche(precedent)}</span>
-          {precedent.data.titre}
-        </a>
-      ) : (
-        <span></span>
-      )}
-      {suivant ? (
-        <a href={`/projets/${suivant.id}/`} rel="next" class="suivant">
-          <span>Planche {numeroPlanche(suivant)} →</span>
-          {suivant.data.titre}
-        </a>
-      ) : (
-        <span></span>
-      )}
-    </nav>
+    <Liasse actuel={projet.id} />
   </article>
 
   <Cartouche

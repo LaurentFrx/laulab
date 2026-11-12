@@ -1283,33 +1283,6 @@ main.page {
   font-size: 0.97rem;
 }
 
-.voisins {
-  display: flex;
-  justify-content: space-between;
-  gap: 1rem;
-  margin-top: 3rem;
-  padding-top: 1rem;
-  border-top: var(--ep-fin) solid var(--trait-3);
-  font-family: var(--f-cote);
-  font-size: 0.9rem;
-}
-.voisins a {
-  color: var(--encre);
-  text-decoration: none;
-  display: grid;
-  gap: 0.15rem;
-}
-.voisins a:hover {
-  color: var(--cote);
-}
-.voisins a span {
-  color: var(--encre-2);
-  font-size: var(--t-0);
-}
-.voisins a.suivant {
-  text-align: right;
-}
-
 /* --- Accueil -------------------------------------------------------------- */
 .bouton {
   display: inline-flex;
@@ -1502,7 +1475,135 @@ main.page {
   }
 }
 
+/* --- Entrée en scène des en-têtes ----------------------------------------- */
+/* Le titre se lève derrière un cache, l'accroche suit, le tampon s'abat. Sans script. */
+@media (prefers-reduced-motion: no-preference) {
+  .planche-tete > .cote {
+    animation: glisser 0.6s ease both;
+  }
+  .planche-tete h1 {
+    animation: lever 0.95s cubic-bezier(0.2, 0.8, 0.2, 1) 0.05s both;
+  }
+  .planche-tete .accroche {
+    animation: glisser 0.85s cubic-bezier(0.2, 0.8, 0.2, 1) 0.3s both;
+  }
+  .planche-tete .tampon {
+    animation: tamponner 0.55s cubic-bezier(0.3, 1.5, 0.5, 1) 0.75s both;
+  }
+}
+@keyframes lever {
+  from {
+    clip-path: inset(-0.1em -0.1em 100% -0.1em);
+    transform: translateY(0.45em);
+  }
+  to {
+    clip-path: inset(-0.1em -0.1em -0.25em -0.1em);
+    transform: none;
+  }
+}
+@keyframes glisser {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+}
+@keyframes tamponner {
+  from {
+    opacity: 0;
+    scale: 2.4;
+  }
+  55% {
+    opacity: 1;
+  }
+  to {
+    opacity: 1;
+    scale: 1;
+  }
+}
+
 /* --- Transitions de pages ------------------------------------------------- */
+/*
+ * Tourner la planche : quand on ouvre une feuille depuis le jeu de plans (Liasse.astro),
+ * la page entière pivote sur son bord comme une feuille de classeur, et la suivante arrive
+ * dessous. `data-tourne` est posé sur <html> le temps de la transition : suivant, precedent
+ * (dans l'ordre des planches) ou ouvrir (depuis la nomenclature).
+ */
+@media (prefers-reduced-motion: no-preference) {
+  html[data-tourne]::view-transition-old(root),
+  html[data-tourne]::view-transition-new(root) {
+    mix-blend-mode: normal;
+  }
+  html[data-tourne]::view-transition-old(root) {
+    z-index: 2;
+  }
+  html[data-tourne='suivant']::view-transition-old(root) {
+    transform-origin: 0 50%;
+    animation: 0.72s cubic-bezier(0.5, 0, 0.8, 0.55) both tourner-vers-gauche;
+  }
+  html[data-tourne='suivant']::view-transition-new(root) {
+    transform-origin: 100% 50%;
+    animation: 0.75s cubic-bezier(0.2, 0.75, 0.2, 1) 0.2s both arriver-de-droite;
+  }
+  html[data-tourne='precedent']::view-transition-old(root) {
+    transform-origin: 100% 50%;
+    animation: 0.72s cubic-bezier(0.5, 0, 0.8, 0.55) both tourner-vers-droite;
+  }
+  html[data-tourne='precedent']::view-transition-new(root) {
+    transform-origin: 0 50%;
+    animation: 0.75s cubic-bezier(0.2, 0.75, 0.2, 1) 0.2s both arriver-de-gauche;
+  }
+  html[data-tourne='ouvrir']::view-transition-old(root) {
+    animation: 0.4s ease-in both s-eloigner;
+  }
+  html[data-tourne='ouvrir']::view-transition-new(root) {
+    transform-origin: 50% 100%;
+    animation: 0.7s cubic-bezier(0.2, 0.75, 0.2, 1) 0.1s both se-poser;
+  }
+}
+/* La feuille reste bien visible pendant qu'elle pivote, et ne s'efface qu'une fois presque de chant */
+@keyframes tourner-vers-gauche {
+  62% {
+    opacity: 1;
+  }
+  to {
+    transform: perspective(1700px) rotateY(-88deg);
+    opacity: 0;
+  }
+}
+@keyframes tourner-vers-droite {
+  62% {
+    opacity: 1;
+  }
+  to {
+    transform: perspective(1700px) rotateY(88deg);
+    opacity: 0;
+  }
+}
+@keyframes arriver-de-droite {
+  from {
+    transform: perspective(1700px) translateZ(-180px) rotateY(24deg);
+    opacity: 0;
+  }
+}
+@keyframes arriver-de-gauche {
+  from {
+    transform: perspective(1700px) translateZ(-180px) rotateY(-24deg);
+    opacity: 0;
+  }
+}
+@keyframes s-eloigner {
+  to {
+    transform: perspective(1700px) translateZ(-140px);
+    opacity: 0;
+  }
+}
+@keyframes se-poser {
+  from {
+    transform: perspective(1700px) translateZ(-120px) rotateX(-16deg);
+    opacity: 0;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   ::view-transition-group(*),
   ::view-transition-old(*),
