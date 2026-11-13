@@ -22,7 +22,6 @@ import Salle from './figures/Salle.astro';
 import Serveur from './figures/Serveur.astro';
 import Vps from './figures/Vps.astro';
 import Imac from './figures/Imac.astro';
-import Hass from './figures/Hass.astro';
 import ACompleter from './figures/ACompleter.astro';
 
 interface Props {
@@ -52,8 +51,7 @@ const figures: Record<string, any> = {
   salle: Salle,
   serveur: Serveur,
   vps: Vps,
-  imac: Imac,
-  hass: Hass
+  imac: Imac
 };
 const Composant = nom ? figures[nom] : undefined;
 ---

@@ -14,7 +14,6 @@ reperes:
   - Domo, ce site et le broker MQTT
   - Tunnel SSH inversé, maintenu par systemd
   - "Appareils de la maison : Shelly, onduleur, batteries, climatisation"
-  - Tunnel Cloudflare, pour certains services
 matieres:
   - VPS Hetzner (tazieff-dev)
   - Caddy

@@ -276,13 +276,6 @@
     animation: imac-doublon 3.6s ease-in-out 1.8s infinite;
   }
 
-  /* --- Home Assistant : la croix se trace --------------------------------- */
-  .figure.anime.hass .croix {
-    stroke-dasharray: 220;
-    stroke-dashoffset: 220;
-    animation: hass-croix 0.6s ease-out forwards;
-    animation-delay: calc(2.4s + var(--r, 0s));
-  }
 
   /* Hors de l'écran : tout attend */
   .figure.anime[data-hors-vue] * {
@@ -514,11 +507,6 @@
   88% {
     opacity: 0;
     transform: translate(6px, -4.5px);
-  }
-}
-@keyframes hass-croix {
-  to {
-    stroke-dashoffset: 0;
   }
 }
 

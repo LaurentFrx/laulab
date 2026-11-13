@@ -49,7 +49,7 @@ const liens = [
   const reduit = window.matchMedia('(prefers-reduced-motion: reduce)');
 
   // Le logo ne tourne que lorsqu'il est à l'écran ; prefers-reduced-motion le laisse arrêté.
-  // Plus éclairci (cyanotype) et plus foncé (calque, gamma) que la figure de la planche 19 : il reste lisible à 40 px.
+  // Plus éclairci (cyanotype) et plus foncé (calque, gamma) que la figure de la planche 18 : il reste lisible à 40 px.
   function brancherLogo(video: HTMLVideoElement) {
     const canvas = video.parentElement?.querySelector('canvas');
     if (video.dataset.pret || !canvas) return;

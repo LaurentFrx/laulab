@@ -70,7 +70,7 @@ Une planche peut s'ouvrir sur un film : l'objet en volumes sur un canvas collant
 
 ## Accueil : la table à plans (novembre 2026)
 
-L'accueil doit montrer tout le travail d'un coup d'œil. Il s'ouvre sur une table vue en perspective où les vingt planches sont posées, une feuille par projet : son dessin (ou son numéro au trait), son repère, son titre, son tampon.
+L'accueil doit montrer tout le travail d'un coup d'œil. Il s'ouvre sur une table vue en perspective où toutes les planches sont posées, une feuille par projet : son dessin (ou son numéro au trait), son repère, son titre, son tampon.
 
 - **À l'arrivée**, les feuilles sont distribuées une à une sur la table.
 - **En faisant défiler**, la table se redresse face à nous et devient une grille lisible : la vue d'ensemble se change en liste.
@@ -81,7 +81,7 @@ L'accueil doit montrer tout le travail d'un coup d'œil. Il s'ouvre sur une tabl
 
 ## Jeu de plans : passer d'une planche à l'autre (novembre 2026)
 
-- **La liasse.** En bas de chaque planche et en tête de la nomenclature, les vingt planches sont des feuilles dans l'espace : celle qu'on regarde est de face, ses voisines pivotent et s'empilent de chaque côté. Chaque feuille porte son dessin (ou son numéro au trait, sur hachures, tant qu'il n'y a pas de dessin) et un cartouche réduit : repère, catégorie, titre, tampon.
+- **La liasse.** En bas de chaque planche et en tête de la nomenclature, toutes les planches sont des feuilles dans l'espace : celle qu'on regarde est de face, ses voisines pivotent et s'empilent de chaque côté. Chaque feuille porte son dessin (ou son numéro au trait, sur hachures, tant qu'il n'y a pas de dessin) et un cartouche réduit : repère, catégorie, titre, tampon.
 - **On feuillette avec la main** : glisser, molette horizontale, flèches du clavier, boutons. La liasse suit le geste, garde son élan, puis se pose sur une feuille avec un ressort à peine dépassé. La feuille de face s'incline un peu vers le pointeur. Une règle graduée, curseur au crayon, dit où l'on est.
 - **Un clic de côté amène la feuille de face ; un clic de face l'ouvre.** La page entière tourne alors comme une feuille de classeur, dans le sens de la numérotation, et la planche suivante arrive dessous. Depuis la nomenclature, la planche se pose sur la table.
 - **En arrivant**, chaque en-tête entre en scène : le titre se lève derrière un cache, l'accroche suit, le tampon s'abat.
